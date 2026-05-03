@@ -592,13 +592,13 @@ input, select, textarea {
 				-webkit-transform: translate3d(0,0,0);
 				-ms-transform: translate3d(0,0,0);
 				transform: translate3d(0,0,0);
-				display: inline-block;
-				height: 5.35em;
-				line-height: 5.885em;
+					display: inline-block;
+					height: auto;
+					line-height: 1.2em;
 				opacity: 0;
 				position: relative;
 				top: 0;
-				width: 5.35em;
+					width: 10em;
 			}
 
 				#header nav li:nth-child(1) {
@@ -675,7 +675,12 @@ input, select, textarea {
 				-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 				-webkit-touch-callout: none;
 				border: 0;
-				display: inline-block;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 0.45em;
+				font-size: 0.95em;
+				text-align: center;
 			}
 
 				#header nav a:before {
@@ -696,7 +701,7 @@ input, select, textarea {
 				}
 
 				#header nav a:hover {
-					font-size: 1.1em;
+					font-size: 0.98em;
 				}
 
 					#header nav a:hover:before {
@@ -715,7 +720,11 @@ input, select, textarea {
 					}
 
 				#header nav a span {
-					display: none;
+					display: block;
+					font-size: 0.72em;
+					line-height: 1.3;
+					max-width: 100%;
+					word-break: break-all;
 				}
 
 /* Footer */
