@@ -31,7 +31,8 @@
       margin: 0 auto;
       padding: 28px 0 0;
       display: flex;
-      gap: 22px;
+      flex-wrap: wrap;
+      gap: 10px 22px;
       font-size: 14px;
       font-weight: 600;
       letter-spacing: 0.04em;
@@ -39,6 +40,7 @@
     .toc a {
       color: var(--muted);
       text-decoration: none;
+      white-space: nowrap;
     }
     .toc a:hover { color: var(--ink); }
     .layout {
@@ -108,14 +110,15 @@
       font-weight: 620;
       font-size: 22px;
       letter-spacing: -0.02em;
+      line-height: 1.25;
     }
     .main { min-width: 0; padding-top: 8px; }
-    .essay:empty { display: none; }
-    .essay:not(:empty) {
-      margin: 0 0 12px;
-      max-width: 40em;
+    .say p {
+      margin: 0 0 14px;
+      max-width: 38em;
       font-size: 17px;
     }
+    .say p:last-child { margin-bottom: 0; }
     h2 {
       margin: 42px 0 18px;
       font-family: Fraunces, serif;
@@ -160,6 +163,7 @@
 <body>
   <nav class="toc">
     <a href="index.html">Home</a>
+    <a href="#say">Something to Say</a>
     <a href="#work">Work</a>
     <a href="#honors">Honors</a>
     <a href="#experience">Experiences</a>
@@ -177,11 +181,15 @@
         <li><a href="mailto:2400017816@stu.pku.edu.cn">Email</a></li>
         <li><a href="https://github.com/Alita-xky">GitHub</a></li>
       </ul>
-      <p class="motto">Keep climbing. 🦊</p>
+      <p class="motto">see you somewhere higher. 🦊⛰️</p>
     </aside>
 
     <main class="main">
-      <div class="essay" id="essay"></div>
+      <section class="say" id="say">
+        <h2>Something to Say</h2>
+        <p>hihi, i'm alita 🦊, a newly minted 20-year-old, still figuring out this whole grown-up thing. Currently exploring video generation, speech, and multimodal AI. I love swimming, beautiful scenery, and wild ideas, and I'm always asking, "Why?"</p>
+        <p>I like to think of life as climbing a mountain: even when the summit is out of sight, I choose to keep moving upward. I want to pursue things that are challenging yet fascinating, discover broader horizons, and hold on to a little romance and ambition along the way. "Stand a little taller, step a little further forward." Keep climbing, stay ambitious, and never lose that curiosity and love for the world.</p>
+      </section>
 
       <section id="work">
         <h2>Work</h2>
