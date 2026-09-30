@@ -1,3 +1,3 @@
-# 邢轲越
+# Keyue Xing
 
-北京大学元培学院通用人工智能实验班个人主页。站点域名：[alitaxky.icu](https://alitaxky.icu)。
+Personal site. The mountain page links to [about](about.html).

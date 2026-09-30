@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About · Keyue Xing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: #fff;
+      font-family: "Source Sans Pro", sans-serif;
+      font-weight: 300;
+      line-height: 1.65;
+      background: #348cb2;
+    }
+    .sky, .shade, .lines {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+    .sky {
+      background: #348cb2 url("assets/css/images/bg.jpg") center bottom / cover no-repeat;
+    }
+    .shade {
+      background:
+        linear-gradient(180deg, rgba(8, 24, 38, 0.28) 0%, rgba(8, 22, 34, 0.42) 42%, rgba(10, 18, 26, 0.62) 100%);
+    }
+    .lines {
+      background: url("assets/css/images/overlay.svg") center / cover no-repeat;
+      opacity: 0.55;
+    }
+    a { color: inherit; }
+    .page {
+      position: relative;
+      width: min(680px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 36px 0 88px;
+    }
+    .home {
+      display: inline-block;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-size: 12px;
+      text-decoration: none;
+      opacity: 0.8;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+      padding-bottom: 3px;
+    }
+    .home:hover { opacity: 1; }
+    header.who { margin: 54px 0 8px; }
+    .latin {
+      margin: 0;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      font-size: 13px;
+      opacity: 0.8;
+    }
+    h1 {
+      margin: 8px 0 0;
+      font-weight: 300;
+      font-size: clamp(40px, 7vw, 58px);
+      letter-spacing: 0.04em;
+      line-height: 1;
+    }
+    section { margin-top: 46px; }
+    h2 {
+      margin: 0 0 16px;
+      font-weight: 300;
+      font-size: 13px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      opacity: 0.72;
+    }
+    p { margin: 0; font-size: 17px; }
+    .lead { max-width: 38em; }
+    article { padding: 16px 0; border-top: 1px solid rgba(255, 255, 255, 0.22); }
+    article:last-child { border-bottom: 1px solid rgba(255, 255, 255, 0.22); }
+    h3 {
+      margin: 0;
+      font-weight: 400;
+      font-size: 18px;
+      line-height: 1.4;
+    }
+    .meta, .authors {
+      margin-top: 6px;
+      font-size: 14px;
+      opacity: 0.82;
+    }
+    .note {
+      margin-top: 8px;
+      font-size: 15px;
+      opacity: 0.92;
+    }
+    ul { margin: 0; padding: 0; list-style: none; }
+    li {
+      padding: 11px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.22);
+      font-size: 16px;
+    }
+    li:last-child { border-bottom: 1px solid rgba(255, 255, 255, 0.22); }
+    .when {
+      display: block;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 3px;
+    }
+    .focus { margin-top: 14px; font-size: 15px; opacity: 0.9; }
+    strong { font-weight: 600; }
+    .year { white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <div class="sky"></div>
+  <div class="shade"></div>
+  <div class="lines"></div>
+
+  <main class="page">
+    <a class="home" href="index.html">Home</a>
+    <header class="who">
+      <p class="latin">Keyue Xing</p>
+      <h1>Alita</h1>
+    </header>
+
+    <section id="about">
+      <h2>About</h2>
+      <p class="lead">I am a junior at Yuanpei College, Peking University, in the experimental class for general artificial intelligence. I work on video generation, speech, and multimodal systems: how an edit stays true to its scene, and how a spoken agent knows when to talk, yield, or keep still.</p>
+    </section>
+
+    <section id="work">
+      <h2>Work</h2>
+      <article>
+        <h3>EditEvolve: A Self-Evolving Agent for Context-Aware Video Editing</h3>
+        <p class="authors">Jiayi Gao, <strong>Keyue Xing</strong>, Changcheng Hua, Yang Liu</p>
+        <p class="meta">Under review, ICLR 2027 · Video editing</p>
+      </article>
+      <article>
+        <h3>DuplexAct-Bench: Broadening Full-Duplex Speech Evaluation toward Proactive Interaction</h3>
+        <p class="authors"><strong>Keyue Xing</strong><sup>†</sup>, Wentao Ding<sup>†</sup>, Mengmeng Wang, Wenming Tu, Zilong Zheng, Yipeng Kang</p>
+        <p class="meta">Under review, ICASSP · <sup>†</sup>Equal contribution</p>
+      </article>
+      <article>
+        <h3>Darlink</h3>
+        <p class="note">A campus project I lead. A short conversation becomes an AI twin of how a student thinks and likes to work, and that twin helps them find classmates they would actually want on a team.</p>
+      </article>
+    </section>
+
+    <section id="honors">
+      <h2>Honors</h2>
+      <ul>
+        <li>Peking University Freshman Scholarship, Second Prize</li>
+        <li>Cushman &amp; Wakefield Scholarship, Peking University, <span class="year">2024–2025</span></li>
+        <li>Peking University Social Work Award, <span class="year">2024–2025</span></li>
+      </ul>
+    </section>
+
+    <section id="experience">
+      <h2>Experience</h2>
+      <ul>
+        <li>
+          <span class="when">Mar 2026 – Present</span>
+          Research intern, Wangxuan Institute of Computer Technology, Peking University
+        </li>
+        <li>
+          <span class="when">Jun 2026 – Present</span>
+          Research intern, Beijing Academy of Artificial Intelligence (BIGAI)
+        </li>
+      </ul>
+      <p class="focus">At both, I work on video generation, speech, and multimodal learning.</p>
+    </section>
+  </main>
+</body>
+</html>

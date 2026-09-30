@@ -1,505 +1,63 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>邢轲越 · Keyue Xing</title>
-  <meta name="description" content="邢轲越，北京大学元培学院通用人工智能实验班 2024 级，大三。研究方向包括视频编辑、全双工语音交互与室内语义导航。">
-  <meta property="og:title" content="邢轲越 · Keyue Xing">
-  <meta property="og:description" content="北京大学元培学院 · 通用人工智能实验班 · 大三">
-  <meta property="og:type" content="website">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,560;1,6..72,400&family=Noto+Sans+SC:wght@400;500;600&family=Noto+Serif+SC:wght@500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --paper: #f4efe6;
-      --paper-2: #ebe4d6;
-      --ink: #1c1915;
-      --muted: #5e574e;
-      --faint: #8a8174;
-      --line: #d8cfc0;
-      --cinnabar: #8d2f2a;
-      --cinnabar-soft: #f3e4df;
-      --card: #fbf8f2;
-      --shadow: 0 18px 40px rgba(48, 36, 22, 0.06);
-    }
+<!DOCTYPE HTML>
+<!--
+	Aerial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Keyue Xing</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+		<style>
+			#header nav li.about {
+				width: auto;
+			}
+			#header nav a.about-link {
+				display: inline-block;
+				letter-spacing: 0.28em;
+				text-transform: uppercase;
+				font-size: 0.78em;
+				font-weight: 300;
+				text-decoration: none;
+				border-bottom: 1px solid rgba(255, 255, 255, 0.75);
+				padding-bottom: 0.35em;
+			}
+			#header nav a.about-link:before {
+				content: none;
+				display: none;
+			}
+			#header nav a.about-link:hover {
+				font-size: 0.78em;
+				border-bottom-color: #fff;
+			}
+		</style>
+	</head>
+	<body class="is-preload">
+		<div id="wrapper">
+			<div id="bg"></div>
+			<div id="overlay"></div>
+			<div id="main">
 
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      color: var(--ink);
-      background:
-        radial-gradient(1200px 500px at 10% -10%, rgba(141, 47, 42, 0.06), transparent 55%),
-        var(--paper);
-      font-family: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", sans-serif;
-      font-size: 16px;
-      line-height: 1.75;
-    }
+				<header id="header">
+					<p class="name">Keyue Xing</p>
+					<h1>Alita</h1>
+					<p>AI Student of Peking University</p>
+					<nav>
+						<ul>
+							<li class="about"><a href="about.html" class="about-link">About Me</a></li>
+						</ul>
+					</nav>
+				</header>
 
-    a { color: inherit; }
-    a:hover { color: var(--cinnabar); }
-
-    .wrap {
-      width: min(1080px, calc(100% - 40px));
-      margin: 0 auto;
-    }
-
-    header.site {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      backdrop-filter: blur(14px);
-      background: rgba(244, 239, 230, 0.86);
-      border-bottom: 1px solid transparent;
-    }
-    header.site.scrolled { border-bottom-color: var(--line); }
-    .bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      min-height: 64px;
-      gap: 16px;
-    }
-    .mark {
-      font-family: "Noto Serif SC", serif;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-decoration: none;
-    }
-    nav { display: flex; gap: 22px; font-size: 14px; }
-    nav a { text-decoration: none; color: var(--muted); }
-    nav a:hover { color: var(--ink); }
-
-    .hero {
-      padding: 72px 0 28px;
-      display: grid;
-      grid-template-columns: 1.4fr 0.8fr;
-      gap: 48px;
-      align-items: end;
-    }
-    .eyebrow {
-      margin: 0 0 18px;
-      color: var(--cinnabar);
-      font-size: 13px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-    }
-    h1 {
-      margin: 0;
-      font-family: "Noto Serif SC", serif;
-      font-weight: 600;
-      font-size: clamp(56px, 8vw, 92px);
-      line-height: 0.95;
-      letter-spacing: 0.06em;
-    }
-    .latin {
-      margin: 14px 0 0;
-      font-family: Newsreader, "Noto Serif SC", serif;
-      font-size: 28px;
-      font-weight: 400;
-      letter-spacing: 0.04em;
-    }
-    .latin em { font-style: italic; color: var(--muted); }
-    .lede {
-      margin: 22px 0 0;
-      max-width: 38em;
-      font-size: 17px;
-      color: var(--muted);
-    }
-    .facts {
-      display: grid;
-      gap: 14px;
-      padding: 8px 0 8px 28px;
-      border-left: 1px solid var(--line);
-    }
-    .facts div { display: grid; gap: 2px; }
-    .facts span {
-      font-size: 12px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--faint);
-    }
-    .facts strong { font-weight: 600; font-size: 15px; }
-
-    section { padding: 42px 0; scroll-margin-top: 76px; }
-    .section-head {
-      display: flex;
-      align-items: baseline;
-      gap: 14px;
-      margin-bottom: 22px;
-    }
-    .section-head h2 {
-      margin: 0;
-      font-family: "Noto Serif SC", serif;
-      font-size: 28px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-    }
-    .num {
-      font-family: Newsreader, serif;
-      font-style: italic;
-      color: var(--cinnabar);
-      font-size: 18px;
-    }
-
-    .about {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 28px;
-    }
-    .about p { margin: 0 0 14px; }
-    .about p:last-child { margin: 0; }
-    .panel {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 22px 22px 8px;
-      box-shadow: var(--shadow);
-    }
-    .panel li {
-      margin: 0 0 14px;
-      color: var(--muted);
-    }
-
-    .projects { display: grid; gap: 16px; }
-    article.project {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 22px 24px 18px;
-      box-shadow: var(--shadow);
-    }
-    article.project header {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: flex-start;
-    }
-    article.project header > div:first-child {
-      flex: 1;
-      min-width: 0;
-    }
-    .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
-    .tag {
-      font-size: 12px;
-      letter-spacing: 0.04em;
-      color: var(--cinnabar);
-      background: var(--cinnabar-soft);
-      border-radius: 999px;
-      padding: 4px 10px;
-      white-space: nowrap;
-    }
-    .tag.quiet {
-      color: var(--muted);
-      background: var(--paper-2);
-    }
-    h3 {
-      margin: 0;
-      font-family: Newsreader, "Noto Serif SC", serif;
-      font-size: 22px;
-      font-weight: 560;
-      line-height: 1.35;
-      letter-spacing: 0;
-    }
-    .role {
-      margin: 8px 0 0;
-      color: var(--faint);
-      font-size: 14px;
-    }
-    article.project ul {
-      margin: 14px 0 0;
-      padding: 0;
-      list-style: none;
-    }
-    article.project li {
-      position: relative;
-      padding-left: 16px;
-      margin: 8px 0;
-      color: var(--muted);
-    }
-    article.project li::before {
-      content: "";
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--cinnabar);
-      position: absolute;
-      left: 0;
-      top: 0.72em;
-    }
-
-    .split {
-      display: grid;
-      grid-template-columns: 0.9fr 1.1fr;
-      gap: 28px;
-    }
-    .school {
-      font-family: "Noto Serif SC", serif;
-      font-size: 22px;
-      margin: 0;
-    }
-    .meta { margin: 6px 0 16px; color: var(--muted); }
-    .gpa {
-      display: inline-block;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 14px;
-      background: var(--card);
-    }
-    .courses {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-    .courses li, .skills span {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 14px;
-      color: var(--ink);
-    }
-    .skills { display: flex; flex-wrap: wrap; gap: 8px; }
-
-    .awards {
-      margin: 0;
-      padding: 0;
-      list-style: none;
-      display: grid;
-      gap: 10px;
-    }
-    .awards li {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 14px 16px;
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-    }
-    .awards small { color: var(--faint); white-space: nowrap; }
-
-    footer {
-      border-top: 1px solid var(--line);
-      padding: 28px 0 48px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-    .foot {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    footer a { text-decoration: none; }
-    .contacts { display: flex; gap: 18px; }
-
-    @media (max-width: 800px) {
-      .hero, .about, .split { grid-template-columns: 1fr; }
-      .facts { padding: 0; border-left: 0; border-top: 1px solid var(--line); padding-top: 18px; }
-      article.project header, .awards li, .foot { flex-direction: column; }
-      .tags { justify-content: flex-start; }
-      nav { gap: 14px; font-size: 13px; }
-      h1 { letter-spacing: 0.02em; }
-      .hero { padding-top: 36px; }
-    }
-  </style>
-</head>
-<body>
-  <header class="site">
-    <div class="wrap bar">
-      <a class="mark" href="#top">邢轲越</a>
-      <nav>
-        <a href="#about">关于</a>
-        <a href="#research">研究</a>
-        <a href="#education">教育</a>
-        <a href="#skills">技能</a>
-        <a href="#awards">荣誉</a>
-      </nav>
-    </div>
-  </header>
-
-  <main id="top" class="wrap">
-    <section class="hero">
-      <div>
-        <p class="eyebrow">Peking University · Yuanpei</p>
-        <h1>邢轲越</h1>
-        <p class="latin">Keyue Xing <em>/ Alita</em></p>
-        <p class="lede">北京大学元培学院通用人工智能实验班 2024 级，目前大三。最近在做视频编辑、全双工语音交互和室内语义导航。</p>
-      </div>
-      <div class="facts">
-        <div>
-          <span>学院</span>
-          <strong>元培学院 · 通智实验班</strong>
-        </div>
-        <div>
-          <span>年级</span>
-          <strong>2024 级 · 大三</strong>
-        </div>
-        <div>
-          <span>绩点</span>
-          <strong>3.731 / 4.0</strong>
-        </div>
-        <div>
-          <span>联系</span>
-          <strong><a href="mailto:2400017816@stu.pku.edu.cn">2400017816@stu.pku.edu.cn</a></strong>
-        </div>
-      </div>
-    </section>
-
-    <section id="about">
-      <div class="section-head">
-        <span class="num">01</span>
-        <h2>关于</h2>
-      </div>
-      <div class="about">
-        <div>
-          <p>我是邢轲越，北京大学元培学院通用人工智能实验班本科生。数学和计算机基础比较扎实，常用 Python 和 PyTorch，能独立把数据处理、实验验证和评测流程做完。</p>
-          <p>目前参与过三项科研：视频编辑（NeurIPS 在投，第二作者）、全双工语音交互基准，以及未知室内环境中的语义对象导航。对多模态，尤其是视觉和语音怎么接在一起，比较有兴趣。</p>
-        </div>
-        <div class="panel">
-          <ul>
-            <li>能从问题定义做到实验落地，也愿意自己把基准和评测流程搭起来。</li>
-            <li>写过论文，也复现过视频生成和视频编辑里的一批经典工作。</li>
-            <li>接下来希望把语音交互基准继续做完整，并做更大规模的评测。</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section id="research">
-      <div class="section-head">
-        <span class="num">02</span>
-        <h2>研究</h2>
-      </div>
-      <div class="projects">
-        <article class="project">
-          <header>
-            <div>
-              <h3>Contextually Harmonious Video Editing with Training-Free Agentic Framework</h3>
-              <p class="role">视频编辑 · 我的部分：基准、数据、方法改进与实验</p>
-            </div>
-            <div class="tags">
-              <span class="tag">NeurIPS 在投</span>
-              <span class="tag quiet">第二作者</span>
-            </div>
-          </header>
-          <ul>
-            <li>提出一种无需训练的 agentic 框架，让视频编辑时上下文能一起改，或者保持一致，并为此做了一套新的评测基准。</li>
-            <li>我负责基准的全流程搭建、数据处理和编辑方法的改进，并完成实验验证。</li>
-            <li>过程中复现了视频生成和视频编辑方向的一批经典工作，也参与了论文写作。</li>
-          </ul>
-        </article>
-
-        <article class="project">
-          <header>
-            <div>
-              <h3>ProAct-Bench: A Proactive Full-Duplex Speech Interaction Benchmark</h3>
-              <p class="role">全双工语音 · 我的部分：数据、基准、评测流程</p>
-            </div>
-            <div class="tags">
-              <span class="tag quiet">中英双语</span>
-              <span class="tag quiet">600 个试验</span>
-            </div>
-          </header>
-          <ul>
-            <li>面向全双工语音对话智能体的基准，用 600 个多场景试验，评估智能体在持续音频流里何时说话、何时打断、何时保持沉默。</li>
-            <li>我负责数据处理、基准构建和评测流程，并对 Doubao Realtime 做了评测。</li>
-          </ul>
-        </article>
-
-        <article class="project">
-          <header>
-            <div>
-              <h3>Common-Sense-Guided Semantic Object Navigation in Unknown Indoor Environments</h3>
-              <p class="role">语义导航 · 我的部分：部分流程实现、实验与写作</p>
-            </div>
-            <div class="tags">
-              <span class="tag quiet">室内导航</span>
-            </div>
-          </header>
-          <ul>
-            <li>用常识引导的方法，在未知室内环境里做语义对象导航。</li>
-            <li>我负责部分流程的代码实现、实验验证和论文撰写。</li>
-          </ul>
-        </article>
-      </div>
-    </section>
-
-    <section id="education">
-      <div class="section-head">
-        <span class="num">03</span>
-        <h2>教育</h2>
-      </div>
-      <div class="split">
-        <div>
-          <p class="school">北京大学 · 元培学院</p>
-          <p class="meta">通用人工智能实验班 · 2024 级 · 大三</p>
-          <span class="gpa">总绩点 3.731 / 4.0</span>
-        </div>
-        <ul class="courses">
-          <li>机器学习</li>
-          <li>数据结构与算法 (A)</li>
-          <li>计算机系统导论</li>
-          <li>信息学中的概率统计</li>
-          <li>人工智能引论</li>
-          <li>程序设计实习</li>
-          <li>CS231n</li>
-          <li>机器人学概论</li>
-          <li>AI 系统实践 I</li>
-        </ul>
-      </div>
-    </section>
-
-    <section id="skills">
-      <div class="section-head">
-        <span class="num">04</span>
-        <h2>技能</h2>
-      </div>
-      <div class="skills">
-        <span>Python</span>
-        <span>C++</span>
-        <span>PyTorch</span>
-        <span>Git</span>
-        <span>Transformer</span>
-        <span>Diffusion</span>
-      </div>
-    </section>
-
-    <section id="awards">
-      <div class="section-head">
-        <span class="num">05</span>
-        <h2>荣誉</h2>
-      </div>
-      <ul class="awards">
-        <li><span>北京大学新生奖学金二等奖</span></li>
-        <li><span>北京大学戴德梁行奖学金</span><small>2024–2025</small></li>
-        <li><span>北京大学社会工作奖</span><small>2024–2025</small></li>
-      </ul>
-    </section>
-  </main>
-
-  <footer>
-    <div class="wrap foot">
-      <span>邢轲越 · 北京大学元培学院</span>
-      <div class="contacts">
-        <a href="mailto:2400017816@stu.pku.edu.cn">邮箱</a>
-        <a href="https://github.com/Alita-xky">GitHub</a>
-      </div>
-    </div>
-  </footer>
-
-  <script>
-    const header = document.querySelector("header.site");
-    const onScroll = () => header.classList.toggle("scrolled", window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-  </script>
-</body>
+			</div>
+		</div>
+		<script>
+			window.onload = function() { document.body.classList.remove('is-preload'); }
+			window.ontouchmove = function() { return false; }
+			window.onorientationchange = function() { document.body.scrollTop = 0; }
+		</script>
+	</body>
 </html>
