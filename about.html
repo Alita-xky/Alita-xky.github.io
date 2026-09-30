@@ -4,178 +4,128 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>About · Keyue Xing</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,560;9..144,680&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ink: #221e1a;
-      --muted: #5e564e;
-      --line: #e4ddd2;
-      --paper: #f3efe8;
-      --sheet: #faf7f2;
-      --fox: #c65d32;
-      --fox-dark: #9a4322;
-      --cream: #f6efe4;
+      --ink: #24292e;
+      --muted: #586069;
+      --line: #eaecef;
+      --paper: #f6f8fa;
+      --link: #0366d6;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       color: var(--ink);
-      background: var(--paper);
-      font-family: "Familjen Grotesk", "PingFang SC", sans-serif;
-      font-weight: 500;
-      font-size: 17px;
-      line-height: 1.6;
+      background: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      font-weight: 400;
     }
-    a { color: inherit; text-decoration: none; }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
     .layout {
-      width: min(1120px, calc(100% - 48px));
+      width: min(1080px, calc(100% - 48px));
       margin: 0 auto;
       display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 72px;
+      grid-template-columns: 280px 1fr;
+      gap: 64px;
       align-items: start;
-      padding: 36px 0 80px;
+      padding: 40px 0 72px;
     }
-    .side { position: sticky; top: 28px; }
+    .side { position: sticky; top: 32px; }
     .home {
       display: inline-block;
-      margin-bottom: 18px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
+      margin-bottom: 16px;
       color: var(--muted);
-      border-bottom: 1.5px solid #cfc6ba;
-      padding-bottom: 2px;
+      font-size: 14px;
+      font-weight: 600;
     }
-    .home:hover { color: var(--ink); }
     .portrait {
       display: block;
       width: 100%;
       aspect-ratio: 4 / 3;
       object-fit: cover;
       object-position: center 42%;
-      border-radius: 2px;
-      background: #ddd6cc;
+      border-radius: 4px;
+      background: #e1e4e8;
     }
-    .latin {
+    h1 {
       margin: 16px 0 0;
-      font-family: Fraunces, serif;
-      font-weight: 680;
-      font-size: 34px;
-      letter-spacing: -0.03em;
-      line-height: 1;
+      font-size: 26px;
+      font-weight: 600;
+      line-height: 1.25;
+      letter-spacing: 0;
     }
     .alias {
-      margin: 6px 0 0;
-      font-family: Fraunces, serif;
-      font-weight: 560;
-      font-style: italic;
-      font-size: 18px;
+      margin: 2px 0 0;
       color: var(--muted);
+      font-size: 16px;
+    }
+    .role {
+      margin: 12px 0 0;
+      font-size: 16px;
+      font-weight: 600;
     }
     .blurb {
+      margin: 12px 0 0;
+      font-size: 15px;
+      color: var(--ink);
+    }
+    .facts {
       margin: 14px 0 0;
-      font-size: 15.5px;
-      font-weight: 500;
-      color: var(--muted);
-      max-width: 28em;
+      padding: 0;
+      list-style: none;
+      font-size: 15px;
     }
-    .climb { margin-top: 18px; }
-    .climb svg { width: 210px; height: 230px; display: block; }
-    .motto {
-      margin: 4px 0 0;
-      font-family: Fraunces, serif;
-      font-weight: 680;
-      font-size: 22px;
-      letter-spacing: -0.02em;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-    .motto.show { opacity: 1; }
-    .main { padding-top: 46px; padding-bottom: 55vh; }
+    .facts li { margin: 6px 0; }
+    .facts a { font-weight: 600; }
+    .main { min-width: 0; }
     .essay:empty { display: none; }
-    .essay:not(:empty) {
-      margin: 0 0 56px;
-      max-width: 40em;
-      font-size: 18px;
-      font-weight: 500;
-    }
-    section { margin-top: 52px; }
-    section:first-of-type { margin-top: 0; }
+    .essay:not(:empty) { margin: 0 0 8px; font-size: 16px; }
+    section { margin-top: 8px; }
     h2 {
-      margin: 0 0 16px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
+      margin: 28px 0 16px;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--line);
+      font-size: 32px;
+      font-weight: 600;
+      line-height: 1.25;
     }
-    article {
-      padding: 16px 0 18px;
-      border-top: 1.5px solid var(--line);
-    }
-    article:last-child { border-bottom: 1.5px solid var(--line); }
+    article { margin: 0 0 18px; }
     h3 {
       margin: 0;
-      font-family: Fraunces, serif;
-      font-weight: 560;
-      font-size: 22px;
-      line-height: 1.3;
-      letter-spacing: -0.02em;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.4;
     }
-    .authors, .meta, .note { margin: 6px 0 0; }
-    .authors, .meta {
-      color: var(--muted);
-      font-size: 14.5px;
-      font-weight: 500;
+    .authors, .meta, .note { margin: 4px 0 0; }
+    .authors, .meta { color: var(--muted); font-size: 14px; }
+    .note { font-size: 16px; }
+    ul.items { margin: 0; padding: 0; list-style: none; }
+    ul.items li {
+      margin: 0 0 12px;
+      font-size: 16px;
     }
-    .note { max-width: 42em; font-weight: 500; }
-    .split {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 48px;
-      margin-top: 52px;
-    }
-    .split section { margin-top: 0; }
-    ul { margin: 0; padding: 0; list-style: none; }
-    li {
-      padding: 12px 0;
-      border-top: 1.5px solid var(--line);
-      font-weight: 500;
-    }
-    li:last-child { border-bottom: 1.5px solid var(--line); }
     .when {
-      display: block;
-      margin-bottom: 2px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
       color: var(--muted);
+      font-weight: 600;
     }
-    .focus {
-      margin: 14px 0 0;
-      color: var(--muted);
-      font-size: 15px;
-      font-weight: 500;
+    .motto {
+      margin: 48px 0 0;
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.3;
     }
-    strong { font-weight: 700; }
-    .year { white-space: nowrap; }
-    @media (prefers-reduced-motion: reduce) {
-      .motto { transition: none; }
-    }
+    strong { font-weight: 600; }
     @media (max-width: 860px) {
       .layout {
         grid-template-columns: 1fr;
-        gap: 36px;
+        gap: 28px;
         width: min(680px, calc(100% - 36px));
       }
       .side { position: static; }
-      .split { grid-template-columns: 1fr; gap: 36px; }
-      .main { padding-top: 0; }
+      h2 { font-size: 26px; }
     }
   </style>
 </head>
@@ -184,42 +134,15 @@
     <aside class="side">
       <a class="home" href="index.html">Home</a>
       <img class="portrait" src="assets/img/portrait.jpg" alt="Keyue Xing">
-      <p class="latin">Keyue Xing</p>
+      <h1>Keyue Xing</h1>
       <p class="alias">Alita</p>
-      <p class="blurb">Junior at Yuanpei College, Peking University. I work on video generation, speech, and multimodal systems.</p>
-
-      <div class="climb" aria-hidden="true">
-        <svg viewBox="0 0 280 360">
-          <path fill="#e6eee8" d="M22 332 L140 28 L258 332 Z"/>
-          <path fill="none" stroke="#c9c1b6" stroke-width="1.4" d="M22 332 L140 28 L258 332"/>
-          <path id="trail" fill="none" stroke="#7d746c" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.4 6.5"
-            d="M102 304 L154 272 L112 240 L158 206 L122 174 L146 146"/>
-          <g id="fox" stroke-linejoin="round">
-            <g transform="scale(1.25)">
-            <g id="bob">
-              <path d="M-2 -20 C-18 -16 -26 -32 -16 -38 C-8 -32 -6 -24 -2 -20 Z" fill="#c65d32"/>
-              <path d="M-14 -32 C-18 -36 -12 -28 -10 -30 Z" fill="#f6efe4"/>
-              <ellipse cx="10" cy="-20" rx="12" ry="7" fill="#c65d32"/>
-              <ellipse cx="14" cy="-18.5" rx="6" ry="3.6" fill="#f6efe4"/>
-              <ellipse cx="22" cy="-27" rx="8" ry="6.2" fill="#c65d32"/>
-              <path d="M16 -31 L18.2 -42 L24 -31 Z" fill="#c65d32"/>
-              <path d="M21 -31 L23.4 -40 L28 -30 Z" fill="#c65d32"/>
-              <path d="M17.4 -31.4 L19 -39 L22.6 -31.6 Z" fill="#f6efe4"/>
-              <ellipse cx="28.5" cy="-25.5" rx="4" ry="2.6" fill="#f6efe4"/>
-              <circle cx="31.6" cy="-25.6" r="1.15" fill="#2a231c"/>
-              <circle cx="24.6" cy="-28.2" r="0.95" fill="#2a231c"/>
-              <g id="leg-a" transform="translate(4,-14)">
-                <path d="M0 0 L-1.4 14 L1.6 14 Z" fill="#9a4322"/>
-              </g>
-              <g id="leg-b" transform="translate(16,-14)">
-                <path d="M0 0 L-0.4 14 L2.4 14 Z" fill="#9a4322"/>
-              </g>
-            </g>
-            </g>
-          </g>
-        </svg>
-        <p class="motto" id="motto">Keep climbing.</p>
-      </div>
+      <p class="role">Undergraduate, Peking University</p>
+      <p class="blurb">I am an undergraduate in the General Artificial Intelligence class (通班) at Yuanpei College. My research interests are video generation, speech, and multimodal learning.</p>
+      <ul class="facts">
+        <li>Luoyang, China</li>
+        <li><a href="mailto:2400017816@stu.pku.edu.cn">2400017816@stu.pku.edu.cn</a></li>
+        <li><a href="https://github.com/Alita-xky">GitHub</a></li>
+      </ul>
     </aside>
 
     <main class="main">
@@ -234,8 +157,8 @@
         </article>
         <article>
           <h3>DuplexAct-Bench: Broadening Full-Duplex Speech Evaluation toward Proactive Interaction</h3>
-          <p class="authors"><strong>Keyue Xing</strong><sup>†</sup>, Wentao Ding<sup>†</sup>, Mengmeng Wang, Wenming Tu, Zilong Zheng, Yipeng Kang</p>
-          <p class="meta">Under review, ICASSP · <sup>†</sup>Equal contribution</p>
+          <p class="authors"><strong>Keyue Xing</strong>, Wentao Ding, Mengmeng Wang, Wenming Tu, Zilong Zheng, Yipeng Kang</p>
+          <p class="meta">Under review, ICASSP · Full-duplex benchmark</p>
         </article>
         <article>
           <h3>Darlink</h3>
@@ -243,64 +166,25 @@
         </article>
       </section>
 
-      <div class="split">
-        <section id="honors">
-          <h2>Honors</h2>
-          <ul>
-            <li>Peking University Freshman Scholarship, Second Prize</li>
-            <li>Cushman &amp; Wakefield Scholarship, Peking University, <span class="year">2024–2025</span></li>
-            <li>Peking University Social Work Award, <span class="year">2024–2025</span></li>
-          </ul>
-        </section>
-        <section id="experience">
-          <h2>Experience</h2>
-          <ul>
-            <li>
-              <span class="when">Mar 2026 – Present</span>
-              Research intern, Wangxuan Institute of Computer Technology, Peking University
-            </li>
-            <li>
-              <span class="when">Jun 2026 – Present</span>
-              Research intern, Beijing Academy of Artificial Intelligence (BIGAI)
-            </li>
-          </ul>
-          <p class="focus">At both, I work on video generation, speech, and multimodal learning.</p>
-        </section>
-      </div>
+      <section id="honors">
+        <h2>Honors</h2>
+        <ul class="items">
+          <li>Peking University Freshman Scholarship, Second Prize</li>
+          <li>Cushman &amp; Wakefield Scholarship, Peking University, 2024–2025</li>
+          <li>Peking University Social Work Award, 2024–2025</li>
+        </ul>
+      </section>
+
+      <section id="experience">
+        <h2>Internships</h2>
+        <ul class="items">
+          <li><span class="when">Mar 2026 – Present.</span> Research intern, Wangxuan Institute of Computer Technology, Peking University</li>
+          <li><span class="when">Jun 2026 – Present.</span> Research intern, Beijing Academy of Artificial Intelligence (BIGAI)</li>
+        </ul>
+      </section>
+
+      <p class="motto">Keep climbing. 🦊</p>
     </main>
   </div>
-
-  <script>
-    const trail = document.getElementById("trail");
-    const fox = document.getElementById("fox");
-    const bob = document.getElementById("bob");
-    const legA = document.getElementById("leg-a");
-    const legB = document.getElementById("leg-b");
-    const motto = document.getElementById("motto");
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const length = trail.getTotalLength();
-
-    function place() {
-      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      const progress = Math.min(1, Math.max(0, window.scrollY / max));
-      const distance = progress * length;
-      const point = trail.getPointAtLength(distance);
-      const ahead = trail.getPointAtLength(Math.min(length, distance + 8));
-      const lean = Math.max(-12, Math.min(14, (ahead.y - point.y) * -0.35 + (ahead.x - point.x) * 0.4));
-      fox.setAttribute("transform", "translate(" + point.x + " " + point.y + ") rotate(" + lean + ")");
-      if (!reduce) {
-        const step = Math.sin(progress * Math.PI * 18) * 18;
-        const lift = Math.abs(Math.sin(progress * Math.PI * 18)) * -1.2;
-        bob.setAttribute("transform", "translate(0 " + lift + ")");
-        legA.setAttribute("transform", "translate(4 -14) rotate(" + step + ")");
-        legB.setAttribute("transform", "translate(16 -14) rotate(" + (-step) + ")");
-      }
-      motto.classList.toggle("show", progress > 0.92);
-    }
-
-    place();
-    window.addEventListener("scroll", place, { passive: true });
-    window.addEventListener("resize", place);
-  </script>
 </body>
 </html>
