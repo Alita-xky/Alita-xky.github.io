@@ -1,45 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>About · Keyue Xing</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --ink: #243038;
+      --muted: #5c6a72;
+      --line: #e2ddd4;
+      --paper: #f6f3ee;
+      --sheet: #fbfaf7;
+      --mist: #e7eef1;
+      --ridge: #8ea3ae;
+      --rock: #d5e2e8;
+      --rock-2: #c5d5dd;
+    }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      color: #fff;
-      font-family: "Source Sans Pro", sans-serif;
+      color: var(--ink);
+      background: var(--mist);
+      font-family: "Source Sans Pro", "Noto Sans SC", "PingFang SC", sans-serif;
       font-weight: 300;
       line-height: 1.65;
-      background: #348cb2;
-    }
-    .sky, .shade, .lines {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-    }
-    .sky {
-      background: #348cb2 url("assets/css/images/bg.jpg") center bottom / cover no-repeat;
-    }
-    .shade {
-      background:
-        linear-gradient(180deg, rgba(8, 24, 38, 0.28) 0%, rgba(8, 22, 34, 0.42) 42%, rgba(10, 18, 26, 0.62) 100%);
-    }
-    .lines {
-      background: url("assets/css/images/overlay.svg") center / cover no-repeat;
-      opacity: 0.55;
     }
     a { color: inherit; }
-    .page {
-      position: relative;
-      width: min(680px, calc(100% - 48px));
-      margin: 0 auto;
-      padding: 36px 0 88px;
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(220px, 280px) 1fr;
+      align-items: start;
+    }
+    .climb {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+    .climb svg { width: 100%; height: 100%; display: block; }
+    .sheet {
+      background: var(--sheet);
+      margin: 22px 22px 22px 0;
+      border-radius: 22px;
+      padding: 42px 56px 28px;
+      box-shadow: 0 18px 50px rgba(36, 48, 56, 0.05);
     }
     .home {
       display: inline-block;
@@ -47,133 +57,229 @@
       text-transform: uppercase;
       font-size: 12px;
       text-decoration: none;
-      opacity: 0.8;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+      color: var(--muted);
+      border-bottom: 1px solid #c9c3b8;
       padding-bottom: 3px;
     }
-    .home:hover { opacity: 1; }
-    header.who { margin: 54px 0 8px; }
+    .home:hover { color: var(--ink); }
+    header.who { margin: 48px 0 0; }
     .latin {
       margin: 0;
       letter-spacing: 0.28em;
       text-transform: uppercase;
       font-size: 13px;
-      opacity: 0.8;
+      color: var(--muted);
     }
     h1 {
-      margin: 8px 0 0;
+      margin: 6px 0 0;
       font-weight: 300;
-      font-size: clamp(40px, 7vw, 58px);
-      letter-spacing: 0.04em;
+      font-size: clamp(44px, 6vw, 64px);
+      letter-spacing: 0.03em;
       line-height: 1;
     }
-    section { margin-top: 46px; }
+    section { margin-top: 88px; }
     h2 {
-      margin: 0 0 16px;
-      font-weight: 300;
-      font-size: 13px;
+      margin: 0 0 18px;
+      font-weight: 400;
+      font-size: 12px;
       letter-spacing: 0.28em;
       text-transform: uppercase;
-      opacity: 0.72;
+      color: var(--muted);
     }
-    p { margin: 0; font-size: 17px; }
-    .lead { max-width: 38em; }
-    article { padding: 16px 0; border-top: 1px solid rgba(255, 255, 255, 0.22); }
-    article:last-child { border-bottom: 1px solid rgba(255, 255, 255, 0.22); }
+    .lead {
+      margin: 0;
+      max-width: 40em;
+      font-size: 18px;
+    }
+    article {
+      padding: 18px 0 18px 16px;
+      border-top: 1px solid var(--line);
+      border-left: 2px solid #d7e3e8;
+    }
+    article:last-child { border-bottom: 1px solid var(--line); }
     h3 {
       margin: 0;
       font-weight: 400;
-      font-size: 18px;
-      line-height: 1.4;
+      font-size: 20px;
+      line-height: 1.35;
     }
-    .meta, .authors {
-      margin-top: 6px;
-      font-size: 14px;
-      opacity: 0.82;
-    }
-    .note {
-      margin-top: 8px;
-      font-size: 15px;
-      opacity: 0.92;
+    .authors, .meta, .note { margin: 6px 0 0; }
+    .authors, .meta { color: var(--muted); font-size: 14.5px; }
+    .note { font-size: 16px; max-width: 42em; }
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 36px;
     }
     ul { margin: 0; padding: 0; list-style: none; }
     li {
-      padding: 11px 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.22);
+      padding: 12px 0;
+      border-top: 1px solid var(--line);
       font-size: 16px;
     }
-    li:last-child { border-bottom: 1px solid rgba(255, 255, 255, 0.22); }
+    li:last-child { border-bottom: 1px solid var(--line); }
     .when {
       display: block;
       font-size: 12px;
-      letter-spacing: 0.16em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      opacity: 0.7;
-      margin-bottom: 3px;
+      color: var(--muted);
+      margin-bottom: 2px;
     }
-    .focus { margin-top: 14px; font-size: 15px; opacity: 0.9; }
+    .focus { margin: 14px 0 0; color: var(--muted); font-size: 15px; }
     strong { font-weight: 600; }
     .year { white-space: nowrap; }
+    .close {
+      margin-top: 96px;
+      min-height: 52vh;
+      padding: 64px 0 48px;
+      text-align: left;
+    }
+    .motto {
+      margin: 0;
+      font-family: "Noto Sans SC", "PingFang SC", serif;
+      font-weight: 500;
+      font-size: clamp(36px, 5vw, 52px);
+      letter-spacing: 0.14em;
+      line-height: 1.2;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    .motto.show { opacity: 1; }
+    #hiker { transition: transform 0.08s linear; }
+    @media (prefers-reduced-motion: reduce) {
+      #hiker { transition: none; }
+      .motto { transition: none; }
+    }
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 86px 1fr; }
+      .sheet { margin: 0; border-radius: 0; padding: 28px 22px 12px; box-shadow: none; }
+      .split { grid-template-columns: 1fr; gap: 8px; }
+      .close { margin-top: 48px; }
+    }
   </style>
 </head>
 <body>
-  <div class="sky"></div>
-  <div class="shade"></div>
-  <div class="lines"></div>
+  <div class="layout">
+    <aside class="climb" aria-hidden="true">
+      <svg viewBox="0 0 220 700" preserveAspectRatio="xMidYMid meet">
+        <path fill="#d3e2e9" d="M18 650 C40 520 62 400 96 270 C112 200 122 140 132 86 C150 160 172 300 196 450 C214 560 220 620 214 650 Z"/>
+        <path fill="#c3d5df" d="M70 650 C88 520 104 400 124 280 C134 210 138 150 142 108 C154 190 168 340 184 480 C196 570 204 620 206 650 Z"/>
+        <path id="trail" fill="none" stroke="#5f7682" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1.5 7"
+          d="M96 612 C138 575 146 548 112 508 C78 468 86 438 124 398 C158 360 148 328 116 296 C88 266 98 232 124 198 C146 168 140 140 132 112"/>
+        <g id="hiker" stroke="#243038" fill="#243038" stroke-linecap="round" stroke-linejoin="round">
+          <g id="scale" transform="scale(1.7)">
+          <g id="bob">
+            <path d="M-7 -29 h6 v9 h-6 z" fill="#8d4a3a" stroke="none"/>
+            <path d="M-3.2 -30 L0 -17 L3.4 -30 Z" fill="#8d4a3a" stroke="none"/>
+            <circle cx="0.4" cy="-34" r="4.4" fill="#243038" stroke="none"/>
+            <line x1="1" y1="-27" x2="11" y2="-16" stroke="#243038" stroke-width="1.6"/>
+            <line x1="11" y1="-16" x2="13" y2="-2" stroke="#243038" stroke-width="1.5"/>
+            <g id="leg-a" transform="translate(0,-16)">
+              <line x1="0" y1="0" x2="-4.5" y2="13" stroke-width="2"/>
+            </g>
+            <g id="leg-b" transform="translate(0,-16)">
+              <line x1="0" y1="0" x2="5" y2="13" stroke-width="2"/>
+            </g>
+          </g>
+          </g>
+        </g>
+      </svg>
+    </aside>
 
-  <main class="page">
-    <a class="home" href="index.html">Home</a>
-    <header class="who">
-      <p class="latin">Keyue Xing</p>
-      <h1>Alita</h1>
-    </header>
+    <main class="sheet">
+      <a class="home" href="index.html">Home</a>
+      <header class="who">
+        <p class="latin">Keyue Xing</p>
+        <h1>Alita</h1>
+      </header>
 
-    <section id="about">
-      <h2>About</h2>
-      <p class="lead">I am a junior at Yuanpei College, Peking University, in the experimental class for general artificial intelligence. I work on video generation, speech, and multimodal systems: how an edit stays true to its scene, and how a spoken agent knows when to talk, yield, or keep still.</p>
-    </section>
+      <section id="about">
+        <h2>About</h2>
+        <p class="lead">I am a junior at Yuanpei College, Peking University, in the experimental class for general artificial intelligence. I work on video generation, speech, and multimodal systems: how an edit stays true to its scene, and how a spoken agent knows when to talk, yield, or keep still.</p>
+      </section>
 
-    <section id="work">
-      <h2>Work</h2>
-      <article>
-        <h3>EditEvolve: A Self-Evolving Agent for Context-Aware Video Editing</h3>
-        <p class="authors">Jiayi Gao, <strong>Keyue Xing</strong>, Changcheng Hua, Yang Liu</p>
-        <p class="meta">Under review, ICLR 2027 · Video editing</p>
-      </article>
-      <article>
-        <h3>DuplexAct-Bench: Broadening Full-Duplex Speech Evaluation toward Proactive Interaction</h3>
-        <p class="authors"><strong>Keyue Xing</strong><sup>†</sup>, Wentao Ding<sup>†</sup>, Mengmeng Wang, Wenming Tu, Zilong Zheng, Yipeng Kang</p>
-        <p class="meta">Under review, ICASSP · <sup>†</sup>Equal contribution</p>
-      </article>
-      <article>
-        <h3>Darlink</h3>
-        <p class="note">A campus project I lead. A short conversation becomes an AI twin of how a student thinks and likes to work, and that twin helps them find classmates they would actually want on a team.</p>
-      </article>
-    </section>
+      <section id="work">
+        <h2>Work</h2>
+        <article>
+          <h3>EditEvolve: A Self-Evolving Agent for Context-Aware Video Editing</h3>
+          <p class="authors">Jiayi Gao, <strong>Keyue Xing</strong>, Changcheng Hua, Yang Liu</p>
+          <p class="meta">Under review, ICLR 2027 · Video editing</p>
+        </article>
+        <article>
+          <h3>DuplexAct-Bench: Broadening Full-Duplex Speech Evaluation toward Proactive Interaction</h3>
+          <p class="authors"><strong>Keyue Xing</strong><sup>†</sup>, Wentao Ding<sup>†</sup>, Mengmeng Wang, Wenming Tu, Zilong Zheng, Yipeng Kang</p>
+          <p class="meta">Under review, ICASSP · <sup>†</sup>Equal contribution</p>
+        </article>
+        <article>
+          <h3>Darlink</h3>
+          <p class="note">A campus project I lead. A short conversation becomes an AI twin of how a student thinks and likes to work, and that twin helps them find classmates they would actually want on a team.</p>
+        </article>
+      </section>
 
-    <section id="honors">
-      <h2>Honors</h2>
-      <ul>
-        <li>Peking University Freshman Scholarship, Second Prize</li>
-        <li>Cushman &amp; Wakefield Scholarship, Peking University, <span class="year">2024–2025</span></li>
-        <li>Peking University Social Work Award, <span class="year">2024–2025</span></li>
-      </ul>
-    </section>
+      <div class="split">
+        <section id="honors">
+          <h2>Honors</h2>
+          <ul>
+            <li>Peking University Freshman Scholarship, Second Prize</li>
+            <li>Cushman &amp; Wakefield Scholarship, Peking University, <span class="year">2024–2025</span></li>
+            <li>Peking University Social Work Award, <span class="year">2024–2025</span></li>
+          </ul>
+        </section>
 
-    <section id="experience">
-      <h2>Experience</h2>
-      <ul>
-        <li>
-          <span class="when">Mar 2026 – Present</span>
-          Research intern, Wangxuan Institute of Computer Technology, Peking University
-        </li>
-        <li>
-          <span class="when">Jun 2026 – Present</span>
-          Research intern, Beijing Academy of Artificial Intelligence (BIGAI)
-        </li>
-      </ul>
-      <p class="focus">At both, I work on video generation, speech, and multimodal learning.</p>
-    </section>
-  </main>
+        <section id="experience">
+          <h2>Experience</h2>
+          <ul>
+            <li>
+              <span class="when">Mar 2026 – Present</span>
+              Research intern, Wangxuan Institute of Computer Technology, Peking University
+            </li>
+            <li>
+              <span class="when">Jun 2026 – Present</span>
+              Research intern, Beijing Academy of Artificial Intelligence (BIGAI)
+            </li>
+          </ul>
+          <p class="focus">At both, I work on video generation, speech, and multimodal learning.</p>
+        </section>
+      </div>
+
+      <div class="close">
+        <p class="motto" id="motto">持续攀登</p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const trail = document.getElementById("trail");
+    const hiker = document.getElementById("hiker");
+    const bob = document.getElementById("bob");
+    const legA = document.getElementById("leg-a");
+    const legB = document.getElementById("leg-b");
+    const motto = document.getElementById("motto");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const length = trail.getTotalLength();
+
+    function place() {
+      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const progress = Math.min(1, Math.max(0, window.scrollY / max));
+      const distance = progress * length;
+      const point = trail.getPointAtLength(distance);
+      const ahead = trail.getPointAtLength(Math.min(length, distance + 6));
+      const lean = Math.max(-16, Math.min(16, (ahead.x - point.x) * 1.4));
+      hiker.setAttribute("transform", "translate(" + point.x + " " + point.y + ") rotate(" + lean + ")");
+      if (!reduce) {
+        const step = Math.sin(progress * Math.PI * 16) * 22;
+        const lift = Math.abs(Math.sin(progress * Math.PI * 16)) * -1.4;
+        bob.setAttribute("transform", "translate(0 " + lift + ")");
+        legA.setAttribute("transform", "translate(0 -16) rotate(" + step + ")");
+        legB.setAttribute("transform", "translate(0 -16) rotate(" + (-step) + ")");
+      }
+      motto.classList.toggle("show", progress > 0.9);
+    }
+
+    place();
+    window.addEventListener("scroll", place, { passive: true });
+    window.addEventListener("resize", place);
+  </script>
 </body>
 </html>
