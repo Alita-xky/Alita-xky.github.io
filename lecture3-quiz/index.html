@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>NLP 第三讲自测</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@600&display=swap" rel="stylesheet">
+<style>
+/* Layout: one reading column, one question at a time; a 10-segment rail records each answer as you go. */
+:root{
+  --bg:#F3F5F9; --surface:#FFFFFF; --fg:#18202F; --muted:#5A6478; --line:#DCE2EC;
+  --accent:#2D4FA0; --accent-soft:#E6ECF8; --on-accent:#FFFFFF;
+  --ok:#1D7A47; --ok-bg:#E3F3EA; --bad:#B42A22; --bad-bg:#FBE7E5;
+  --font-display:"Noto Serif SC","Songti SC","STSong",serif;
+  --font-body:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151C; --surface:#181E28; --fg:#E5E9F0; --muted:#9AA4B5; --line:#2A3342;
+    --accent:#93ACEF; --accent-soft:#1E2A44; --on-accent:#11151C;
+    --ok:#74D19C; --ok-bg:#15301F; --bad:#FF8F85; --bad-bg:#3A1A18; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151C; --surface:#181E28; --fg:#E5E9F0; --muted:#9AA4B5; --line:#2A3342;
+  --accent:#93ACEF; --accent-soft:#1E2A44; --on-accent:#11151C;
+  --ok:#74D19C; --ok-bg:#15301F; --bad:#FF8F85; --bad-bg:#3A1A18; color-scheme:dark;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.7}
+.wrap{max-width:680px;margin:0 auto;padding-inline:16px;padding-block:32px 56px}
+.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+h1{font-family:var(--font-display);font-weight:600;font-size:30px;line-height:1.3;margin:6px 0 6px;text-wrap:balance}
+.meta{color:var(--muted);font-size:14px;margin:0}
+.rail{display:flex;gap:4px;margin:24px 0 20px}
+.rail span{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.rail span.now{background:var(--accent)}
+.rail span.ok{background:var(--ok)}
+.rail span.bad{background:var(--bad)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+.qhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:10px}
+.tag{font-family:var(--font-mono);font-size:12px;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:4px}
+.q{font-size:17px;margin:0 0 14px;min-width:0}
+pre.code{font-family:var(--font-mono);font-size:13px;line-height:1.6;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;margin:0 0 16px;white-space:pre}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;font:inherit;font-size:15px;line-height:1.6;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;cursor:pointer}
+.opt:hover:not([disabled]){border-color:var(--accent)}
+.opt .k{font-family:var(--font-mono);color:var(--muted);flex:none}
+.opt.ok{border-color:var(--ok);background:var(--ok-bg)}
+.opt.ok .k{color:var(--ok)}
+.opt.bad{border-color:var(--bad);background:var(--bad-bg)}
+.opt.bad .k{color:var(--bad)}
+.opt[disabled]{cursor:default}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.fb{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:15px}
+.verdict{font-weight:600;margin-bottom:4px}
+.verdict.ok{color:var(--ok)}
+.verdict.bad{color:var(--bad)}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:20px}
+.btn{font:inherit;font-size:15px;padding:8px 18px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.err{font-size:13px;color:var(--bad)}
+.score{font-family:var(--font-mono);font-size:13px;color:var(--muted);margin-left:auto}
+.big{font-family:var(--font-mono);font-size:44px;font-weight:500;line-height:1.1;font-variant-numeric:tabular-nums}
+.big small{font-size:20px;color:var(--muted)}
+.list{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:6px}
+.list li{display:flex;gap:10px;align-items:baseline;font-size:15px;min-width:0}
+.pill{flex:none;font-size:12px;padding:1px 8px;border-radius:4px}
+.pill.ok{color:var(--ok);background:var(--ok-bg)}
+.pill.bad{color:var(--bad);background:var(--bad-bg)}
+.status{font-size:13px;color:var(--muted)}
+textarea{width:100%;box-sizing:border-box;margin-top:12px;font:inherit;font-size:13px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px}
+footer{margin-top:28px;font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion: no-preference){.rail span{transition:background .2s}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">NLP-DL · Lecture 3</div>
+    <h1>第三讲自测</h1>
+    <p class="meta">10 道选择题：平滑、困惑度、CKY、PCFG、依存分析。点选项即判分，并给出解析和课件页码。</p>
+  </header>
+
+  <div class="rail" id="rail" aria-hidden="true"></div>
+
+  <section id="quiz" class="card" aria-live="polite">
+    <div class="qhead"><span id="qnum">第 1 题 / 10</span><span class="tag" id="qtag">平滑</span></div>
+    <p class="q" id="qtext">正在加载题目</p>
+    <pre class="code" id="qcode" hidden></pre>
+    <div class="opts" id="opts"></div>
+    <div class="fb" id="fb" hidden></div>
+    <div class="actions">
+      <button class="btn" id="next" type="button">下一题</button>
+      <span class="err" id="err"></span>
+      <span class="score" id="score">得分 0</span>
+    </div>
+  </section>
+
+  <section id="result" class="card" hidden>
+    <div class="eyebrow">成绩</div>
+    <div class="big" id="final">0 <small>/ 10</small></div>
+    <ul class="list" id="review"></ul>
+    <div class="actions">
+      <button class="btn" id="copy" type="button">复制错题</button>
+      <button class="btn ghost" id="restart" type="button">重新做一遍</button>
+      <span class="status" id="copyStatus"></span>
+    </div>
+    <textarea id="copyBox" rows="5" readonly hidden></textarea>
+  </section>
+
+  <footer>题目依据 NLP-DL 第 3 讲课件，解析中的页码对应课件 PDF 页码。</footer>
+</div>
+
+<script>
+const Q = [
+  {tag:"平滑", q:"词表大小 V = 1000，C(beautifully) = 10，C(beautifully blue) = 3。用 Add-one 平滑，P(blue | beautifully) 约是多少？",
+   o:["0.3","4/11 ≈ 0.36","4/1010 ≈ 0.004","3/1010 ≈ 0.003"], a:2,
+   e:"Add-one 公式：P = (C(前词 当前词) + 1) / (C(前词) + V)。代入得 (3 + 1) / (10 + 1000) = 4/1010 ≈ 0.004。分子加 1 好理解；分母加 V，是因为词表里每个可能的后续词都加了 1，一共加了 V 次，这样所有后续词的概率加起来仍等于 1（第 17 页）。0.3 是不平滑的最大似然估计 3/10；4/11 是忘了在分母上加 V。"},
+  {tag:"平滑", q:"Add-one 平滑的主要问题是什么？",
+   o:["给没出现过的 n 元组分了太多概率，见过的搭配概率被严重压低","平滑后仍然会出现零概率","计算量太大，无法用于大语料","只能用于一元模型"], a:0,
+   e:"没出现过的 n 元组数量远远多于出现过的。每个都加 1，合起来会分走大部分概率，见过的搭配反而被严重压低，课件称为“引入了巨大的估计偏差”（第 17 页）。看上一题：见过 3 次的 beautifully blue，概率从 0.3 掉到了 0.004。B 不对：加 1 之后所有概率都大于 0，不会再有零概率。"},
+  {tag:"困惑度", q:"测试集有两句话：句子 A 有 2 个词，每个词的惊讶程度（−log₂P）都是 1 比特；句子 B 有 8 个词，每个都是 3 比特。整个测试集的交叉熵是多少？",
+   o:["2.0 比特","2.6 比特","4.0 比特","26 比特"], a:1,
+   e:"交叉熵按词平均：(2×1 + 8×3) / 10 = 2.6 比特，困惑度就是 2^2.6。2.0 是先算每句的平均、再对两句取平均，会让短句占的比重过大（第 27 页）。"},
+  {tag:"CKY", q:"文法：S → AB，A → a，B → AB | b。输入 aab，CKY 表顶格 X(1,3) 是什么？",
+   o:["∅","{S}","{S, B}","{A, B}"], a:2,
+   e:"第 1 行：{A} {A} {B}。第 2 行：aa 是 AA，没有规则，得 ∅；ab 是 AB，得 {S, B}。顶格有两种切法：a|ab 得 A×{S,B}，其中 AB 对应 S 和 B；aa|b 的左半是空集，没有结果。合并得 {S, B}，含 S，所以 aab 属于该语言（第 43–55 页）。"},
+  {tag:"PCFG", q:"规则概率：S → NP VP 0.8，NP → Pronoun 0.4，Pronoun → she 0.5，VP → Verb 0.2，Verb → sleeps 0.5。she sleeps 这棵句法树的概率是：",
+   o:["2.4","0.016","0.032","0.08"], a:1,
+   e:"树的概率 = 用到的所有规则概率连乘：0.8 × 0.4 × 0.5 × 0.2 × 0.5 = 0.016（第 62 页）。0.032 漏乘了 Verb → sleeps；2.4 是把概率加起来了。"},
+  {tag:"投影性", q:"下面句子中，从句 which was a Yorkshire Terrier 修饰 dog，所以有一条弧 dog → was。这棵依存树是投影的吗？",
+   code:"John₁ saw₂ a₃ dog₄ yesterday₅ which₆ was₇ a₈ Yorkshire₉ Terrier₁₀\n\nsaw → John, dog, yesterday     dog → a, was\nwas → which, Terrier           Terrier → a, Yorkshire",
+   o:["投影：每个词都只有一个中心词","投影：依存图里没有环","非投影：ROOT 没有中心词","非投影：dog 的子树 {a, dog, which … Terrier} 被 yesterday 隔开，不连续"], a:3,
+   e:"投影性要求每个词连同它的全部下属在句中是连续的一段。dog₄ 的子树占了位置 3、4、6–10，缺了 5：yesterday 属于 saw，却夹在中间。画成弧，dog → was 和 saw → yesterday 会交叉（第 82–84 页）。单中心、无环、ROOT 没有中心词是所有依存树都要满足的条件，和投影性无关。"},
+  {tag:"基于图", q:"基于图的依存分析把问题转化为求最大生成树。如果要允许非投影结构，应该用哪个算法？",
+   o:["CKY","Eisner","Chu-Liu-Edmonds","Viterbi"], a:2,
+   e:"基于图的方法给每条弧打分 s(i, j)，在 ROOT 加所有词构成的有向图里找得分最高的生成树（第 90 页）。CKY 和 Eisner 靠拼接相邻的连续片段，只能得到投影树；Chu-Liu-Edmonds 不受词序限制，可以得到非投影树（第 91 页）。Viterbi 是 PCFG 和 HMM 里找最优结果的算法。"},
+  {tag:"arc-standard", q:"用 arc-standard 分析 John hit the ball with the bat。当前格局如下，下一步要添加弧 ball → the（the 依附于 ball）。应该执行哪个动作，执行后格局是什么？",
+   code:"栈：    [ROOT, hit, the]\n缓冲区：[ball, with, the, bat]",
+   o:["SHIFT：栈 [ROOT, hit, the, ball]，缓冲区 [with, the, bat]，不加弧","LEFT-ARC：栈 [ROOT, hit]，缓冲区 [ball, with, the, bat]，添加 ball → the","RIGHT-ARC：栈 [ROOT, hit]，缓冲区 [the, with, the, bat]，添加 the → ball","REDUCE：栈 [ROOT, hit]，缓冲区不变，添加 ball → the"], a:1,
+   e:"LEFT-ARC 让栈顶的词（the）依附于缓冲区的第一个词（ball），并把 the 弹出栈，缓冲区不变（第 95 页）。RIGHT-ARC 方向相反：添加 the → ball，删掉 ball，再把 the 放回缓冲区开头。SHIFT 只移进、不加弧。arc-standard 只有三种动作，没有 REDUCE。"},
+  {tag:"arc-eager", q:"arc-eager 比 arc-standard 多了一个 REDUCE 动作，原因是：",
+   o:["REDUCE 用来添加从右往左的弧","REDUCE 用来把缓冲区的词移进栈","REDUCE 用来撤销错误的弧","arc-eager 的 RIGHT-ARC 会把依存词压进栈，等它的依存词都挂完，需要 REDUCE 把它弹出"], a:3,
+   e:"arc-eager 的 RIGHT-ARC 一看到右边的依存词就马上挂上，并把它压进栈，因为它后面可能还有自己的依存词。例如加上 hit → ball 后，ball 留在栈里；确认 ball 处理完，执行 REDUCE 把它弹出，hit 回到栈顶，才能接着加 hit → with（第 96–97 页）。REDUCE 的前提是栈顶词已经有了中心词。"},
+  {tag:"评测", q:"下面是一个句子的标准答案和分析结果（格式：中心词编号 关系标签）。UAS 和 LAS 分别是多少？",
+   code:"词          标准答案      分析结果\n1 She       2 nsubj       2 nsubj\n2 ate       0 root        0 root\n3 red       4 amod        2 amod\n4 apples    2 obj         2 nsubj",
+   o:["UAS 50%，LAS 75%","UAS 100%，LAS 50%","UAS 75%，LAS 50%","UAS 75%，LAS 75%"], a:2,
+   e:"UAS 只看中心词：She、ate、apples 对，red 错（应挂到 apples，却挂到了 ate），3/4 = 75%。LAS 还要求标签也对：apples 的标签应是 obj，分析成了 nsubj，所以只剩 She、ate，2/4 = 50%（第 98–99 页）。LAS 一定不会超过 UAS，所以 A 可以直接排除。"}
+];
+
+const $ = id => document.getElementById(id);
+const answers = new Array(Q.length).fill(null);
+let i = 0;
+
+const rail = $("rail");
+Q.forEach(() => rail.appendChild(document.createElement("span")));
+
+function score(){ return answers.reduce((s, v, k) => s + (v === Q[k].a ? 1 : 0), 0); }
+
+function paintRail(){
+  [...rail.children].forEach((el, k) => {
+    el.className = answers[k] === null ? (k === i ? "now" : "") : (answers[k] === Q[k].a ? "ok" : "bad");
+  });
+}
+
+function render(){
+  const q = Q[i];
+  $("qnum").textContent = "第 " + (i + 1) + " 题 / " + Q.length;
+  $("qtag").textContent = q.tag;
+  $("qtext").textContent = q.q;
+  const code = $("qcode");
+  code.textContent = q.code || "";
+  code.hidden = !q.code;
+  const box = $("opts");
+  box.innerHTML = "";
+  q.o.forEach((t, k) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "opt";
+    b.id = "opt-" + k;
+    const key = document.createElement("span");
+    key.className = "k";
+    key.textContent = "ABCD"[k];
+    const txt = document.createElement("span");
+    txt.textContent = t;
+    b.append(key, txt);
+    b.addEventListener("click", () => pick(k));
+    box.appendChild(b);
+  });
+  $("fb").hidden = true;
+  $("err").textContent = "";
+  $("next").textContent = i === Q.length - 1 ? "查看成绩" : "下一题";
+  $("score").textContent = "得分 " + score();
+  if (answers[i] !== null) showFeedback(answers[i]);
+  paintRail();
+}
+
+function showFeedback(k){
+  const q = Q[i];
+  const btns = $("opts").children;
+  [...btns].forEach(b => b.disabled = true);
+  btns[q.a].classList.add("ok");
+  const right = k === q.a;
+  if (!right) btns[k].classList.add("bad");
+  const fb = $("fb");
+  fb.innerHTML = "";
+  const v = document.createElement("div");
+  v.className = "verdict " + (right ? "ok" : "bad");
+  v.textContent = right ? "回答正确" : "回答错误，正确答案是 " + "ABCD"[q.a];
+  const e = document.createElement("div");
+  e.textContent = q.e;
+  fb.append(v, e);
+  fb.hidden = false;
+}
+
+function pick(k){
+  if (answers[i] !== null) return;
+  answers[i] = k;
+  showFeedback(k);
+  $("err").textContent = "";
+  $("score").textContent = "得分 " + score();
+  paintRail();
+}
+
+$("next").addEventListener("click", () => {
+  if (answers[i] === null){ $("err").textContent = "先选一个答案"; return; }
+  if (i < Q.length - 1){ i++; render(); } else { showResult(); }
+});
+
+function wrongText(){
+  const wrong = Q.map((q, k) => ({q, k})).filter(x => answers[x.k] !== x.q.a);
+  if (!wrong.length) return "我在 NLP 第三讲自测里 10 题全部答对了。";
+  return "我在 NLP 第三讲自测里做错了这些题，请逐题讲解：\n" +
+    wrong.map(x => "第 " + (x.k + 1) + " 题（" + x.q.tag + "）：" + x.q.q + "　我选了 " + "ABCD"[answers[x.k]] + "，正确答案是 " + "ABCD"[x.q.a]).join("\n");
+}
+
+function showResult(){
+  $("quiz").hidden = true;
+  $("result").hidden = false;
+  const s = score();
+  $("final").innerHTML = "";
+  $("final").append(String(s) + " ");
+  const sm = document.createElement("small");
+  sm.textContent = "/ " + Q.length;
+  $("final").appendChild(sm);
+  const list = $("review");
+  list.innerHTML = "";
+  Q.forEach((q, k) => {
+    const li = document.createElement("li");
+    const ok = answers[k] === q.a;
+    const p = document.createElement("span");
+    p.className = "pill " + (ok ? "ok" : "bad");
+    p.textContent = ok ? "对" : "错";
+    const t = document.createElement("span");
+    t.textContent = "第 " + (k + 1) + " 题 · " + q.tag;
+    li.append(p, t);
+    list.appendChild(li);
+  });
+  $("copy").textContent = s === Q.length ? "复制成绩" : "复制错题";
+  $("copyStatus").textContent = "";
+  $("copyBox").hidden = true;
+  paintRail();
+}
+
+$("copy").addEventListener("click", () => {
+  const text = wrongText();
+  const fallback = () => {
+    const box = $("copyBox");
+    box.value = text;
+    box.hidden = false;
+    box.focus();
+    box.select();
+    $("copyStatus").textContent = "没能自动复制，请手动复制下面的文字";
+  };
+  try {
+    navigator.clipboard.writeText(text)
+      .then(() => { $("copyStatus").textContent = "已复制，可以直接粘贴给 Claude"; })
+      .catch(fallback);
+  } catch (err) { fallback(); }
+});
+
+$("restart").addEventListener("click", () => {
+  answers.fill(null);
+  i = 0;
+  $("result").hidden = true;
+  $("quiz").hidden = false;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
