@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Schedule · Keyue Xing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,620&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1c3140;
+      --muted: #4d6573;
+      --faint: #8aa2ae;
+      --line: #c5d8e2;
+      --sky: #e5f2f7;
+      --paper: #f3f9fb;
+      --link: #1a4f68;
+      --warn: #b3492f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--sky);
+      font-family: "Familjen Grotesk", "PingFang SC", sans-serif;
+      font-size: 16px;
+      font-weight: 450;
+      line-height: 1.5;
+    }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    [hidden] { display: none !important; }
+    .wrap {
+      width: min(1080px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .toc {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 22px;
+      padding: 28px 0 0;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .toc a { color: var(--muted); text-decoration: none; }
+    .toc a:hover { color: var(--ink); }
+    .toc .spacer { flex: 1; }
+    .sync {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+    .sync::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--faint);
+    }
+    .sync[data-state="synced"]::before { background: #3d7a5a; }
+    .sync[data-state="saving"]::before,
+    .sync[data-state="loading"]::before { background: #b8862b; }
+    .sync[data-state="error"]::before,
+    .sync[data-state="offline"]::before { background: var(--warn); }
+    .linkbtn {
+      background: none;
+      border: 0;
+      padding: 0 0 1px;
+      font-weight: 600;
+      color: var(--link);
+      border-bottom: 1px solid rgba(26, 79, 104, 0.35);
+    }
+    .linkbtn:hover { border-bottom-color: var(--link); }
+
+    header.top { padding: 26px 0 0; }
+    h1 {
+      margin: 0;
+      font-family: Fraunces, serif;
+      font-weight: 620;
+      font-size: 40px;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .today-line { margin: 8px 0 0; color: var(--muted); font-size: 15.5px; }
+    .banner {
+      margin: 22px 0 0;
+      padding: 14px 18px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 18px;
+      font-size: 15px;
+    }
+    .banner.is-warn { border-color: rgba(179, 73, 47, 0.4); }
+    .banner p { margin: 0; flex: 1 1 320px; }
+
+    .next {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0 36px;
+      margin: 36px 0 0;
+    }
+    .label {
+      margin: 0;
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .next .date {
+      margin: 2px 0 10px;
+      font-family: Fraunces, serif;
+      font-weight: 560;
+      font-size: 23px;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    ul.evs { margin: 0; padding: 0; list-style: none; }
+    ul.evs li { border-top: 1px solid var(--line); }
+    ul.evs li:last-child { border-bottom: 1px solid var(--line); }
+    li.empty { padding: 10px 0; color: var(--faint); font-size: 15px; }
+    .ev-btn {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 10px;
+      width: 100%;
+      padding: 9px 4px 9px 13px;
+      border: 0;
+      background: none;
+      text-align: left;
+    }
+    .ev-btn::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 11px;
+      bottom: 11px;
+      width: 3px;
+      border-radius: 2px;
+      background: var(--c);
+    }
+    .ev-btn:hover { background: rgba(255, 255, 255, 0.45); }
+    .ev .time {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+      padding-top: 1px;
+      white-space: nowrap;
+    }
+    .ev .title { font-weight: 500; overflow-wrap: anywhere; }
+    .ev .note {
+      grid-column: 2;
+      color: var(--muted);
+      font-size: 14px;
+      white-space: pre-line;
+      overflow-wrap: anywhere;
+    }
+    .add {
+      margin: 10px 0 0;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--link);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .add:hover { text-decoration: underline; }
+
+    .cal { margin: 56px 0 0; padding-bottom: 80px; }
+    .cal-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 14px;
+    }
+    h2 {
+      margin: 0;
+      font-family: Fraunces, serif;
+      font-weight: 560;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+    .cal-nav { display: flex; gap: 6px; }
+    .cal-nav button {
+      min-width: 34px;
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 2px;
+      background: var(--paper);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .cal-nav button:hover { border-color: var(--muted); }
+    .cal-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 44px;
+      align-items: start;
+    }
+    .dow {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      margin: 0 0 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .dow span { padding: 0 7px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      border-left: 1px solid var(--line);
+    }
+    .cell {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+      min-width: 0;
+      min-height: 98px;
+      padding: 6px 6px 8px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: none;
+      text-align: left;
+    }
+    .cell:hover { background: rgba(255, 255, 255, 0.4); }
+    .cell.is-sel { background: var(--paper); box-shadow: inset 0 0 0 1.5px var(--link); }
+    .cell.is-out { color: var(--faint); }
+    .cell.is-out .chip { opacity: 0.6; }
+    .num {
+      display: inline-block;
+      min-width: 24px;
+      padding: 0 6px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 22px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    .cell.is-today .num { background: var(--ink); color: var(--sky); }
+    .chips { display: flex; flex-direction: column; gap: 2px; width: 100%; min-width: 0; }
+    .chip {
+      display: block;
+      overflow: hidden;
+      padding-left: 5px;
+      border-left: 2px solid var(--c);
+      font-size: 12.5px;
+      line-height: 1.35;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .more { font-size: 12px; color: var(--muted); padding-left: 7px; }
+
+    .day { position: sticky; top: 24px; }
+    .day h3 {
+      margin: 2px 0 12px;
+      font-family: Fraunces, serif;
+      font-weight: 560;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .btn {
+      height: 36px;
+      padding: 0 16px;
+      border: 1px solid var(--ink);
+      border-radius: 2px;
+      background: var(--ink);
+      color: var(--sky);
+      font-size: 14.5px;
+      font-weight: 600;
+    }
+    .btn:hover { background: #2a4558; }
+    .btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+    .btn.ghost:hover { border-color: var(--muted); }
+    .btn.danger { background: transparent; color: var(--warn); border-color: rgba(179, 73, 47, 0.4); }
+    .btn.danger:hover { border-color: var(--warn); }
+    .btn:disabled { opacity: 0.6; cursor: default; }
+    .day .btn { margin-top: 14px; }
+
+    dialog {
+      width: min(470px, calc(100% - 32px));
+      padding: 22px 22px 18px;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      background: var(--paper);
+      color: var(--ink);
+      box-shadow: 0 18px 50px rgba(28, 49, 64, 0.22);
+    }
+    dialog::backdrop { background: rgba(28, 49, 64, 0.28); }
+    dialog h3 {
+      margin: 0 0 16px;
+      font-family: Fraunces, serif;
+      font-weight: 560;
+      font-size: 24px;
+      letter-spacing: -0.02em;
+    }
+    .field { display: flex; flex-direction: column; gap: 4px; margin: 0 0 12px; min-width: 0; }
+    .field > span, legend {
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      min-height: 38px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 2px;
+      background: #fff;
+    }
+    .field textarea { resize: vertical; }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: 2px solid rgba(26, 79, 104, 0.35);
+      outline-offset: 0;
+      border-color: var(--link);
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+    .hint { margin: -4px 0 12px; font-size: 13.5px; color: var(--muted); }
+    fieldset { margin: 0 0 12px; padding: 0; border: 0; }
+    legend { padding: 0; margin-bottom: 6px; }
+    .swatches { display: flex; gap: 8px; }
+    .swatches label { position: relative; }
+    .swatches input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+    .swatches span {
+      display: block;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--c);
+      box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px transparent;
+    }
+    .swatches input:checked + span { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--c); }
+    .swatches input:focus-visible + span { outline: 2px solid var(--link); outline-offset: 4px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .actions .spacer { flex: 1; }
+    .steps { margin: 0 0 14px; padding-left: 20px; font-size: 14.5px; }
+    .steps li { margin: 0 0 6px; }
+    .steps a { color: var(--link); font-weight: 600; }
+    code { font-size: 0.92em; background: rgba(197, 216, 226, 0.5); padding: 1px 4px; border-radius: 2px; }
+    .msg { margin: 0 0 12px; color: var(--warn); font-size: 14.5px; }
+
+    @media (max-width: 860px) {
+      .wrap { width: min(680px, calc(100% - 32px)); }
+      .next { grid-template-columns: 1fr; gap: 24px; }
+      .cal-body { grid-template-columns: 1fr; gap: 28px; }
+      .day { position: static; }
+    }
+    @media (max-width: 560px) {
+      h1 { font-size: 34px; }
+      .cell { min-height: 56px; padding: 4px; }
+      .dow span { padding: 0 4px; }
+      .chips { flex-direction: row; flex-wrap: wrap; gap: 3px; padding-left: 4px; }
+      .chip { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 50%; background: var(--c); font-size: 0; }
+      .more { display: none; }
+      .row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="toc">
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+      <span class="spacer"></span>
+      <span class="sync" id="sync" data-state="setup">Not connected</span>
+      <button type="button" class="linkbtn" id="settingsBtn">GitHub</button>
+    </nav>
+
+    <header class="top">
+      <h1>Schedule</h1>
+      <p class="today-line" id="todayLine"></p>
+      <div class="banner" id="setupBanner" hidden>
+        <p>Events are saved to a private GitHub repository. Connect a token once in this browser to start adding them.</p>
+        <button type="button" class="btn" id="connectBtn">Connect GitHub</button>
+      </div>
+      <div class="banner is-warn" id="notice" hidden>
+        <p id="noticeText"></p>
+        <button type="button" class="btn ghost" id="noticeClose">Dismiss</button>
+      </div>
+    </header>
+
+    <section class="next" id="next" aria-label="Today, tomorrow and the day after"></section>
+
+    <section class="cal" aria-label="Month">
+      <div class="cal-head">
+        <h2 id="monthTitle"></h2>
+        <div class="cal-nav">
+          <button type="button" id="prevMonth" aria-label="Previous month">‹</button>
+          <button type="button" id="thisMonth">Today</button>
+          <button type="button" id="nextMonth" aria-label="Next month">›</button>
+        </div>
+      </div>
+      <div class="cal-body">
+        <div>
+          <div class="dow" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+          <div class="grid" id="grid"></div>
+        </div>
+        <aside class="day" id="dayPanel"></aside>
+      </div>
+    </section>
+  </div>
+
+  <dialog id="editor">
+    <form id="editorForm" novalidate>
+      <h3 id="editorTitle">New event</h3>
+      <label class="field"><span>Title</span><input name="title" required autocomplete="off"></label>
+      <div class="row">
+        <label class="field"><span id="dateLabel">Date</span><input type="date" name="date" required></label>
+        <label class="field"><span>Repeat</span>
+          <select name="repeat">
+            <option value="">Does not repeat</option>
+            <option value="daily">Every day</option>
+            <option value="weekly">Every week</option>
+            <option value="biweekly">Every 2 weeks</option>
+          </select>
+        </label>
+      </div>
+      <div class="row">
+        <label class="field"><span>Starts</span><input type="time" name="start"></label>
+        <label class="field"><span>Ends</span><input type="time" name="end"></label>
+      </div>
+      <p class="hint">Leave the times empty for an all-day item.</p>
+      <label class="field" id="untilField"><span>Repeat until (optional)</span><input type="date" name="until"></label>
+      <fieldset>
+        <legend>Color</legend>
+        <div class="swatches" id="swatches"></div>
+      </fieldset>
+      <label class="field"><span>Note</span><textarea name="note" rows="2"></textarea></label>
+      <p class="hint" id="seriesHint">Changes apply to every repeat of this event.</p>
+      <p class="msg" id="editorMsg" hidden></p>
+      <div class="actions">
+        <button type="button" class="btn danger" id="deleteOne">Delete this day</button>
+        <button type="button" class="btn danger" id="deleteAll">Delete</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn ghost" id="editorCancel">Cancel</button>
+        <button type="submit" class="btn">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="settings">
+    <form id="settingsForm" novalidate>
+      <h3>Connect GitHub</h3>
+      <ol class="steps">
+        <li><a href="https://github.com/new" target="_blank" rel="noopener">Create a private repository</a> named <code id="repoName"></code>, with “Add a README” ticked.</li>
+        <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Create a fine-grained token</a>: Repository access → Only select repositories → that repo; Permissions → Contents → Read and write.</li>
+        <li>Paste the token below. It stays in this browser only.</li>
+      </ol>
+      <p class="msg" id="settingsMsg" hidden></p>
+      <label class="field"><span>Token</span><input type="password" name="token" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>
+      <div class="actions">
+        <button type="button" class="btn danger" id="disconnect">Disconnect</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn ghost" id="settingsCancel">Cancel</button>
+        <button type="submit" class="btn" id="settingsSave">Connect</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+  (() => {
+    'use strict';
+
+    // Where the events live. Point this at a public repo instead if the schedule should be public.
+    const STORE = { owner: 'Alita-xky', repo: 'schedule', branch: 'main', path: 'events.json' };
+    const API = `https://api.github.com/repos/${STORE.owner}/${STORE.repo}`;
+    const COLORS = { ink: '#1c3140', blue: '#2f7ea8', coral: '#c4573a', green: '#3d7a5a', amber: '#c28f2c', violet: '#6b5a9e' };
+    const NEXT_LABELS = ['Today', 'Tomorrow', 'Day after'];
+
+    const $ = sel => document.querySelector(sel);
+    const store = {
+      get: k => { try { return localStorage.getItem(k); } catch { return null; } },
+      set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
+      del: k => { try { localStorage.removeItem(k); } catch {} },
+    };
+    const clone = x => JSON.parse(JSON.stringify(x));
+
+    // ---- dates: every day is a local "YYYY-MM-DD" key
+
+    const pad = n => String(n).padStart(2, '0');
+    const keyOf = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const dateOf = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+    const dayNum = k => { const [y, m, d] = k.split('-').map(Number); return Date.UTC(y, m - 1, d) / 864e5; };
+    const addDays = (k, n) => { const d = dateOf(k); d.setDate(d.getDate() + n); return keyOf(d); };
+    const fmt = (k, opts) => dateOf(k).toLocaleDateString('en-US', opts);
+
+    function occursOn(ev, k) {
+      if (k < ev.date || (ev.until && k > ev.until)) return false;
+      if (ev.skip && ev.skip.includes(k)) return false;
+      const diff = dayNum(k) - dayNum(ev.date);
+      if (ev.repeat === 'daily') return true;
+      if (ev.repeat === 'weekly') return diff % (7 * (ev.every || 1)) === 0;
+      return diff === 0;
+    }
+    const byTime = (a, b) => (a.start || '').localeCompare(b.start || '') || a.title.localeCompare(b.title);
+    const eventsOn = k => state.data.events.filter(ev => occursOn(ev, k)).sort(byTime);
+    const timeText = ev => ev.start ? (ev.end ? `${ev.start}–${ev.end}` : ev.start) : 'All day';
+    const colorOf = ev => COLORS[ev.color] || COLORS.ink;
+
+    function normalize(d) {
+      const events = Array.isArray(d && d.events) ? d.events : [];
+      return { version: 1, events: events.filter(e => e && e.id && e.title && /^\d{4}-\d{2}-\d{2}$/.test(e.date)) };
+    }
+
+    // ---- state
+
+    const today = keyOf(new Date());
+    const state = {
+      token: store.get('schedule.token') || '',
+      data: readCache(),
+      remote: null,   // last copy known to be on GitHub
+      sha: null,
+      rev: 0,         // bumps on every local change
+      pending: 0,     // changes not yet on GitHub
+      today,
+      month: today.slice(0, 7),
+      selected: today,
+    };
+
+    function readCache() {
+      try { return normalize(JSON.parse(store.get('schedule.cache'))); } catch { return normalize(null); }
+    }
+    const writeCache = () => store.set('schedule.cache', JSON.stringify(state.data));
+
+    // ---- GitHub contents API
+
+    class SyncError extends Error {
+      constructor(kind, status) { super(kind); this.kind = kind; this.status = status; }
+    }
+    const kindOf = status => status === 401 || status === 403 ? 'auth' : 'http';
+
+    async function gh(path, opts = {}) {
+      try {
+        return await fetch(API + path, {
+          cache: 'no-store',
+          ...opts,
+          headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${state.token}`, ...opts.headers },
+        });
+      } catch {
+        throw new SyncError('net');
+      }
+    }
+
+    function toB64(str) {
+      const bytes = new TextEncoder().encode(str);
+      let bin = '';
+      for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+      return btoa(bin);
+    }
+    const fromB64 = b64 => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\s/g, '')), c => c.charCodeAt(0)));
+
+    async function getRemote() {
+      const res = await gh(`/contents/${STORE.path}?ref=${STORE.branch}&t=${Date.now()}`);
+      if (res.status === 404) {
+        // Either the repo is invisible to this token, or events.json just doesn't exist yet.
+        const repo = await gh('');
+        if (!repo.ok) throw new SyncError(repo.status === 404 ? 'repo' : kindOf(repo.status), repo.status);
+        return { data: normalize(null), sha: null };
+      }
+      if (!res.ok) throw new SyncError(kindOf(res.status), res.status);
+      const file = await res.json();
+      return { data: normalize(JSON.parse(fromB64(file.content))), sha: file.sha };
+    }
+
+    function putRemote(data, sha, message) {
+      const body = { message, branch: STORE.branch, content: toB64(JSON.stringify(data, null, 2) + '\n') };
+      if (sha) body.sha = sha;
+      return gh(`/contents/${STORE.path}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    }
+
+    // ---- sync
+
+    let queue = Promise.resolve();
+
+    function adopt(remote) {
+      state.remote = remote.data;
+      state.sha = remote.sha;
+      state.data = clone(remote.data);
+      writeCache();
+      render();
+    }
+
+    async function refresh() {
+      if (!state.token || state.pending) return;
+      const rev = state.rev;
+      setStatus('loading');
+      try {
+        const remote = await getRemote();
+        if (state.rev !== rev || state.pending) return;
+        adopt(remote);
+        setStatus('synced');
+      } catch (err) {
+        if (state.rev === rev && !state.pending) failed(err, false);
+      }
+    }
+
+    // Apply `mutate` here right away, then replay it on top of GitHub's latest copy.
+    // Mutations work by event id, so replaying after a conflict is safe.
+    function change(mutate, message) {
+      mutate(state.data);
+      state.rev++;
+      state.pending++;
+      writeCache();
+      render();
+      setStatus('saving');
+      queue = queue.then(async () => {
+        try {
+          await push(mutate, message);
+          state.pending--;
+          if (!state.pending) { state.data = clone(state.remote); writeCache(); render(); setStatus('synced'); hideNotice(); }
+        } catch (err) {
+          state.pending--;
+          failed(err, true);
+        }
+      });
+    }
+
+    async function push(mutate, message) {
+      let base = state.remote ? { data: state.remote, sha: state.sha } : await getRemote();
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const next = clone(base.data);
+        mutate(next);
+        const res = await putRemote(next, base.sha, message);
+        if (res.ok) {
+          state.remote = next;
+          state.sha = (await res.json()).content.sha;
+          return;
+        }
+        if (res.status !== 409 && res.status !== 422) throw new SyncError(kindOf(res.status), res.status);
+        base = await getRemote();   // someone else saved first: rebase and retry
+      }
+      throw new SyncError('conflict');
+    }
+
+    function failed(err, wasSaving) {
+      if (wasSaving && state.remote && !state.pending) {
+        state.data = clone(state.remote);
+        writeCache();
+        render();
+      }
+      if (err.kind === 'net') {
+        setStatus('offline', wasSaving ? 'Not saved' : 'Offline');
+        showNotice(wasSaving ? "Couldn't reach GitHub, so that change wasn't saved." : "Can't reach GitHub. Showing the copy saved in this browser.");
+      } else {
+        setStatus('error', wasSaving ? 'Not saved' : 'Sync error');
+        if (err.kind === 'auth' || err.kind === 'repo') openSettings(errorText(err));
+        else showNotice(errorText(err));
+      }
+    }
+
+    function errorText(err) {
+      if (err.kind === 'auth') {
+        return err.status === 403
+          ? `GitHub refused. The token needs Contents → Read and write on ${STORE.owner}/${STORE.repo}.`
+          : 'GitHub rejected this token. It may be mistyped or expired.';
+      }
+      if (err.kind === 'repo') return `This token can't see ${STORE.owner}/${STORE.repo}. Create that private repo and give the token access to it.`;
+      if (err.kind === 'net') return "Can't reach GitHub. Check your connection.";
+      if (err.kind === 'conflict') return 'Another device kept saving at the same time. Reload and try again.';
+      return `GitHub returned an error${err.status ? ` (${err.status})` : ''}. Try again in a moment.`;
+    }
+
+    function setStatus(s, text) {
+      const el = $('#sync');
+      el.dataset.state = s;
+      el.textContent = text || { synced: 'Synced', saving: 'Saving…', loading: 'Loading…', setup: 'Not connected', error: 'Sync error', offline: 'Offline' }[s];
+    }
+    function showNotice(text) { $('#noticeText').textContent = text; $('#notice').hidden = false; }
+    function hideNotice() { $('#notice').hidden = true; }
+
+    // ---- mutations
+
+    const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    const upsert = ev => d => { d.events = d.events.filter(e => e.id !== ev.id); d.events.push(clone(ev)); };
+    const remove = id => d => { d.events = d.events.filter(e => e.id !== id); };
+    const skipDay = (id, k) => d => {
+      const ev = d.events.find(e => e.id === id);
+      if (ev && !(ev.skip || []).includes(k)) ev.skip = [...(ev.skip || []), k].sort();
+    };
+
+    // ---- rendering
+
+    function h(tag, props, ...kids) {
+      const el = document.createElement(tag);
+      for (const [k, v] of Object.entries(props || {})) {
+        if (v == null || v === false) continue;
+        if (k === 'class') el.className = v;
+        else if (k === 'style') el.style.cssText = v;
+        else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+        else el.setAttribute(k, v === true ? '' : v);
+      }
+      for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid);
+      return el;
+    }
+
+    function eventList(k) {
+      const evs = eventsOn(k);
+      if (!evs.length) return h('ul', { class: 'evs' }, h('li', { class: 'empty' }, 'Nothing planned.'));
+      return h('ul', { class: 'evs' }, evs.map(ev =>
+        h('li', { class: 'ev' },
+          h('button', { type: 'button', class: 'ev-btn', style: `--c:${colorOf(ev)}`, onclick: () => openEditor(ev, k) },
+            h('span', { class: 'time' }, timeText(ev)),
+            h('span', { class: 'title' }, ev.title),
+            ev.note ? h('span', { class: 'note' }, ev.note) : null))));
+    }
+
+    function renderNext() {
+      $('#todayLine').textContent = fmt(state.today, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      $('#next').replaceChildren(...NEXT_LABELS.map((label, i) => {
+        const k = addDays(state.today, i);
+        return h('div', null,
+          h('p', { class: 'label' }, label),
+          h('p', { class: 'date' }, fmt(k, { weekday: 'short', month: 'short', day: 'numeric' })),
+          eventList(k),
+          h('button', { type: 'button', class: 'add', onclick: () => openEditor(null, k) }, '+ Add'));
+      }));
+    }
+
+    function renderMonth() {
+      const [y, m] = state.month.split('-').map(Number);
+      $('#monthTitle').textContent = new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      const offset = (new Date(y, m - 1, 1).getDay() + 6) % 7;   // weeks start on Monday
+      const cells = Math.ceil((offset + new Date(y, m, 0).getDate()) / 7) * 7;
+      const start = keyOf(new Date(y, m - 1, 1 - offset));
+      const out = [];
+      for (let i = 0; i < cells; i++) {
+        const k = addDays(start, i);
+        const evs = eventsOn(k);
+        const cls = ['cell', k.slice(0, 7) !== state.month && 'is-out', k === state.today && 'is-today', k === state.selected && 'is-sel'];
+        const label = fmt(k, { weekday: 'long', month: 'long', day: 'numeric' }) + (evs.length ? `, ${evs.length} event${evs.length > 1 ? 's' : ''}` : '');
+        out.push(h('button', {
+          type: 'button',
+          class: cls.filter(Boolean).join(' '),
+          'data-k': k,
+          'aria-label': label,
+          'aria-pressed': String(k === state.selected),
+          onclick: () => select(k),
+          ondblclick: () => openEditor(null, k),
+        },
+          h('span', { class: 'num' }, String(dateOf(k).getDate())),
+          h('span', { class: 'chips' },
+            evs.slice(0, 3).map(ev => h('span', { class: 'chip', style: `--c:${colorOf(ev)}` }, ev.start ? `${ev.start} ${ev.title}` : ev.title)),
+            evs.length > 3 ? h('span', { class: 'more' }, `+${evs.length - 3} more`) : null)));
+      }
+      $('#grid').replaceChildren(...out);
+    }
+
+    function renderDay() {
+      const k = state.selected;
+      const rel = (dayNum(k) - dayNum(state.today));
+      $('#dayPanel').replaceChildren(
+        h('p', { class: 'label' }, rel >= 0 && rel < 3 ? NEXT_LABELS[rel] : fmt(k, { weekday: 'long' })),
+        h('h3', null, fmt(k, { month: 'long', day: 'numeric', year: 'numeric' })),
+        eventList(k),
+        h('button', { type: 'button', class: 'btn', onclick: () => openEditor(null, k) }, '+ Add event'));
+    }
+
+    function render() {
+      $('#setupBanner').hidden = !!state.token;
+      renderNext();
+      renderMonth();
+      renderDay();
+    }
+
+    function select(k) {
+      const sameMonth = k.slice(0, 7) === state.month;
+      state.selected = k;
+      state.month = k.slice(0, 7);
+      if (!sameMonth) return render();
+      // Keep the cells in place so a double-click can land on the same element.
+      for (const cell of $('#grid').children) {
+        const on = cell.dataset.k === k;
+        cell.classList.toggle('is-sel', on);
+        cell.setAttribute('aria-pressed', String(on));
+      }
+      renderDay();
+    }
+
+    function shiftMonth(n) {
+      const [y, m] = state.month.split('-').map(Number);
+      state.month = keyOf(new Date(y, m - 1 + n, 1)).slice(0, 7);
+      renderMonth();
+    }
+
+    // ---- event editor
+
+    const editor = $('#editor');
+    const E = $('#editorForm').elements;
+    let editing = null;   // { ev, k }: ev is null for a new event; k is the day it was opened from
+
+    $('#swatches').append(...Object.entries(COLORS).map(([name, c]) =>
+      h('label', { title: name }, h('input', { type: 'radio', name: 'color', value: name, 'aria-label': name }), h('span', { style: `--c:${c}` }))));
+
+    function openEditor(ev, k) {
+      if (!state.token) { openSettings('Connect GitHub first so your events can be saved.'); return; }
+      editing = { ev, k };
+      $('#editorForm').reset();
+      $('#editorTitle').textContent = ev ? 'Edit event' : 'New event';
+      E.title.value = ev ? ev.title : '';
+      E.date.value = ev ? ev.date : k;
+      E.start.value = (ev && ev.start) || '';
+      E.end.value = (ev && ev.end) || '';
+      E.repeat.value = !ev || !ev.repeat ? '' : ev.repeat === 'weekly' && ev.every === 2 ? 'biweekly' : ev.repeat;
+      E.until.value = (ev && ev.until) || '';
+      E.color.value = (ev && ev.color) || 'ink';
+      E.note.value = (ev && ev.note) || '';
+      $('#deleteOne').hidden = !(ev && ev.repeat);
+      $('#deleteAll').hidden = !ev;
+      $('#deleteAll').textContent = ev && ev.repeat ? 'Delete all' : 'Delete';
+      $('#seriesHint').hidden = !(ev && ev.repeat);
+      $('#editorMsg').hidden = true;
+      syncRepeatFields();
+      editor.showModal();
+      E.title.focus();
+    }
+
+    function syncRepeatFields() {
+      $('#untilField').hidden = !E.repeat.value;
+      $('#dateLabel').textContent = E.repeat.value ? 'Starts on' : 'Date';
+    }
+    E.repeat.addEventListener('change', syncRepeatFields);
+
+    function editorError(text) {
+      $('#editorMsg').textContent = text;
+      $('#editorMsg').hidden = false;
+    }
+
+    $('#editorForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const title = E.title.value.trim();
+      const date = E.date.value;
+      const start = E.start.value;
+      const end = start ? E.end.value : '';
+      const repeat = E.repeat.value;
+      const until = repeat ? E.until.value : '';
+      if (!title) return editorError('Give it a title.');
+      if (!date) return editorError('Pick a date.');
+      if (end && end < start) return editorError('It ends before it starts.');
+      if (until && until < date) return editorError('“Repeat until” is before the start date.');
+
+      const prev = editing.ev;
+      const ev = { id: prev ? prev.id : newId(), title, date };
+      if (start) ev.start = start;
+      if (end) ev.end = end;
+      if (repeat) {
+        ev.repeat = repeat === 'biweekly' ? 'weekly' : repeat;
+        if (repeat === 'biweekly') ev.every = 2;
+        if (until) ev.until = until;
+        if (prev && prev.skip && prev.skip.length) ev.skip = prev.skip.slice();
+      }
+      if (E.color.value && E.color.value !== 'ink') ev.color = E.color.value;
+      const note = E.note.value.trim();
+      if (note) ev.note = note;
+
+      editor.close();
+      change(upsert(ev), `${prev ? 'Edit' : 'Add'} "${title}" (${date})`);
+      if (!repeat && date !== editing.k) select(date);
+    });
+
+    $('#deleteAll').addEventListener('click', () => {
+      const { ev } = editing;
+      editor.close();
+      change(remove(ev.id), `Delete "${ev.title}"`);
+    });
+    $('#deleteOne').addEventListener('click', () => {
+      const { ev, k } = editing;
+      editor.close();
+      change(skipDay(ev.id, k), `Skip "${ev.title}" on ${k}`);
+    });
+    $('#editorCancel').addEventListener('click', () => editor.close());
+
+    // ---- token settings
+
+    const settings = $('#settings');
+    const T = $('#settingsForm').elements;
+    $('#repoName').textContent = STORE.repo;
+
+    function openSettings(msg) {
+      if (editor.open) editor.close();
+      $('#settingsMsg').textContent = msg || '';
+      $('#settingsMsg').hidden = !msg;
+      T.token.value = state.token;
+      $('#disconnect').hidden = !state.token;
+      if (!settings.open) settings.showModal();
+      T.token.focus();
+    }
+
+    $('#settingsForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const token = T.token.value.trim();
+      if (!token) return;
+      const prev = state.token;
+      const btn = $('#settingsSave');
+      btn.disabled = true;
+      btn.textContent = 'Checking…';
+      state.token = token;
+      try {
+        const remote = await getRemote();
+        store.set('schedule.token', token);
+        settings.close();
+        hideNotice();
+        adopt(remote);
+        setStatus('synced');
+      } catch (err) {
+        state.token = prev;
+        $('#settingsMsg').textContent = errorText(err);
+        $('#settingsMsg').hidden = false;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Connect';
+      }
+    });
+
+    $('#disconnect').addEventListener('click', () => {
+      state.token = '';
+      state.remote = state.sha = null;
+      state.data = normalize(null);
+      store.del('schedule.token');
+      store.del('schedule.cache');
+      settings.close();
+      hideNotice();
+      setStatus('setup');
+      render();
+    });
+    $('#settingsCancel').addEventListener('click', () => settings.close());
+    $('#settingsBtn').addEventListener('click', () => openSettings());
+    $('#connectBtn').addEventListener('click', () => openSettings());
+    $('#noticeClose').addEventListener('click', hideNotice);
+
+    $('#prevMonth').addEventListener('click', () => shiftMonth(-1));
+    $('#nextMonth').addEventListener('click', () => shiftMonth(1));
+    $('#thisMonth').addEventListener('click', () => select(state.today));
+
+    // Roll over at midnight, and pick up edits made on other devices when the tab comes back.
+    function tick() {
+      const now = keyOf(new Date());
+      if (now === state.today) return;
+      if (state.selected === state.today) state.selected = now;
+      state.today = now;
+      state.month = state.selected.slice(0, 7);
+      render();
+    }
+    setInterval(tick, 60 * 1000);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) return;
+      tick();
+      refresh();
+    });
+
+    render();
+    if (state.token) refresh();
+    else setStatus('setup');
+  })();
+  </script>
+</body>
+</html>
