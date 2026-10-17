@@ -19,6 +19,7 @@
       --paper: #f3f9fb;
       --link: #1a4f68;
       --warn: #b3492f;
+      --due: #c4573a;
       --serif: Fraunces, "Songti SC", "Noto Serif SC", serif;
     }
     * { box-sizing: border-box; }
@@ -29,36 +30,48 @@
       font-family: "Familjen Grotesk", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       font-size: 16px;
       font-weight: 450;
-      line-height: 1.55;
+      line-height: 1.5;
     }
     button, input, select, textarea { font: inherit; color: inherit; }
     button { cursor: pointer; }
     [hidden] { display: none !important; }
     .wrap {
-      width: min(1080px, calc(100% - 48px));
+      width: min(1240px, calc(100% - 48px));
       margin: 0 auto;
+      padding-bottom: 72px;
     }
 
+    header.top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px 24px;
+      flex-wrap: wrap;
+      padding: 28px 0 0;
+    }
+    h1 {
+      margin: 0;
+      font-family: var(--serif);
+      font-weight: 620;
+      font-size: 36px;
+      letter-spacing: 0.02em;
+      line-height: 1.1;
+    }
     .toc {
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
-      gap: 10px 22px;
-      padding: 28px 0 0;
+      gap: 18px;
       font-size: 14px;
       font-weight: 600;
-      letter-spacing: 0.04em;
     }
     .toc a { color: var(--muted); text-decoration: none; }
     .toc a:hover { color: var(--ink); }
-    .toc .spacer { flex: 1; }
     .sync {
       display: inline-flex;
       align-items: center;
       gap: 7px;
       color: var(--muted);
       font-weight: 500;
-      letter-spacing: 0;
     }
     .sync::before {
       content: "";
@@ -81,20 +94,9 @@
       border-bottom: 1px solid rgba(26, 79, 104, 0.35);
     }
     .linkbtn:hover { border-bottom-color: var(--link); }
-
-    header.top { padding: 26px 0 0; }
-    h1 {
-      margin: 0;
-      font-family: var(--serif);
-      font-weight: 620;
-      font-size: 40px;
-      letter-spacing: 0.02em;
-      line-height: 1.1;
-    }
-    .today-line { margin: 8px 0 0; color: var(--muted); font-size: 15.5px; }
     .banner {
-      margin: 22px 0 0;
-      padding: 14px 18px;
+      margin: 18px 0 0;
+      padding: 12px 16px;
       border: 1px solid var(--line);
       background: var(--paper);
       display: flex;
@@ -104,60 +106,53 @@
       font-size: 15px;
     }
     .banner.is-warn { border-color: rgba(179, 73, 47, 0.4); }
-    .banner p { margin: 0; flex: 1 1 320px; }
+    .banner p { margin: 0; flex: 1 1 280px; }
 
     .label {
       margin: 0;
       font-size: 13px;
       font-weight: 600;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.1em;
       color: var(--muted);
     }
+
+    /* next three days */
     .next {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0 36px;
-      margin: 36px 0 0;
+      margin: 28px 0 0;
     }
+    .next .head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    .next .planned { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
     .next .date {
-      margin: 2px 0 10px;
+      margin: 0 0 8px;
       font-family: var(--serif);
       font-weight: 560;
-      font-size: 23px;
+      font-size: 22px;
       line-height: 1.25;
     }
-
-    .stats { margin: 0 0 10px; }
     .bar {
       display: flex;
-      height: 6px;
+      height: 5px;
+      margin: 0 0 8px;
       border-radius: 3px;
       overflow: hidden;
       background: rgba(28, 49, 64, 0.08);
     }
     .bar span { background: var(--c); }
     .bar span + span { box-shadow: inset 1px 0 0 var(--sky); }
-    .stats p { margin: 5px 0 0; font-size: 13px; color: var(--muted); }
-    .nudge {
-      margin: 10px 0 0;
-      padding: 6px 10px;
-      border-left: 2px solid var(--c);
-      background: rgba(255, 255, 255, 0.5);
-      font-size: 13.5px;
-      line-height: 1.45;
-    }
-
     ul.evs { margin: 0; padding: 0; list-style: none; }
     ul.evs li { border-top: 1px solid var(--line); }
     ul.evs li:last-child { border-bottom: 1px solid var(--line); }
-    li.empty { padding: 10px 0; color: var(--faint); font-size: 15px; }
+    li.empty { padding: 8px 0; color: var(--faint); font-size: 15px; }
     .ev-btn {
       position: relative;
       display: grid;
       grid-template-columns: auto 1fr;
       column-gap: 10px;
       width: 100%;
-      padding: 9px 4px 9px 13px;
+      padding: 8px 4px 8px 13px;
       border: 0;
       background: none;
       text-align: left;
@@ -166,8 +161,8 @@
       content: "";
       position: absolute;
       left: 0;
-      top: 11px;
-      bottom: 11px;
+      top: 10px;
+      bottom: 10px;
       width: 3px;
       border-radius: 2px;
       background: var(--c);
@@ -189,8 +184,18 @@
       white-space: pre-line;
       overflow-wrap: anywhere;
     }
+    .foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 8px 0 0; }
+    .nudge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--c);
+    }
+    .nudge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--c); }
     .add {
-      margin: 10px 0 0;
+      margin-left: auto;
       padding: 0;
       border: 0;
       background: none;
@@ -200,52 +205,47 @@
     }
     .add:hover { text-decoration: underline; }
 
-    .due { margin: 48px 0 0; }
-    .due-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 10px;
-      margin: 10px 0 0;
-      padding: 0;
-      list-style: none;
-    }
-    .due-btn {
+    /* deadlines */
+    .due {
       display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--line);
-      border-left: 3px solid #c4573a;
-      border-radius: 2px;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 10px;
+      margin: 26px 0 0;
+    }
+    .due .label { color: var(--due); margin-right: 4px; }
+    .due-chip {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 5px 12px;
+      border: 1px solid rgba(196, 87, 58, 0.35);
+      border-radius: 999px;
       background: var(--paper);
-      text-align: left;
+      font-size: 14.5px;
     }
-    .due-btn:hover { border-color: var(--muted); border-left-color: #c4573a; }
-    .count {
-      flex: none;
-      min-width: 54px;
-      padding: 1px 0;
-      font-family: var(--serif);
+    .due-chip:hover { border-color: var(--due); }
+    .due-chip .count { font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .due-chip .count.soon { color: var(--due); }
+    .due-chip .title { font-weight: 600; }
+    .due-chip .when { font-size: 13px; color: var(--muted); }
+    .due-chip .prep {
+      padding: 0 6px;
+      border-radius: 3px;
+      background: rgba(196, 87, 58, 0.12);
+      color: var(--due);
+      font-size: 12.5px;
       font-weight: 600;
-      font-size: 15px;
-      color: var(--muted);
-      white-space: nowrap;
     }
-    .count.soon { color: #c4573a; }
-    .due-btn .what { min-width: 0; }
-    .due-btn .title { display: block; font-weight: 600; overflow-wrap: anywhere; }
-    .due-btn .when { display: block; font-size: 13.5px; color: var(--muted); }
-    .due-btn .prep { display: block; margin-top: 2px; font-size: 13px; color: #c4573a; }
-    .due-empty { margin: 8px 0 0; color: var(--faint); font-size: 15px; }
 
-    .cal { margin: 52px 0 0; }
+    /* month */
+    .cal { margin: 40px 0 0; }
     .cal-head {
       display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 16px;
-      margin: 0 0 14px;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 20px;
+      margin: 0 0 12px;
     }
     h2 {
       margin: 0;
@@ -254,7 +254,10 @@
       font-size: 28px;
       line-height: 1.2;
     }
-    .cal-nav { display: flex; gap: 6px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13.5px; color: var(--muted); }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; cursor: help; }
+    .legend span::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
+    .cal-nav { display: flex; gap: 6px; margin-left: auto; }
     .cal-nav button {
       min-width: 34px;
       height: 32px;
@@ -266,12 +269,6 @@
       font-weight: 600;
     }
     .cal-nav button:hover { border-color: var(--muted); }
-    .cal-body {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 280px;
-      gap: 44px;
-      align-items: start;
-    }
     .dow {
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -290,21 +287,19 @@
     .cell {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
       gap: 3px;
       min-width: 0;
-      min-height: 98px;
+      min-height: 128px;
       padding: 6px 6px 8px;
-      border: 0;
       border-right: 1px solid var(--line);
       border-bottom: 1px solid var(--line);
-      background: none;
-      text-align: left;
+      cursor: pointer;
     }
-    .cell:hover { background: rgba(255, 255, 255, 0.4); }
-    .cell.is-sel { background: var(--paper); box-shadow: inset 0 0 0 1.5px var(--link); }
+    .cell:hover { background: rgba(255, 255, 255, 0.35); }
+    .cell.is-today { background: rgba(255, 255, 255, 0.55); }
     .cell.is-out { color: var(--faint); }
-    .cell.is-out .chip { opacity: 0.6; }
+    .cell.is-out .chip { opacity: 0.55; }
+    .cell-head { display: flex; align-items: center; justify-content: space-between; }
     .num {
       display: inline-block;
       min-width: 24px;
@@ -317,27 +312,49 @@
       font-variant-numeric: tabular-nums;
     }
     .cell.is-today .num { background: var(--ink); color: var(--sky); }
-    .chips { display: flex; flex-direction: column; gap: 2px; width: 100%; min-width: 0; }
+    .cell-add {
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: none;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1;
+      opacity: 0;
+    }
+    .cell:hover .cell-add, .cell-add:focus-visible { opacity: 1; }
+    .cell-add:hover { background: rgba(28, 49, 64, 0.08); }
+    .chips { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
     .chip {
       display: block;
+      width: 100%;
       overflow: hidden;
-      padding-left: 5px;
-      border-left: 2px solid var(--c);
-      font-size: 12.5px;
-      line-height: 1.35;
+      padding: 2px 6px;
+      border: 0;
+      border-left: 3px solid var(--c);
+      border-radius: 2px;
+      background: color-mix(in srgb, var(--c) 13%, transparent);
+      font-size: 13px;
+      line-height: 1.4;
+      text-align: left;
       white-space: nowrap;
       text-overflow: ellipsis;
     }
-    .more { font-size: 12px; color: var(--muted); padding-left: 7px; }
-
-    .day { position: sticky; top: 24px; }
-    .day h3 {
-      margin: 2px 0 12px;
-      font-family: var(--serif);
-      font-weight: 560;
-      font-size: 22px;
-      line-height: 1.25;
+    .chip:hover { background: color-mix(in srgb, var(--c) 22%, transparent); }
+    .chip b { font-weight: 600; font-variant-numeric: tabular-nums; margin-right: 4px; }
+    .more {
+      align-self: flex-start;
+      padding: 0 6px;
+      border: 0;
+      background: none;
+      color: var(--muted);
+      font-size: 12.5px;
+      font-weight: 600;
     }
+    .more:hover { color: var(--ink); }
+
     .btn {
       height: 36px;
       padding: 0 16px;
@@ -354,47 +371,9 @@
     .btn.danger { background: transparent; color: var(--warn); border-color: rgba(179, 73, 47, 0.4); }
     .btn.danger:hover { border-color: var(--warn); }
     .btn:disabled { opacity: 0.6; cursor: default; }
-    .day .btn { margin-top: 14px; }
-
-    .guide { margin: 72px 0 0; padding: 0 0 90px; }
-    .guide .lead { margin: 8px 0 0; max-width: 40em; color: var(--muted); }
-    .kinds {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0 32px;
-      margin: 22px 0 0;
-    }
-    .kind { padding: 14px 0; border-top: 1px solid var(--line); }
-    .kind h3 {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      margin: 0;
-      font-family: var(--serif);
-      font-weight: 600;
-      font-size: 20px;
-    }
-    .kind h3::before {
-      content: "";
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--c);
-    }
-    .kind .what { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
-    .kind .rule { margin: 6px 0 0; font-size: 15px; }
-    .rules-title {
-      margin: 34px 0 10px;
-      font-family: var(--serif);
-      font-weight: 600;
-      font-size: 22px;
-    }
-    .rules { margin: 0; padding-left: 22px; max-width: 46em; }
-    .rules li { margin: 0 0 8px; padding-left: 4px; }
-    .rules b { font-weight: 650; }
 
     dialog {
-      width: min(480px, calc(100% - 32px));
+      width: min(460px, calc(100% - 32px));
       padding: 22px 22px 18px;
       border: 1px solid var(--line);
       border-radius: 3px;
@@ -407,13 +386,12 @@
       margin: 0 0 16px;
       font-family: var(--serif);
       font-weight: 600;
-      font-size: 24px;
+      font-size: 22px;
     }
     .field { display: flex; flex-direction: column; gap: 4px; margin: 0 0 12px; min-width: 0; }
     .field > span, legend {
       font-size: 13px;
       font-weight: 600;
-      letter-spacing: 0.06em;
       color: var(--muted);
     }
     .field input, .field select, .field textarea {
@@ -431,7 +409,7 @@
       border-color: var(--link);
     }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
-    .hint { margin: -4px 0 12px; font-size: 13.5px; color: var(--muted); }
+    .hint { margin: -4px 0 12px; font-size: 13px; color: var(--muted); }
     fieldset { margin: 0 0 12px; padding: 0; border: 0; }
     legend { padding: 0; margin-bottom: 6px; }
     .picks { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -456,14 +434,7 @@
     }
     .pick input:checked + span { border-color: var(--c); box-shadow: inset 0 0 0 1px var(--c); font-weight: 600; }
     .pick input:focus-visible + span { outline: 2px solid var(--link); outline-offset: 2px; }
-    .kind-rule {
-      margin: 8px 0 0;
-      padding: 6px 10px;
-      border-left: 2px solid var(--c);
-      background: #fff;
-      font-size: 13.5px;
-      line-height: 1.45;
-    }
+    .kind-rule { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
     .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
     .actions .spacer { flex: 1; }
     .steps { margin: 0 0 14px; padding-left: 20px; font-size: 14.5px; }
@@ -471,90 +442,74 @@
     .steps a { color: var(--link); font-weight: 600; }
     code { font-size: 0.92em; background: rgba(197, 216, 226, 0.5); padding: 1px 4px; border-radius: 2px; }
     .msg { margin: 0 0 12px; color: var(--warn); font-size: 14.5px; }
+    #dayList { margin: 0 0 14px; }
 
     @media (max-width: 860px) {
-      .wrap { width: min(680px, calc(100% - 32px)); }
-      .next { grid-template-columns: 1fr; gap: 26px; }
-      .cal-body { grid-template-columns: 1fr; gap: 28px; }
-      .day { position: static; }
-      .kinds { grid-template-columns: 1fr 1fr; }
+      .wrap { width: calc(100% - 32px); }
+      .next { grid-template-columns: 1fr; gap: 22px; }
+      .cell { min-height: 96px; }
     }
     @media (max-width: 560px) {
-      h1 { font-size: 34px; }
-      .cell { min-height: 56px; padding: 4px; }
+      h1 { font-size: 30px; }
+      .cell { min-height: 58px; padding: 4px; }
       .dow span { padding: 0 5px; }
       .chips { flex-direction: row; flex-wrap: wrap; gap: 3px; padding-left: 4px; }
-      .chip { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 50%; background: var(--c); font-size: 0; }
-      .more { display: none; }
+      .chip { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%; background: var(--c); font-size: 0; pointer-events: none; }
+      .cell-add, .more { display: none; }
       .row { grid-template-columns: 1fr; }
-      .kinds { grid-template-columns: 1fr; }
+      .cal-nav { margin-left: 0; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <nav class="toc">
-      <a href="../index.html">首页</a>
-      <a href="../about.html">关于</a>
-      <a href="#guide">颜色规则</a>
-      <span class="spacer"></span>
-      <span class="sync" id="sync" data-state="setup">未连接</span>
-      <button type="button" class="linkbtn" id="settingsBtn">GitHub</button>
-    </nav>
-
     <header class="top">
       <h1>日程</h1>
-      <p class="today-line" id="todayLine"></p>
-      <div class="banner" id="setupBanner" hidden>
-        <p>日程保存在你的私有 GitHub 仓库里。在这个浏览器里连接一次，就可以开始添加。</p>
-        <button type="button" class="btn" id="connectBtn">连接 GitHub</button>
-      </div>
-      <div class="banner is-warn" id="notice" hidden>
-        <p id="noticeText"></p>
-        <button type="button" class="btn ghost" id="noticeClose">知道了</button>
-      </div>
+      <nav class="toc">
+        <a href="../about.html">关于</a>
+        <span class="sync" id="sync" data-state="setup">未连接</span>
+        <button type="button" class="linkbtn" id="settingsBtn">GitHub</button>
+      </nav>
     </header>
+    <div class="banner" id="setupBanner" hidden>
+      <p>连接 GitHub 后才能保存日程。</p>
+      <button type="button" class="btn" id="connectBtn">连接 GitHub</button>
+    </div>
+    <div class="banner is-warn" id="notice" hidden>
+      <p id="noticeText"></p>
+      <button type="button" class="btn ghost" id="noticeClose">知道了</button>
+    </div>
 
     <section class="next" id="next" aria-label="今天、明天、后天"></section>
 
-    <section class="due" aria-label="即将截止">
-      <p class="label">即将截止 · 30 天内</p>
-      <ul class="due-list" id="dueList"></ul>
-      <p class="due-empty" id="dueEmpty" hidden>30 天内没有截止日期。</p>
+    <section class="due" id="due" aria-label="即将截止" hidden>
+      <p class="label">截止</p>
     </section>
 
     <section class="cal" aria-label="月历">
       <div class="cal-head">
         <h2 id="monthTitle"></h2>
+        <div class="legend" id="legend"></div>
         <div class="cal-nav">
           <button type="button" id="prevMonth" aria-label="上个月">‹</button>
           <button type="button" id="thisMonth">今天</button>
           <button type="button" id="nextMonth" aria-label="下个月">›</button>
         </div>
       </div>
-      <div class="cal-body">
-        <div>
-          <div class="dow" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
-          <div class="grid" id="grid"></div>
-        </div>
-        <aside class="day" id="dayPanel"></aside>
-      </div>
-    </section>
-
-    <section class="guide" id="guide">
-      <h2>怎么用颜色做计划</h2>
-      <p class="lead">给 P 人的版本：不用把每一分钟都排满，只要知道每一段时间属于哪一种。颜色就是提醒你“这段时间该怎么用”。</p>
-      <div class="kinds" id="kindsGuide"></div>
-      <h3 class="rules-title">五条小规则</h3>
-      <ol class="rules">
-        <li><b>每晚 5 分钟</b>看一眼明天，只挑 1–3 件最重要的事。</li>
-        <li><b>按顺序排</b>：先放固定的，再从截止日往前倒推，然后放深度块和生活，剩下的就是留白。</li>
-        <li><b>最多排满 70%</b>。事情永远比想象的慢，没排的那 30% 就是留白。</li>
-        <li><b>计划乱了很正常</b>。没做完的挪到留白或者明天，不自责，也不用重排整周。</li>
-        <li><b>每周日花 10 分钟</b>看下一周：先找红色的截止，再往前放蓝色的深度块。</li>
-      </ol>
+      <div class="dow" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+      <div class="grid" id="grid"></div>
     </section>
   </div>
+
+  <dialog id="dayDialog">
+    <h3 id="dayTitle"></h3>
+    <div id="dayList"></div>
+    <div class="actions">
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost" id="dayClose">关闭</button>
+      <button type="button" class="btn" id="dayAdd">+ 添加</button>
+    </div>
+  </dialog>
 
   <dialog id="editor">
     <form id="editorForm" novalidate>
@@ -580,13 +535,13 @@
         <label class="field"><span>开始</span><input type="time" name="start"></label>
         <label class="field"><span>结束</span><input type="time" name="end"></label>
       </div>
-      <p class="hint">不填时间就是全天。</p>
+      <p class="hint">不填时间 = 全天</p>
       <label class="field" id="untilField"><span>重复到（可不填）</span><input type="date" name="until"></label>
       <label class="field"><span>备注</span><textarea name="note" rows="2"></textarea></label>
-      <p class="hint" id="seriesHint">修改会应用到这个日程的每一次重复。</p>
+      <p class="hint" id="seriesHint">改动会应用到每一次重复</p>
       <p class="msg" id="editorMsg" hidden></p>
       <div class="actions">
-        <button type="button" class="btn danger" id="deleteOne">只删这一天</button>
+        <button type="button" class="btn danger" id="deleteOne">只删这天</button>
         <button type="button" class="btn danger" id="deleteAll">删除</button>
         <span class="spacer"></span>
         <button type="button" class="btn ghost" id="editorCancel">取消</button>
@@ -599,9 +554,9 @@
     <form id="settingsForm" novalidate>
       <h3>连接 GitHub</h3>
       <ol class="steps">
-        <li><a href="https://github.com/new" target="_blank" rel="noopener">新建一个私有仓库</a>，名字叫 <code id="repoName"></code>，勾选 “Add a README file”。</li>
-        <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">生成一个 fine-grained 令牌</a>：Repository access 选 Only select repositories → 这个仓库；Permissions → Contents 设为 Read and write。</li>
-        <li>把令牌粘贴到下面。它只保存在这个浏览器里，每个浏览器连接一次就行。</li>
+        <li><a href="https://github.com/new" target="_blank" rel="noopener">新建私有仓库</a> <code id="repoName"></code>，勾选 Add a README</li>
+        <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">生成令牌</a>：只选这个仓库，Contents 设为 Read and write</li>
+        <li>粘贴到下面（只存在这个浏览器）</li>
       </ol>
       <p class="msg" id="settingsMsg" hidden></p>
       <label class="field"><span>令牌</span><input type="password" name="token" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>
@@ -622,19 +577,20 @@
     const STORE = { owner: 'Alita-xky', repo: 'schedule', branch: 'main', path: 'events.json' };
     const API = `https://api.github.com/repos/${STORE.owner}/${STORE.repo}`;
 
-    // Each event has one kind; the kind decides its color and the planning rule shown for it.
+    // Each event has one kind; the kind decides its color and the short rule shown for it.
     const KINDS = {
-      fixed: { name: '固定', color: '#1c3140', what: '上课、组会、约好的见面', rule: '时间是别人定的。最先放进日历，其他安排绕着它走。' },
-      deep: { name: '深度', color: '#2f7ea8', what: '科研、写论文、写代码、备考', rule: '一块 60–90 分钟，手机放远。一天最多 3 块，放在精力最好的时段。' },
-      due: { name: '截止', color: '#c4573a', what: '作业 ddl、论文投稿、考试', rule: '标在当天，然后倒推：在它前面几天放好深度块，别留到最后一晚。' },
-      admin: { name: '杂事', color: '#c28f2c', what: '邮件、报销、填表、取快递', rule: '攒在一起，一次 30 分钟集中清掉，别让它们切碎深度时间。' },
-      life: { name: '生活', color: '#3d7a5a', what: '游泳、运动、吃饭、睡觉、见朋友', rule: '和上课一样认真对待。人累垮了，什么计划都没用。' },
-      free: { name: '留白', color: '#9384c4', what: '故意不安排任何事的空档', rule: 'P 人的秘密武器：每天留 1–2 小时，想做什么做什么；计划被打乱时就拿它来补。' },
+      fixed: { name: '固定', color: '#1c3140', what: '上课、组会', rule: '先放进日历，别的绕着它排' },
+      deep: { name: '深度', color: '#2f7ea8', what: '科研、写代码、备考', rule: '60–90 分钟一块，一天最多 3 块' },
+      due: { name: '截止', color: '#c4573a', what: 'ddl、考试', rule: '往前倒推，提前放深度块' },
+      admin: { name: '杂事', color: '#c28f2c', what: '邮件、报销', rule: '攒在一起，30 分钟清掉' },
+      life: { name: '生活', color: '#3d7a5a', what: '运动、吃饭、睡觉', rule: '和上课一样认真' },
+      free: { name: '留白', color: '#9384c4', what: '空档', rule: '每天留 1–2 小时，计划乱了用它补' },
     };
     const LEGACY_COLORS = { ink: 'fixed', blue: 'deep', coral: 'due', amber: 'admin', green: 'life', violet: 'free' };
     const NEXT_LABELS = ['今天', '明天', '后天'];
     const WEEK = '日一二三四五六';
     const DAY_HOURS = 16;   // a waking day, roughly 7:00–23:00
+    const CHIPS_PER_CELL = 4;
 
     const $ = sel => document.querySelector(sel);
     const store = {
@@ -643,6 +599,7 @@
       del: k => { try { localStorage.removeItem(k); } catch {} },
     };
     const clone = x => JSON.parse(JSON.stringify(x));
+    const narrow = () => matchMedia('(max-width: 560px)').matches;
 
     // ---- dates: every day is a local "YYYY-MM-DD" key
 
@@ -653,7 +610,6 @@
     const addDays = (k, n) => { const d = dateOf(k); d.setDate(d.getDate() + n); return keyOf(d); };
     const md = k => { const d = dateOf(k); return `${d.getMonth() + 1}月${d.getDate()}日`; };
     const wk = k => '周' + WEEK[dateOf(k).getDay()];
-    const ymd = k => { const d = dateOf(k); return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`; };
 
     function occursOn(ev, k) {
       if (k < ev.date || (ev.until && k > ev.until)) return false;
@@ -682,7 +638,7 @@
     // ---- planning helpers
 
     const minutes = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-    const hours = h => `${Math.round(h * 2) / 2} 小时`;
+    const hours = h => `${Math.round(h * 2) / 2}h`;
 
     function dayStats(evs) {
       const by = {};
@@ -697,13 +653,13 @@
       return { by, total };
     }
 
-    // One gentle suggestion per day, most important first.
+    // At most one short reminder per day.
     function nudge(evs, stats) {
+      if (!evs.length) return null;
       const has = kind => evs.some(ev => kindOf(ev) === kind);
-      if (!evs.length) return { kind: 'fixed', text: '还空着：先放固定的，再挑 1–3 件最重要的事。' };
-      if (stats.total > DAY_HOURS * 0.7) return { kind: 'due', text: `已经排了 ${hours(stats.total)}，超过一天的 70%，留点白吧。` };
-      if (!has('deep') && !has('due')) return { kind: 'deep', text: '还没有深度块：挑一件要事，给它 60–90 分钟。' };
-      if (!has('free') && stats.total >= 6) return { kind: 'free', text: '加一块留白，计划乱了也有地方补。' };
+      if (stats.total > DAY_HOURS * 0.7) return { kind: 'due', text: '排太满了' };
+      if (!has('deep') && !has('due')) return { kind: 'deep', text: '没有深度块' };
+      if (!has('free') && stats.total >= 6) return { kind: 'free', text: '加块留白' };
       return null;
     }
 
@@ -713,8 +669,7 @@
         const k = addDays(state.today, i);
         for (const ev of eventsOn(k)) {
           if (kindOf(ev) !== 'due') continue;
-          // Has any deep block been planned between now and the deadline?
-          let prepared = false;
+          let prepared = false;   // any deep block between now and the deadline?
           for (let j = 0; j < i && !prepared; j++) prepared = eventsOn(addDays(state.today, j)).some(e => kindOf(e) === 'deep');
           out.push({ ev, k, i, prepared });
         }
@@ -734,7 +689,6 @@
       pending: 0,     // changes not yet on GitHub
       today,
       month: today.slice(0, 7),
-      selected: today,
     };
 
     function readCache() {
@@ -864,7 +818,7 @@
       }
       if (err.kind === 'net') {
         setStatus('offline', wasSaving ? '未保存' : '离线');
-        showNotice(wasSaving ? '连不上 GitHub，这次修改没有保存。' : '连不上 GitHub，现在显示的是这个浏览器里保存的副本。');
+        showNotice(wasSaving ? '连不上 GitHub，刚才的修改没保存。' : '连不上 GitHub，显示的是本地副本。');
       } else {
         setStatus('error', wasSaving ? '未保存' : '同步出错');
         if (err.kind === 'auth' || err.kind === 'repo') openSettings(errorText(err));
@@ -875,13 +829,13 @@
     function errorText(err) {
       if (err.kind === 'auth') {
         return err.status === 403
-          ? `GitHub 拒绝了：这个令牌需要对 ${STORE.owner}/${STORE.repo} 有 Contents 读写权限。`
-          : 'GitHub 不认这个令牌，可能复制错了，或者已经过期。';
+          ? `令牌没有 ${STORE.owner}/${STORE.repo} 的 Contents 读写权限。`
+          : '令牌无效或已过期。';
       }
-      if (err.kind === 'repo') return `这个令牌看不到 ${STORE.owner}/${STORE.repo}。请先建好这个私有仓库，并给令牌访问它的权限。`;
-      if (err.kind === 'net') return '连不上 GitHub，请检查网络。';
-      if (err.kind === 'conflict') return '另一台设备也在同时保存。刷新页面后再试一次。';
-      return `GitHub 出错了${err.status ? `（${err.status}）` : ''}，稍后再试。`;
+      if (err.kind === 'repo') return `令牌看不到 ${STORE.owner}/${STORE.repo}。`;
+      if (err.kind === 'net') return '连不上 GitHub。';
+      if (err.kind === 'conflict') return '其他设备同时在保存，刷新后再试。';
+      return `GitHub 出错${err.status ? `（${err.status}）` : ''}，稍后再试。`;
     }
 
     function setStatus(s, text) {
@@ -917,8 +871,10 @@
       return el;
     }
 
+    const kindTip = key => `${KINDS[key].name}：${KINDS[key].what} · ${KINDS[key].rule}`;
+
     function eventList(k, evs) {
-      if (!evs.length) return h('ul', { class: 'evs' }, h('li', { class: 'empty' }, '没有安排。'));
+      if (!evs.length) return h('ul', { class: 'evs' }, h('li', { class: 'empty' }, '没有安排'));
       return h('ul', { class: 'evs' }, evs.map(ev =>
         h('li', { class: 'ev' },
           h('button', { type: 'button', class: 'ev-btn', style: `--c:${colorOf(ev)}`, title: KINDS[kindOf(ev)].name, onclick: () => openEditor(ev, k) },
@@ -927,48 +883,42 @@
             ev.note ? h('span', { class: 'note' }, ev.note) : null))));
     }
 
-    function statsLine(stats) {
-      if (!stats.total) return null;
+    function bar(stats) {
       const scale = Math.max(DAY_HOURS, stats.total);
       const parts = Object.keys(KINDS).filter(k => stats.by[k]);
-      return h('div', { class: 'stats' },
-        h('div', { class: 'bar', role: 'img', 'aria-label': parts.map(k => `${KINDS[k].name} ${hours(stats.by[k])}`).join('，') },
-          parts.map(k => h('span', { style: `--c:${KINDS[k].color};width:${stats.by[k] / scale * 100}%`, title: `${KINDS[k].name} ${hours(stats.by[k])}` }))),
-        h('p', null, `已排 ${hours(stats.total)}` + (stats.by.deep ? ` · 深度 ${hours(stats.by.deep)}` : '')));
-    }
-
-    function nudgeLine(evs, stats) {
-      const n = nudge(evs, stats);
-      return n ? h('p', { class: 'nudge', style: `--c:${KINDS[n.kind].color}` }, n.text) : null;
+      return h('div', { class: 'bar', role: 'img', 'aria-label': parts.map(k => `${KINDS[k].name} ${hours(stats.by[k])}`).join('，') },
+        parts.map(k => h('span', { style: `--c:${KINDS[k].color};width:${stats.by[k] / scale * 100}%`, title: `${KINDS[k].name} ${hours(stats.by[k])}` })));
     }
 
     function renderNext() {
-      $('#todayLine').textContent = `${ymd(state.today)} 星期${WEEK[dateOf(state.today).getDay()]}`;
       $('#next').replaceChildren(...NEXT_LABELS.map((label, i) => {
         const k = addDays(state.today, i);
         const evs = eventsOn(k);
         const stats = dayStats(evs);
+        const n = nudge(evs, stats);
         return h('div', null,
-          h('p', { class: 'label' }, label),
+          h('div', { class: 'head' },
+            h('p', { class: 'label' }, label),
+            stats.total ? h('span', { class: 'planned' }, `已排 ${hours(stats.total)}`) : null),
           h('p', { class: 'date' }, `${md(k)} ${wk(k)}`),
-          statsLine(stats),
+          bar(stats),
           eventList(k, evs),
-          nudgeLine(evs, stats),
-          h('button', { type: 'button', class: 'add', onclick: () => openEditor(null, k) }, '+ 添加'));
+          h('div', { class: 'foot' },
+            n ? h('span', { class: 'nudge', style: `--c:${KINDS[n.kind].color}` }, n.text) : null,
+            h('button', { type: 'button', class: 'add', onclick: () => openEditor(null, k) }, '+ 添加')));
       }));
     }
 
     function renderDue() {
       const items = upcomingDue(30);
-      $('#dueEmpty').hidden = items.length > 0;
-      $('#dueList').replaceChildren(...items.map(({ ev, k, i, prepared }) =>
-        h('li', null,
-          h('button', { type: 'button', class: 'due-btn', onclick: () => openEditor(ev, k) },
-            h('span', { class: 'count' + (i <= 3 ? ' soon' : '') }, i === 0 ? '就是今天' : i === 1 ? '明天' : `还有 ${i} 天`),
-            h('span', { class: 'what' },
-              h('span', { class: 'title' }, ev.title),
-              h('span', { class: 'when' }, `${md(k)} ${wk(k)}` + (ev.start ? ` ${ev.start}` : '')),
-              !prepared && i >= 2 ? h('span', { class: 'prep' }, '还没排准备时间：往前放几块深度吧') : null)))));
+      const section = $('#due');
+      section.hidden = !items.length;
+      section.replaceChildren(section.firstElementChild, ...items.map(({ ev, k, i, prepared }) =>
+        h('button', { type: 'button', class: 'due-chip', onclick: () => openEditor(ev, k) },
+          h('span', { class: 'count' + (i <= 3 ? ' soon' : '') }, i === 0 ? '今天' : i === 1 ? '明天' : `${i}天`),
+          h('span', { class: 'title' }, ev.title),
+          h('span', { class: 'when' }, md(k)),
+          !prepared && i >= 2 ? h('span', { class: 'prep', title: '截止前还没有深度块' }, '未准备') : null)));
     }
 
     function renderMonth() {
@@ -981,36 +931,23 @@
       for (let i = 0; i < cells; i++) {
         const k = addDays(start, i);
         const evs = eventsOn(k);
-        const cls = ['cell', k.slice(0, 7) !== state.month && 'is-out', k === state.today && 'is-today', k === state.selected && 'is-sel'];
-        out.push(h('button', {
-          type: 'button',
+        const cls = ['cell', k.slice(0, 7) !== state.month && 'is-out', k === state.today && 'is-today'];
+        const extra = evs.length - CHIPS_PER_CELL;
+        out.push(h('div', {
           class: cls.filter(Boolean).join(' '),
           'data-k': k,
-          'aria-label': `${md(k)} ${wk(k)}` + (evs.length ? `，${evs.length} 项安排` : ''),
-          'aria-pressed': String(k === state.selected),
-          onclick: () => select(k),
-          ondblclick: () => openEditor(null, k),
+          onclick: e => { if (!e.target.closest('button')) narrow() ? openDay(k) : openEditor(null, k); },
         },
-          h('span', { class: 'num' }, String(dateOf(k).getDate())),
-          h('span', { class: 'chips' },
-            evs.slice(0, 3).map(ev => h('span', { class: 'chip', style: `--c:${colorOf(ev)}` }, ev.start ? `${ev.start} ${ev.title}` : ev.title)),
-            evs.length > 3 ? h('span', { class: 'more' }, `还有 ${evs.length - 3} 项`) : null)));
+          h('div', { class: 'cell-head' },
+            h('span', { class: 'num' }, String(dateOf(k).getDate())),
+            h('button', { type: 'button', class: 'cell-add', 'aria-label': `在${md(k)}添加`, onclick: () => openEditor(null, k) }, '+')),
+          h('div', { class: 'chips' },
+            evs.slice(0, extra > 0 ? CHIPS_PER_CELL - 1 : CHIPS_PER_CELL).map(ev =>
+              h('button', { type: 'button', class: 'chip', style: `--c:${colorOf(ev)}`, title: `${timeText(ev)} ${ev.title}`, onclick: () => openEditor(ev, k) },
+                ev.start ? h('b', null, ev.start) : null, ev.title)),
+            extra > 0 ? h('button', { type: 'button', class: 'more', onclick: () => openDay(k) }, `还有 ${extra + 1} 项`) : null)));
       }
       $('#grid').replaceChildren(...out);
-    }
-
-    function renderDay() {
-      const k = state.selected;
-      const rel = dayNum(k) - dayNum(state.today);
-      const evs = eventsOn(k);
-      const stats = dayStats(evs);
-      $('#dayPanel').replaceChildren(
-        h('p', { class: 'label' }, rel >= 0 && rel < 3 ? `${NEXT_LABELS[rel]} · ${wk(k)}` : `星期${WEEK[dateOf(k).getDay()]}`),
-        h('h3', null, ymd(k)),
-        statsLine(stats),
-        eventList(k, evs),
-        rel >= 0 ? nudgeLine(evs, stats) : null,
-        h('button', { type: 'button', class: 'btn', onclick: () => openEditor(null, k) }, '+ 添加日程'));
     }
 
     function render() {
@@ -1018,21 +955,6 @@
       renderNext();
       renderDue();
       renderMonth();
-      renderDay();
-    }
-
-    function select(k) {
-      const sameMonth = k.slice(0, 7) === state.month;
-      state.selected = k;
-      state.month = k.slice(0, 7);
-      if (!sameMonth) return render();
-      // Keep the cells in place so a double-click can land on the same element.
-      for (const cell of $('#grid').children) {
-        const on = cell.dataset.k === k;
-        cell.classList.toggle('is-sel', on);
-        cell.setAttribute('aria-pressed', String(on));
-      }
-      renderDay();
     }
 
     function shiftMonth(n) {
@@ -1041,11 +963,22 @@
       renderMonth();
     }
 
-    $('#kindsGuide').append(...Object.values(KINDS).map(k =>
-      h('div', { class: 'kind', style: `--c:${k.color}` },
-        h('h3', null, k.name),
-        h('p', { class: 'what' }, k.what),
-        h('p', { class: 'rule' }, k.rule))));
+    $('#legend').append(...Object.keys(KINDS).map(key =>
+      h('span', { style: `--c:${KINDS[key].color}`, title: kindTip(key) }, KINDS[key].name)));
+
+    // ---- one day (used on phones and for busy days)
+
+    const dayDialog = $('#dayDialog');
+    let dayKey = null;
+
+    function openDay(k) {
+      dayKey = k;
+      $('#dayTitle').textContent = `${md(k)} ${wk(k)}`;
+      $('#dayList').replaceChildren(eventList(k, eventsOn(k)));
+      dayDialog.showModal();
+    }
+    $('#dayClose').addEventListener('click', () => dayDialog.close());
+    $('#dayAdd').addEventListener('click', () => openEditor(null, dayKey));
 
     // ---- event editor
 
@@ -1060,16 +993,16 @@
 
     function showKindRule() {
       const k = KINDS[E.kind.value] || KINDS.fixed;
-      $('#kindRule').style.setProperty('--c', k.color);
-      $('#kindRule').textContent = `${k.what}。${k.rule}`;
+      $('#kindRule').textContent = `${k.what} · ${k.rule}`;
     }
     $('#kindPick').addEventListener('change', showKindRule);
 
     function openEditor(ev, k) {
-      if (!state.token) { openSettings('先连接 GitHub，日程才能保存。'); return; }
+      if (dayDialog.open) dayDialog.close();
+      if (!state.token) { openSettings('先连接 GitHub 才能保存。'); return; }
       editing = { ev, k };
       $('#editorForm').reset();
-      $('#editorTitle').textContent = ev ? '编辑日程' : '新建日程';
+      $('#editorTitle').textContent = ev ? '编辑日程' : `新建 · ${md(k)}`;
       E.title.value = ev ? ev.title : '';
       E.kind.value = ev ? kindOf(ev) : 'fixed';
       E.date.value = ev ? ev.date : k;
@@ -1128,7 +1061,7 @@
 
       editor.close();
       change(upsert(ev), `${prev ? '修改' : '添加'}「${title}」(${date})`);
-      if (!repeat && date !== editing.k) select(date);
+      if (date.slice(0, 7) !== state.month && !repeat) { state.month = date.slice(0, 7); renderMonth(); }
     });
 
     $('#deleteAll').addEventListener('click', () => {
@@ -1203,15 +1136,14 @@
 
     $('#prevMonth').addEventListener('click', () => shiftMonth(-1));
     $('#nextMonth').addEventListener('click', () => shiftMonth(1));
-    $('#thisMonth').addEventListener('click', () => select(state.today));
+    $('#thisMonth').addEventListener('click', () => { state.month = state.today.slice(0, 7); renderMonth(); });
 
     // Roll over at midnight, and pick up edits made on other devices when the tab comes back.
     function tick() {
       const now = keyOf(new Date());
       if (now === state.today) return;
-      if (state.selected === state.today) state.selected = now;
+      if (state.month === state.today.slice(0, 7)) state.month = now.slice(0, 7);
       state.today = now;
-      state.month = state.selected.slice(0, 7);
       render();
     }
     setInterval(tick, 60 * 1000);
