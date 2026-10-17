@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
-  <title>Schedule · Keyue Xing</title>
+  <title>日程 · Keyue Xing</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,620&display=swap" rel="stylesheet">
+  <!-- Loaded without blocking: Google Fonts is often unreachable from mainland China. -->
+  <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,620&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <style>
     :root {
       --ink: #1c3140;
@@ -18,16 +19,17 @@
       --paper: #f3f9fb;
       --link: #1a4f68;
       --warn: #b3492f;
+      --serif: Fraunces, "Songti SC", "Noto Serif SC", serif;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       color: var(--ink);
       background: var(--sky);
-      font-family: "Familjen Grotesk", "PingFang SC", sans-serif;
+      font-family: "Familjen Grotesk", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       font-size: 16px;
       font-weight: 450;
-      line-height: 1.5;
+      line-height: 1.55;
     }
     button, input, select, textarea { font: inherit; color: inherit; }
     button { cursor: pointer; }
@@ -67,7 +69,7 @@
     }
     .sync[data-state="synced"]::before { background: #3d7a5a; }
     .sync[data-state="saving"]::before,
-    .sync[data-state="loading"]::before { background: #b8862b; }
+    .sync[data-state="loading"]::before { background: #c28f2c; }
     .sync[data-state="error"]::before,
     .sync[data-state="offline"]::before { background: var(--warn); }
     .linkbtn {
@@ -83,11 +85,11 @@
     header.top { padding: 26px 0 0; }
     h1 {
       margin: 0;
-      font-family: Fraunces, serif;
+      font-family: var(--serif);
       font-weight: 620;
       font-size: 40px;
-      letter-spacing: -0.03em;
-      line-height: 1;
+      letter-spacing: 0.02em;
+      line-height: 1.1;
     }
     .today-line { margin: 8px 0 0; color: var(--muted); font-size: 15.5px; }
     .banner {
@@ -104,28 +106,47 @@
     .banner.is-warn { border-color: rgba(179, 73, 47, 0.4); }
     .banner p { margin: 0; flex: 1 1 320px; }
 
+    .label {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
     .next {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0 36px;
       margin: 36px 0 0;
     }
-    .label {
-      margin: 0;
-      font-size: 12.5px;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
     .next .date {
       margin: 2px 0 10px;
-      font-family: Fraunces, serif;
+      font-family: var(--serif);
       font-weight: 560;
       font-size: 23px;
-      letter-spacing: -0.02em;
-      line-height: 1.2;
+      line-height: 1.25;
     }
+
+    .stats { margin: 0 0 10px; }
+    .bar {
+      display: flex;
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+      background: rgba(28, 49, 64, 0.08);
+    }
+    .bar span { background: var(--c); }
+    .bar span + span { box-shadow: inset 1px 0 0 var(--sky); }
+    .stats p { margin: 5px 0 0; font-size: 13px; color: var(--muted); }
+    .nudge {
+      margin: 10px 0 0;
+      padding: 6px 10px;
+      border-left: 2px solid var(--c);
+      background: rgba(255, 255, 255, 0.5);
+      font-size: 13.5px;
+      line-height: 1.45;
+    }
+
     ul.evs { margin: 0; padding: 0; list-style: none; }
     ul.evs li { border-top: 1px solid var(--line); }
     ul.evs li:last-child { border-bottom: 1px solid var(--line); }
@@ -179,7 +200,46 @@
     }
     .add:hover { text-decoration: underline; }
 
-    .cal { margin: 56px 0 0; padding-bottom: 80px; }
+    .due { margin: 48px 0 0; }
+    .due-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 10px;
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .due-btn {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-left: 3px solid #c4573a;
+      border-radius: 2px;
+      background: var(--paper);
+      text-align: left;
+    }
+    .due-btn:hover { border-color: var(--muted); border-left-color: #c4573a; }
+    .count {
+      flex: none;
+      min-width: 54px;
+      padding: 1px 0;
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .count.soon { color: #c4573a; }
+    .due-btn .what { min-width: 0; }
+    .due-btn .title { display: block; font-weight: 600; overflow-wrap: anywhere; }
+    .due-btn .when { display: block; font-size: 13.5px; color: var(--muted); }
+    .due-btn .prep { display: block; margin-top: 2px; font-size: 13px; color: #c4573a; }
+    .due-empty { margin: 8px 0 0; color: var(--faint); font-size: 15px; }
+
+    .cal { margin: 52px 0 0; }
     .cal-head {
       display: flex;
       align-items: baseline;
@@ -189,11 +249,10 @@
     }
     h2 {
       margin: 0;
-      font-family: Fraunces, serif;
+      font-family: var(--serif);
       font-weight: 560;
       font-size: 28px;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
+      line-height: 1.2;
     }
     .cal-nav { display: flex; gap: 6px; }
     .cal-nav button {
@@ -217,13 +276,11 @@
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
       margin: 0 0 6px;
-      font-size: 12.5px;
+      font-size: 13px;
       font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
       color: var(--muted);
     }
-    .dow span { padding: 0 7px; }
+    .dow span { padding: 0 8px; }
     .grid {
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -276,11 +333,10 @@
     .day { position: sticky; top: 24px; }
     .day h3 {
       margin: 2px 0 12px;
-      font-family: Fraunces, serif;
+      font-family: var(--serif);
       font-weight: 560;
       font-size: 22px;
-      letter-spacing: -0.02em;
-      line-height: 1.2;
+      line-height: 1.25;
     }
     .btn {
       height: 36px;
@@ -300,8 +356,45 @@
     .btn:disabled { opacity: 0.6; cursor: default; }
     .day .btn { margin-top: 14px; }
 
+    .guide { margin: 72px 0 0; padding: 0 0 90px; }
+    .guide .lead { margin: 8px 0 0; max-width: 40em; color: var(--muted); }
+    .kinds {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0 32px;
+      margin: 22px 0 0;
+    }
+    .kind { padding: 14px 0; border-top: 1px solid var(--line); }
+    .kind h3 {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0;
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 20px;
+    }
+    .kind h3::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--c);
+    }
+    .kind .what { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
+    .kind .rule { margin: 6px 0 0; font-size: 15px; }
+    .rules-title {
+      margin: 34px 0 10px;
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 22px;
+    }
+    .rules { margin: 0; padding-left: 22px; max-width: 46em; }
+    .rules li { margin: 0 0 8px; padding-left: 4px; }
+    .rules b { font-weight: 650; }
+
     dialog {
-      width: min(470px, calc(100% - 32px));
+      width: min(480px, calc(100% - 32px));
       padding: 22px 22px 18px;
       border: 1px solid var(--line);
       border-radius: 3px;
@@ -312,17 +405,15 @@
     dialog::backdrop { background: rgba(28, 49, 64, 0.28); }
     dialog h3 {
       margin: 0 0 16px;
-      font-family: Fraunces, serif;
-      font-weight: 560;
+      font-family: var(--serif);
+      font-weight: 600;
       font-size: 24px;
-      letter-spacing: -0.02em;
     }
     .field { display: flex; flex-direction: column; gap: 4px; margin: 0 0 12px; min-width: 0; }
     .field > span, legend {
-      font-size: 12.5px;
+      font-size: 13px;
       font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: 0.06em;
       color: var(--muted);
     }
     .field input, .field select, .field textarea {
@@ -343,19 +434,36 @@
     .hint { margin: -4px 0 12px; font-size: 13.5px; color: var(--muted); }
     fieldset { margin: 0 0 12px; padding: 0; border: 0; }
     legend { padding: 0; margin-bottom: 6px; }
-    .swatches { display: flex; gap: 8px; }
-    .swatches label { position: relative; }
-    .swatches input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
-    .swatches span {
-      display: block;
-      width: 24px;
-      height: 24px;
+    .picks { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pick { position: relative; }
+    .pick input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+    .pick span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px 4px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      font-size: 14px;
+    }
+    .pick span::before {
+      content: "";
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
       background: var(--c);
-      box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px transparent;
     }
-    .swatches input:checked + span { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--c); }
-    .swatches input:focus-visible + span { outline: 2px solid var(--link); outline-offset: 4px; }
+    .pick input:checked + span { border-color: var(--c); box-shadow: inset 0 0 0 1px var(--c); font-weight: 600; }
+    .pick input:focus-visible + span { outline: 2px solid var(--link); outline-offset: 2px; }
+    .kind-rule {
+      margin: 8px 0 0;
+      padding: 6px 10px;
+      border-left: 2px solid var(--c);
+      background: #fff;
+      font-size: 13.5px;
+      line-height: 1.45;
+    }
     .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
     .actions .spacer { flex: 1; }
     .steps { margin: 0 0 14px; padding-left: 20px; font-size: 14.5px; }
@@ -366,118 +474,142 @@
 
     @media (max-width: 860px) {
       .wrap { width: min(680px, calc(100% - 32px)); }
-      .next { grid-template-columns: 1fr; gap: 24px; }
+      .next { grid-template-columns: 1fr; gap: 26px; }
       .cal-body { grid-template-columns: 1fr; gap: 28px; }
       .day { position: static; }
+      .kinds { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 560px) {
       h1 { font-size: 34px; }
       .cell { min-height: 56px; padding: 4px; }
-      .dow span { padding: 0 4px; }
+      .dow span { padding: 0 5px; }
       .chips { flex-direction: row; flex-wrap: wrap; gap: 3px; padding-left: 4px; }
       .chip { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 50%; background: var(--c); font-size: 0; }
       .more { display: none; }
       .row { grid-template-columns: 1fr; }
+      .kinds { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <nav class="toc">
-      <a href="../index.html">Home</a>
-      <a href="../about.html">About</a>
+      <a href="../index.html">首页</a>
+      <a href="../about.html">关于</a>
+      <a href="#guide">颜色规则</a>
       <span class="spacer"></span>
-      <span class="sync" id="sync" data-state="setup">Not connected</span>
+      <span class="sync" id="sync" data-state="setup">未连接</span>
       <button type="button" class="linkbtn" id="settingsBtn">GitHub</button>
     </nav>
 
     <header class="top">
-      <h1>Schedule</h1>
+      <h1>日程</h1>
       <p class="today-line" id="todayLine"></p>
       <div class="banner" id="setupBanner" hidden>
-        <p>Events are saved to a private GitHub repository. Connect a token once in this browser to start adding them.</p>
-        <button type="button" class="btn" id="connectBtn">Connect GitHub</button>
+        <p>日程保存在你的私有 GitHub 仓库里。在这个浏览器里连接一次，就可以开始添加。</p>
+        <button type="button" class="btn" id="connectBtn">连接 GitHub</button>
       </div>
       <div class="banner is-warn" id="notice" hidden>
         <p id="noticeText"></p>
-        <button type="button" class="btn ghost" id="noticeClose">Dismiss</button>
+        <button type="button" class="btn ghost" id="noticeClose">知道了</button>
       </div>
     </header>
 
-    <section class="next" id="next" aria-label="Today, tomorrow and the day after"></section>
+    <section class="next" id="next" aria-label="今天、明天、后天"></section>
 
-    <section class="cal" aria-label="Month">
+    <section class="due" aria-label="即将截止">
+      <p class="label">即将截止 · 30 天内</p>
+      <ul class="due-list" id="dueList"></ul>
+      <p class="due-empty" id="dueEmpty" hidden>30 天内没有截止日期。</p>
+    </section>
+
+    <section class="cal" aria-label="月历">
       <div class="cal-head">
         <h2 id="monthTitle"></h2>
         <div class="cal-nav">
-          <button type="button" id="prevMonth" aria-label="Previous month">‹</button>
-          <button type="button" id="thisMonth">Today</button>
-          <button type="button" id="nextMonth" aria-label="Next month">›</button>
+          <button type="button" id="prevMonth" aria-label="上个月">‹</button>
+          <button type="button" id="thisMonth">今天</button>
+          <button type="button" id="nextMonth" aria-label="下个月">›</button>
         </div>
       </div>
       <div class="cal-body">
         <div>
-          <div class="dow" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+          <div class="dow" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
           <div class="grid" id="grid"></div>
         </div>
         <aside class="day" id="dayPanel"></aside>
       </div>
     </section>
+
+    <section class="guide" id="guide">
+      <h2>怎么用颜色做计划</h2>
+      <p class="lead">给 P 人的版本：不用把每一分钟都排满，只要知道每一段时间属于哪一种。颜色就是提醒你“这段时间该怎么用”。</p>
+      <div class="kinds" id="kindsGuide"></div>
+      <h3 class="rules-title">五条小规则</h3>
+      <ol class="rules">
+        <li><b>每晚 5 分钟</b>看一眼明天，只挑 1–3 件最重要的事。</li>
+        <li><b>按顺序排</b>：先放固定的，再从截止日往前倒推，然后放深度块和生活，剩下的就是留白。</li>
+        <li><b>最多排满 70%</b>。事情永远比想象的慢，没排的那 30% 就是留白。</li>
+        <li><b>计划乱了很正常</b>。没做完的挪到留白或者明天，不自责，也不用重排整周。</li>
+        <li><b>每周日花 10 分钟</b>看下一周：先找红色的截止，再往前放蓝色的深度块。</li>
+      </ol>
+    </section>
   </div>
 
   <dialog id="editor">
     <form id="editorForm" novalidate>
-      <h3 id="editorTitle">New event</h3>
-      <label class="field"><span>Title</span><input name="title" required autocomplete="off"></label>
+      <h3 id="editorTitle">新建日程</h3>
+      <label class="field"><span>标题</span><input name="title" required autocomplete="off"></label>
+      <fieldset>
+        <legend>类型</legend>
+        <div class="picks" id="kindPick"></div>
+        <p class="kind-rule" id="kindRule"></p>
+      </fieldset>
       <div class="row">
-        <label class="field"><span id="dateLabel">Date</span><input type="date" name="date" required></label>
-        <label class="field"><span>Repeat</span>
+        <label class="field"><span id="dateLabel">日期</span><input type="date" name="date" required></label>
+        <label class="field"><span>重复</span>
           <select name="repeat">
-            <option value="">Does not repeat</option>
-            <option value="daily">Every day</option>
-            <option value="weekly">Every week</option>
-            <option value="biweekly">Every 2 weeks</option>
+            <option value="">不重复</option>
+            <option value="daily">每天</option>
+            <option value="weekly">每周</option>
+            <option value="biweekly">每两周</option>
           </select>
         </label>
       </div>
       <div class="row">
-        <label class="field"><span>Starts</span><input type="time" name="start"></label>
-        <label class="field"><span>Ends</span><input type="time" name="end"></label>
+        <label class="field"><span>开始</span><input type="time" name="start"></label>
+        <label class="field"><span>结束</span><input type="time" name="end"></label>
       </div>
-      <p class="hint">Leave the times empty for an all-day item.</p>
-      <label class="field" id="untilField"><span>Repeat until (optional)</span><input type="date" name="until"></label>
-      <fieldset>
-        <legend>Color</legend>
-        <div class="swatches" id="swatches"></div>
-      </fieldset>
-      <label class="field"><span>Note</span><textarea name="note" rows="2"></textarea></label>
-      <p class="hint" id="seriesHint">Changes apply to every repeat of this event.</p>
+      <p class="hint">不填时间就是全天。</p>
+      <label class="field" id="untilField"><span>重复到（可不填）</span><input type="date" name="until"></label>
+      <label class="field"><span>备注</span><textarea name="note" rows="2"></textarea></label>
+      <p class="hint" id="seriesHint">修改会应用到这个日程的每一次重复。</p>
       <p class="msg" id="editorMsg" hidden></p>
       <div class="actions">
-        <button type="button" class="btn danger" id="deleteOne">Delete this day</button>
-        <button type="button" class="btn danger" id="deleteAll">Delete</button>
+        <button type="button" class="btn danger" id="deleteOne">只删这一天</button>
+        <button type="button" class="btn danger" id="deleteAll">删除</button>
         <span class="spacer"></span>
-        <button type="button" class="btn ghost" id="editorCancel">Cancel</button>
-        <button type="submit" class="btn">Save</button>
+        <button type="button" class="btn ghost" id="editorCancel">取消</button>
+        <button type="submit" class="btn">保存</button>
       </div>
     </form>
   </dialog>
 
   <dialog id="settings">
     <form id="settingsForm" novalidate>
-      <h3>Connect GitHub</h3>
+      <h3>连接 GitHub</h3>
       <ol class="steps">
-        <li><a href="https://github.com/new" target="_blank" rel="noopener">Create a private repository</a> named <code id="repoName"></code>, with “Add a README” ticked.</li>
-        <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Create a fine-grained token</a>: Repository access → Only select repositories → that repo; Permissions → Contents → Read and write.</li>
-        <li>Paste the token below. It stays in this browser only.</li>
+        <li><a href="https://github.com/new" target="_blank" rel="noopener">新建一个私有仓库</a>，名字叫 <code id="repoName"></code>，勾选 “Add a README file”。</li>
+        <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">生成一个 fine-grained 令牌</a>：Repository access 选 Only select repositories → 这个仓库；Permissions → Contents 设为 Read and write。</li>
+        <li>把令牌粘贴到下面。它只保存在这个浏览器里，每个浏览器连接一次就行。</li>
       </ol>
       <p class="msg" id="settingsMsg" hidden></p>
-      <label class="field"><span>Token</span><input type="password" name="token" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>
+      <label class="field"><span>令牌</span><input type="password" name="token" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>
       <div class="actions">
-        <button type="button" class="btn danger" id="disconnect">Disconnect</button>
+        <button type="button" class="btn danger" id="disconnect">断开</button>
         <span class="spacer"></span>
-        <button type="button" class="btn ghost" id="settingsCancel">Cancel</button>
-        <button type="submit" class="btn" id="settingsSave">Connect</button>
+        <button type="button" class="btn ghost" id="settingsCancel">取消</button>
+        <button type="submit" class="btn" id="settingsSave">连接</button>
       </div>
     </form>
   </dialog>
@@ -489,8 +621,20 @@
     // Where the events live. Point this at a public repo instead if the schedule should be public.
     const STORE = { owner: 'Alita-xky', repo: 'schedule', branch: 'main', path: 'events.json' };
     const API = `https://api.github.com/repos/${STORE.owner}/${STORE.repo}`;
-    const COLORS = { ink: '#1c3140', blue: '#2f7ea8', coral: '#c4573a', green: '#3d7a5a', amber: '#c28f2c', violet: '#6b5a9e' };
-    const NEXT_LABELS = ['Today', 'Tomorrow', 'Day after'];
+
+    // Each event has one kind; the kind decides its color and the planning rule shown for it.
+    const KINDS = {
+      fixed: { name: '固定', color: '#1c3140', what: '上课、组会、约好的见面', rule: '时间是别人定的。最先放进日历，其他安排绕着它走。' },
+      deep: { name: '深度', color: '#2f7ea8', what: '科研、写论文、写代码、备考', rule: '一块 60–90 分钟，手机放远。一天最多 3 块，放在精力最好的时段。' },
+      due: { name: '截止', color: '#c4573a', what: '作业 ddl、论文投稿、考试', rule: '标在当天，然后倒推：在它前面几天放好深度块，别留到最后一晚。' },
+      admin: { name: '杂事', color: '#c28f2c', what: '邮件、报销、填表、取快递', rule: '攒在一起，一次 30 分钟集中清掉，别让它们切碎深度时间。' },
+      life: { name: '生活', color: '#3d7a5a', what: '游泳、运动、吃饭、睡觉、见朋友', rule: '和上课一样认真对待。人累垮了，什么计划都没用。' },
+      free: { name: '留白', color: '#9384c4', what: '故意不安排任何事的空档', rule: 'P 人的秘密武器：每天留 1–2 小时，想做什么做什么；计划被打乱时就拿它来补。' },
+    };
+    const LEGACY_COLORS = { ink: 'fixed', blue: 'deep', coral: 'due', amber: 'admin', green: 'life', violet: 'free' };
+    const NEXT_LABELS = ['今天', '明天', '后天'];
+    const WEEK = '日一二三四五六';
+    const DAY_HOURS = 16;   // a waking day, roughly 7:00–23:00
 
     const $ = sel => document.querySelector(sel);
     const store = {
@@ -507,7 +651,9 @@
     const dateOf = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
     const dayNum = k => { const [y, m, d] = k.split('-').map(Number); return Date.UTC(y, m - 1, d) / 864e5; };
     const addDays = (k, n) => { const d = dateOf(k); d.setDate(d.getDate() + n); return keyOf(d); };
-    const fmt = (k, opts) => dateOf(k).toLocaleDateString('en-US', opts);
+    const md = k => { const d = dateOf(k); return `${d.getMonth() + 1}月${d.getDate()}日`; };
+    const wk = k => '周' + WEEK[dateOf(k).getDay()];
+    const ymd = k => { const d = dateOf(k); return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`; };
 
     function occursOn(ev, k) {
       if (k < ev.date || (ev.until && k > ev.until)) return false;
@@ -519,12 +665,61 @@
     }
     const byTime = (a, b) => (a.start || '').localeCompare(b.start || '') || a.title.localeCompare(b.title);
     const eventsOn = k => state.data.events.filter(ev => occursOn(ev, k)).sort(byTime);
-    const timeText = ev => ev.start ? (ev.end ? `${ev.start}–${ev.end}` : ev.start) : 'All day';
-    const colorOf = ev => COLORS[ev.color] || COLORS.ink;
+    const timeText = ev => ev.start ? (ev.end ? `${ev.start}–${ev.end}` : ev.start) : '全天';
+    const kindOf = ev => KINDS[ev.kind] ? ev.kind : 'fixed';
+    const colorOf = ev => KINDS[kindOf(ev)].color;
 
     function normalize(d) {
-      const events = Array.isArray(d && d.events) ? d.events : [];
-      return { version: 1, events: events.filter(e => e && e.id && e.title && /^\d{4}-\d{2}-\d{2}$/.test(e.date)) };
+      const events = (Array.isArray(d && d.events) ? d.events : [])
+        .filter(e => e && e.id && e.title && /^\d{4}-\d{2}-\d{2}$/.test(e.date));
+      for (const e of events) {   // events saved before kinds existed only had a color
+        if (!e.kind && e.color) e.kind = LEGACY_COLORS[e.color] || 'fixed';
+        delete e.color;
+      }
+      return { version: 1, events };
+    }
+
+    // ---- planning helpers
+
+    const minutes = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+    const hours = h => `${Math.round(h * 2) / 2} 小时`;
+
+    function dayStats(evs) {
+      const by = {};
+      let total = 0;
+      for (const ev of evs) {
+        if (!ev.start || !ev.end) continue;
+        const h = (minutes(ev.end) - minutes(ev.start)) / 60;
+        if (h <= 0) continue;
+        by[kindOf(ev)] = (by[kindOf(ev)] || 0) + h;
+        total += h;
+      }
+      return { by, total };
+    }
+
+    // One gentle suggestion per day, most important first.
+    function nudge(evs, stats) {
+      const has = kind => evs.some(ev => kindOf(ev) === kind);
+      if (!evs.length) return { kind: 'fixed', text: '还空着：先放固定的，再挑 1–3 件最重要的事。' };
+      if (stats.total > DAY_HOURS * 0.7) return { kind: 'due', text: `已经排了 ${hours(stats.total)}，超过一天的 70%，留点白吧。` };
+      if (!has('deep') && !has('due')) return { kind: 'deep', text: '还没有深度块：挑一件要事，给它 60–90 分钟。' };
+      if (!has('free') && stats.total >= 6) return { kind: 'free', text: '加一块留白，计划乱了也有地方补。' };
+      return null;
+    }
+
+    function upcomingDue(days) {
+      const out = [];
+      for (let i = 0; i <= days; i++) {
+        const k = addDays(state.today, i);
+        for (const ev of eventsOn(k)) {
+          if (kindOf(ev) !== 'due') continue;
+          // Has any deep block been planned between now and the deadline?
+          let prepared = false;
+          for (let j = 0; j < i && !prepared; j++) prepared = eventsOn(addDays(state.today, j)).some(e => kindOf(e) === 'deep');
+          out.push({ ev, k, i, prepared });
+        }
+      }
+      return out.slice(0, 6);
     }
 
     // ---- state
@@ -552,7 +747,7 @@
     class SyncError extends Error {
       constructor(kind, status) { super(kind); this.kind = kind; this.status = status; }
     }
-    const kindOf = status => status === 401 || status === 403 ? 'auth' : 'http';
+    const errorKind = status => status === 401 || status === 403 ? 'auth' : 'http';
 
     async function gh(path, opts = {}) {
       try {
@@ -579,10 +774,10 @@
       if (res.status === 404) {
         // Either the repo is invisible to this token, or events.json just doesn't exist yet.
         const repo = await gh('');
-        if (!repo.ok) throw new SyncError(repo.status === 404 ? 'repo' : kindOf(repo.status), repo.status);
+        if (!repo.ok) throw new SyncError(repo.status === 404 ? 'repo' : errorKind(repo.status), repo.status);
         return { data: normalize(null), sha: null };
       }
-      if (!res.ok) throw new SyncError(kindOf(res.status), res.status);
+      if (!res.ok) throw new SyncError(errorKind(res.status), res.status);
       const file = await res.json();
       return { data: normalize(JSON.parse(fromB64(file.content))), sha: file.sha };
     }
@@ -655,7 +850,7 @@
           state.sha = (await res.json()).content.sha;
           return;
         }
-        if (res.status !== 409 && res.status !== 422) throw new SyncError(kindOf(res.status), res.status);
+        if (res.status !== 409 && res.status !== 422) throw new SyncError(errorKind(res.status), res.status);
         base = await getRemote();   // someone else saved first: rebase and retry
       }
       throw new SyncError('conflict');
@@ -668,10 +863,10 @@
         render();
       }
       if (err.kind === 'net') {
-        setStatus('offline', wasSaving ? 'Not saved' : 'Offline');
-        showNotice(wasSaving ? "Couldn't reach GitHub, so that change wasn't saved." : "Can't reach GitHub. Showing the copy saved in this browser.");
+        setStatus('offline', wasSaving ? '未保存' : '离线');
+        showNotice(wasSaving ? '连不上 GitHub，这次修改没有保存。' : '连不上 GitHub，现在显示的是这个浏览器里保存的副本。');
       } else {
-        setStatus('error', wasSaving ? 'Not saved' : 'Sync error');
+        setStatus('error', wasSaving ? '未保存' : '同步出错');
         if (err.kind === 'auth' || err.kind === 'repo') openSettings(errorText(err));
         else showNotice(errorText(err));
       }
@@ -680,19 +875,19 @@
     function errorText(err) {
       if (err.kind === 'auth') {
         return err.status === 403
-          ? `GitHub refused. The token needs Contents → Read and write on ${STORE.owner}/${STORE.repo}.`
-          : 'GitHub rejected this token. It may be mistyped or expired.';
+          ? `GitHub 拒绝了：这个令牌需要对 ${STORE.owner}/${STORE.repo} 有 Contents 读写权限。`
+          : 'GitHub 不认这个令牌，可能复制错了，或者已经过期。';
       }
-      if (err.kind === 'repo') return `This token can't see ${STORE.owner}/${STORE.repo}. Create that private repo and give the token access to it.`;
-      if (err.kind === 'net') return "Can't reach GitHub. Check your connection.";
-      if (err.kind === 'conflict') return 'Another device kept saving at the same time. Reload and try again.';
-      return `GitHub returned an error${err.status ? ` (${err.status})` : ''}. Try again in a moment.`;
+      if (err.kind === 'repo') return `这个令牌看不到 ${STORE.owner}/${STORE.repo}。请先建好这个私有仓库，并给令牌访问它的权限。`;
+      if (err.kind === 'net') return '连不上 GitHub，请检查网络。';
+      if (err.kind === 'conflict') return '另一台设备也在同时保存。刷新页面后再试一次。';
+      return `GitHub 出错了${err.status ? `（${err.status}）` : ''}，稍后再试。`;
     }
 
     function setStatus(s, text) {
       const el = $('#sync');
       el.dataset.state = s;
-      el.textContent = text || { synced: 'Synced', saving: 'Saving…', loading: 'Loading…', setup: 'Not connected', error: 'Sync error', offline: 'Offline' }[s];
+      el.textContent = text || { synced: '已同步', saving: '保存中…', loading: '加载中…', setup: '未连接', error: '同步出错', offline: '离线' }[s];
     }
     function showNotice(text) { $('#noticeText').textContent = text; $('#notice').hidden = false; }
     function hideNotice() { $('#notice').hidden = true; }
@@ -722,32 +917,63 @@
       return el;
     }
 
-    function eventList(k) {
-      const evs = eventsOn(k);
-      if (!evs.length) return h('ul', { class: 'evs' }, h('li', { class: 'empty' }, 'Nothing planned.'));
+    function eventList(k, evs) {
+      if (!evs.length) return h('ul', { class: 'evs' }, h('li', { class: 'empty' }, '没有安排。'));
       return h('ul', { class: 'evs' }, evs.map(ev =>
         h('li', { class: 'ev' },
-          h('button', { type: 'button', class: 'ev-btn', style: `--c:${colorOf(ev)}`, onclick: () => openEditor(ev, k) },
+          h('button', { type: 'button', class: 'ev-btn', style: `--c:${colorOf(ev)}`, title: KINDS[kindOf(ev)].name, onclick: () => openEditor(ev, k) },
             h('span', { class: 'time' }, timeText(ev)),
             h('span', { class: 'title' }, ev.title),
             ev.note ? h('span', { class: 'note' }, ev.note) : null))));
     }
 
+    function statsLine(stats) {
+      if (!stats.total) return null;
+      const scale = Math.max(DAY_HOURS, stats.total);
+      const parts = Object.keys(KINDS).filter(k => stats.by[k]);
+      return h('div', { class: 'stats' },
+        h('div', { class: 'bar', role: 'img', 'aria-label': parts.map(k => `${KINDS[k].name} ${hours(stats.by[k])}`).join('，') },
+          parts.map(k => h('span', { style: `--c:${KINDS[k].color};width:${stats.by[k] / scale * 100}%`, title: `${KINDS[k].name} ${hours(stats.by[k])}` }))),
+        h('p', null, `已排 ${hours(stats.total)}` + (stats.by.deep ? ` · 深度 ${hours(stats.by.deep)}` : '')));
+    }
+
+    function nudgeLine(evs, stats) {
+      const n = nudge(evs, stats);
+      return n ? h('p', { class: 'nudge', style: `--c:${KINDS[n.kind].color}` }, n.text) : null;
+    }
+
     function renderNext() {
-      $('#todayLine').textContent = fmt(state.today, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      $('#todayLine').textContent = `${ymd(state.today)} 星期${WEEK[dateOf(state.today).getDay()]}`;
       $('#next').replaceChildren(...NEXT_LABELS.map((label, i) => {
         const k = addDays(state.today, i);
+        const evs = eventsOn(k);
+        const stats = dayStats(evs);
         return h('div', null,
           h('p', { class: 'label' }, label),
-          h('p', { class: 'date' }, fmt(k, { weekday: 'short', month: 'short', day: 'numeric' })),
-          eventList(k),
-          h('button', { type: 'button', class: 'add', onclick: () => openEditor(null, k) }, '+ Add'));
+          h('p', { class: 'date' }, `${md(k)} ${wk(k)}`),
+          statsLine(stats),
+          eventList(k, evs),
+          nudgeLine(evs, stats),
+          h('button', { type: 'button', class: 'add', onclick: () => openEditor(null, k) }, '+ 添加'));
       }));
+    }
+
+    function renderDue() {
+      const items = upcomingDue(30);
+      $('#dueEmpty').hidden = items.length > 0;
+      $('#dueList').replaceChildren(...items.map(({ ev, k, i, prepared }) =>
+        h('li', null,
+          h('button', { type: 'button', class: 'due-btn', onclick: () => openEditor(ev, k) },
+            h('span', { class: 'count' + (i <= 3 ? ' soon' : '') }, i === 0 ? '就是今天' : i === 1 ? '明天' : `还有 ${i} 天`),
+            h('span', { class: 'what' },
+              h('span', { class: 'title' }, ev.title),
+              h('span', { class: 'when' }, `${md(k)} ${wk(k)}` + (ev.start ? ` ${ev.start}` : '')),
+              !prepared && i >= 2 ? h('span', { class: 'prep' }, '还没排准备时间：往前放几块深度吧') : null)))));
     }
 
     function renderMonth() {
       const [y, m] = state.month.split('-').map(Number);
-      $('#monthTitle').textContent = new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      $('#monthTitle').textContent = `${y}年${m}月`;
       const offset = (new Date(y, m - 1, 1).getDay() + 6) % 7;   // weeks start on Monday
       const cells = Math.ceil((offset + new Date(y, m, 0).getDate()) / 7) * 7;
       const start = keyOf(new Date(y, m - 1, 1 - offset));
@@ -756,12 +982,11 @@
         const k = addDays(start, i);
         const evs = eventsOn(k);
         const cls = ['cell', k.slice(0, 7) !== state.month && 'is-out', k === state.today && 'is-today', k === state.selected && 'is-sel'];
-        const label = fmt(k, { weekday: 'long', month: 'long', day: 'numeric' }) + (evs.length ? `, ${evs.length} event${evs.length > 1 ? 's' : ''}` : '');
         out.push(h('button', {
           type: 'button',
           class: cls.filter(Boolean).join(' '),
           'data-k': k,
-          'aria-label': label,
+          'aria-label': `${md(k)} ${wk(k)}` + (evs.length ? `，${evs.length} 项安排` : ''),
           'aria-pressed': String(k === state.selected),
           onclick: () => select(k),
           ondblclick: () => openEditor(null, k),
@@ -769,24 +994,29 @@
           h('span', { class: 'num' }, String(dateOf(k).getDate())),
           h('span', { class: 'chips' },
             evs.slice(0, 3).map(ev => h('span', { class: 'chip', style: `--c:${colorOf(ev)}` }, ev.start ? `${ev.start} ${ev.title}` : ev.title)),
-            evs.length > 3 ? h('span', { class: 'more' }, `+${evs.length - 3} more`) : null)));
+            evs.length > 3 ? h('span', { class: 'more' }, `还有 ${evs.length - 3} 项`) : null)));
       }
       $('#grid').replaceChildren(...out);
     }
 
     function renderDay() {
       const k = state.selected;
-      const rel = (dayNum(k) - dayNum(state.today));
+      const rel = dayNum(k) - dayNum(state.today);
+      const evs = eventsOn(k);
+      const stats = dayStats(evs);
       $('#dayPanel').replaceChildren(
-        h('p', { class: 'label' }, rel >= 0 && rel < 3 ? NEXT_LABELS[rel] : fmt(k, { weekday: 'long' })),
-        h('h3', null, fmt(k, { month: 'long', day: 'numeric', year: 'numeric' })),
-        eventList(k),
-        h('button', { type: 'button', class: 'btn', onclick: () => openEditor(null, k) }, '+ Add event'));
+        h('p', { class: 'label' }, rel >= 0 && rel < 3 ? `${NEXT_LABELS[rel]} · ${wk(k)}` : `星期${WEEK[dateOf(k).getDay()]}`),
+        h('h3', null, ymd(k)),
+        statsLine(stats),
+        eventList(k, evs),
+        rel >= 0 ? nudgeLine(evs, stats) : null,
+        h('button', { type: 'button', class: 'btn', onclick: () => openEditor(null, k) }, '+ 添加日程'));
     }
 
     function render() {
       $('#setupBanner').hidden = !!state.token;
       renderNext();
+      renderDue();
       renderMonth();
       renderDay();
     }
@@ -811,33 +1041,49 @@
       renderMonth();
     }
 
+    $('#kindsGuide').append(...Object.values(KINDS).map(k =>
+      h('div', { class: 'kind', style: `--c:${k.color}` },
+        h('h3', null, k.name),
+        h('p', { class: 'what' }, k.what),
+        h('p', { class: 'rule' }, k.rule))));
+
     // ---- event editor
 
     const editor = $('#editor');
     const E = $('#editorForm').elements;
     let editing = null;   // { ev, k }: ev is null for a new event; k is the day it was opened from
 
-    $('#swatches').append(...Object.entries(COLORS).map(([name, c]) =>
-      h('label', { title: name }, h('input', { type: 'radio', name: 'color', value: name, 'aria-label': name }), h('span', { style: `--c:${c}` }))));
+    $('#kindPick').append(...Object.entries(KINDS).map(([key, k]) =>
+      h('label', { class: 'pick', style: `--c:${k.color}` },
+        h('input', { type: 'radio', name: 'kind', value: key }),
+        h('span', null, k.name))));
+
+    function showKindRule() {
+      const k = KINDS[E.kind.value] || KINDS.fixed;
+      $('#kindRule').style.setProperty('--c', k.color);
+      $('#kindRule').textContent = `${k.what}。${k.rule}`;
+    }
+    $('#kindPick').addEventListener('change', showKindRule);
 
     function openEditor(ev, k) {
-      if (!state.token) { openSettings('Connect GitHub first so your events can be saved.'); return; }
+      if (!state.token) { openSettings('先连接 GitHub，日程才能保存。'); return; }
       editing = { ev, k };
       $('#editorForm').reset();
-      $('#editorTitle').textContent = ev ? 'Edit event' : 'New event';
+      $('#editorTitle').textContent = ev ? '编辑日程' : '新建日程';
       E.title.value = ev ? ev.title : '';
+      E.kind.value = ev ? kindOf(ev) : 'fixed';
       E.date.value = ev ? ev.date : k;
       E.start.value = (ev && ev.start) || '';
       E.end.value = (ev && ev.end) || '';
       E.repeat.value = !ev || !ev.repeat ? '' : ev.repeat === 'weekly' && ev.every === 2 ? 'biweekly' : ev.repeat;
       E.until.value = (ev && ev.until) || '';
-      E.color.value = (ev && ev.color) || 'ink';
       E.note.value = (ev && ev.note) || '';
       $('#deleteOne').hidden = !(ev && ev.repeat);
       $('#deleteAll').hidden = !ev;
-      $('#deleteAll').textContent = ev && ev.repeat ? 'Delete all' : 'Delete';
+      $('#deleteAll').textContent = ev && ev.repeat ? '全部删除' : '删除';
       $('#seriesHint').hidden = !(ev && ev.repeat);
       $('#editorMsg').hidden = true;
+      showKindRule();
       syncRepeatFields();
       editor.showModal();
       E.title.focus();
@@ -845,7 +1091,7 @@
 
     function syncRepeatFields() {
       $('#untilField').hidden = !E.repeat.value;
-      $('#dateLabel').textContent = E.repeat.value ? 'Starts on' : 'Date';
+      $('#dateLabel').textContent = E.repeat.value ? '从哪天开始' : '日期';
     }
     E.repeat.addEventListener('change', syncRepeatFields);
 
@@ -862,13 +1108,13 @@
       const end = start ? E.end.value : '';
       const repeat = E.repeat.value;
       const until = repeat ? E.until.value : '';
-      if (!title) return editorError('Give it a title.');
-      if (!date) return editorError('Pick a date.');
-      if (end && end < start) return editorError('It ends before it starts.');
-      if (until && until < date) return editorError('“Repeat until” is before the start date.');
+      if (!title) return editorError('请填写标题。');
+      if (!date) return editorError('请选择日期。');
+      if (end && end < start) return editorError('结束时间早于开始时间。');
+      if (until && until < date) return editorError('“重复到”早于开始日期。');
 
       const prev = editing.ev;
-      const ev = { id: prev ? prev.id : newId(), title, date };
+      const ev = { id: prev ? prev.id : newId(), title, date, kind: E.kind.value || 'fixed' };
       if (start) ev.start = start;
       if (end) ev.end = end;
       if (repeat) {
@@ -877,24 +1123,23 @@
         if (until) ev.until = until;
         if (prev && prev.skip && prev.skip.length) ev.skip = prev.skip.slice();
       }
-      if (E.color.value && E.color.value !== 'ink') ev.color = E.color.value;
       const note = E.note.value.trim();
       if (note) ev.note = note;
 
       editor.close();
-      change(upsert(ev), `${prev ? 'Edit' : 'Add'} "${title}" (${date})`);
+      change(upsert(ev), `${prev ? '修改' : '添加'}「${title}」(${date})`);
       if (!repeat && date !== editing.k) select(date);
     });
 
     $('#deleteAll').addEventListener('click', () => {
       const { ev } = editing;
       editor.close();
-      change(remove(ev.id), `Delete "${ev.title}"`);
+      change(remove(ev.id), `删除「${ev.title}」`);
     });
     $('#deleteOne').addEventListener('click', () => {
       const { ev, k } = editing;
       editor.close();
-      change(skipDay(ev.id, k), `Skip "${ev.title}" on ${k}`);
+      change(skipDay(ev.id, k), `跳过「${ev.title}」${k}`);
     });
     $('#editorCancel').addEventListener('click', () => editor.close());
 
@@ -921,7 +1166,7 @@
       const prev = state.token;
       const btn = $('#settingsSave');
       btn.disabled = true;
-      btn.textContent = 'Checking…';
+      btn.textContent = '检查中…';
       state.token = token;
       try {
         const remote = await getRemote();
@@ -936,7 +1181,7 @@
         $('#settingsMsg').hidden = false;
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Connect';
+        btn.textContent = '连接';
       }
     });
 
