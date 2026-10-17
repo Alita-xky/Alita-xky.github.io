@@ -370,10 +370,66 @@
     .btn.ghost:hover { border-color: var(--muted); }
     .btn.danger { background: transparent; color: var(--warn); border-color: rgba(179, 73, 47, 0.4); }
     .btn.danger:hover { border-color: var(--warn); }
+    .btn.good { background: transparent; color: #2f6b48; border-color: rgba(61, 122, 90, 0.5); }
+    .btn.good:hover { border-color: #2f6b48; }
     .btn:disabled { opacity: 0.6; cursor: default; }
+
+    li.ev { display: flex; align-items: stretch; }
+    .done-btn {
+      flex: 0 0 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      background: none;
+      padding: 0;
+    }
+    .done-btn::before {
+      content: "";
+      display: block;
+      width: 15px;
+      height: 15px;
+      margin: 0 auto;
+      border: 1.5px solid var(--line);
+      border-radius: 50%;
+      background: #fff;
+    }
+    .done-btn:hover::before { border-color: #3d7a5a; background: rgba(61, 122, 90, 0.16); }
+    .ev-btn { flex: 1; min-width: 0; }
+
+    .recap {
+      margin: 28px 0 0;
+      padding: 16px 18px 6px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+    }
+    .recap h2 { font-size: 26px; margin: 2px 0 6px; }
+    .recap-line { margin: 0 0 8px; color: var(--muted); }
+    ul.done-list, #praiseList { margin: 0; padding: 0; list-style: none; }
+    ul.done-list li, #praiseList li {
+      display: grid;
+      grid-template-columns: 88px 1fr auto;
+      gap: 8px;
+      align-items: baseline;
+      padding: 7px 0;
+      border-top: 1px solid var(--line);
+    }
+    .done-list .kind, #praiseList .kind { font-size: 13px; font-weight: 600; color: var(--c); }
+    #praiseTitle { font-size: 32px; margin-bottom: 8px; }
+    #praiseKicker {
+      margin: 0 0 4px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    #praiseBody { margin: 0 0 12px; }
+    #praiseList { max-height: 240px; overflow: auto; margin-bottom: 12px; }
 
     dialog {
       width: min(460px, calc(100% - 32px));
+      max-height: calc(100% - 32px);
+      overflow: auto;
       padding: 22px 22px 18px;
       border: 1px solid var(--line);
       border-radius: 3px;
@@ -486,6 +542,13 @@
       <p class="label">截止</p>
     </section>
 
+    <section class="recap" id="recap" hidden>
+      <p class="label" id="recapLabel">这个月完成了</p>
+      <h2 id="recapPraise">邢轲越真棒</h2>
+      <p class="recap-line" id="recapLine"></p>
+      <ul class="done-list" id="recapList"></ul>
+    </section>
+
     <section class="cal" aria-label="月历">
       <div class="cal-head">
         <h2 id="monthTitle"></h2>
@@ -541,6 +604,7 @@
       <p class="hint" id="seriesHint">改动会应用到每一次重复</p>
       <p class="msg" id="editorMsg" hidden></p>
       <div class="actions">
+        <button type="button" class="btn good" id="completeBtn">完成</button>
         <button type="button" class="btn danger" id="deleteOne">只删这天</button>
         <button type="button" class="btn danger" id="deleteAll">删除</button>
         <span class="spacer"></span>
@@ -548,6 +612,18 @@
         <button type="submit" class="btn">保存</button>
       </div>
     </form>
+  </dialog>
+
+  <dialog id="praise">
+    <p id="praiseKicker" hidden></p>
+    <h3 id="praiseTitle">邢轲越真棒</h3>
+    <p id="praiseBody"></p>
+    <ul id="praiseList" hidden></ul>
+    <div class="actions">
+      <button type="button" class="btn ghost" id="praiseUndo" hidden>撤销</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn" id="praiseClose">收下</button>
+    </div>
   </dialog>
 
   <dialog id="settings">
@@ -632,7 +708,15 @@
         if (!e.kind && e.color) e.kind = LEGACY_COLORS[e.color] || 'fixed';
         delete e.color;
       }
-      return { version: 1, events };
+      const done = (Array.isArray(d && d.done) ? d.done : [])
+        .filter(e => e && e.id && e.title && /^\d{4}-\d{2}-\d{2}$/.test(e.date))
+        .map(e => {
+          const item = { id: String(e.id), title: String(e.title), date: e.date, kind: KINDS[e.kind] ? e.kind : 'fixed' };
+          if (e.eventId) item.eventId = String(e.eventId);
+          if (e.at) item.at = String(e.at);
+          return item;
+        });
+      return { version: 1, events, done };
     }
 
     // ---- planning helpers
@@ -816,6 +900,10 @@
         writeCache();
         render();
       }
+      if (wasSaving && undoTarget) {
+        undoTarget = null;
+        if (praiseDialog.open && praiseDialog.dataset.mode === 'once') praiseDialog.close();
+      }
       if (err.kind === 'net') {
         setStatus('offline', wasSaving ? '未保存' : '离线');
         showNotice(wasSaving ? '连不上 GitHub，刚才的修改没保存。' : '连不上 GitHub，显示的是本地副本。');
@@ -855,6 +943,31 @@
       const ev = d.events.find(e => e.id === id);
       if (ev && !(ev.skip || []).includes(k)) ev.skip = [...(ev.skip || []), k].sort();
     };
+    // Completing keeps a record for the monthly recap. Deleting does not.
+    // One occurrence of a repeat is skipped; a single event is removed.
+    const markDone = (ev, k, doneId) => d => {
+      d.done = d.done || [];
+      if (d.done.some(x => x.id === doneId || (x.eventId === ev.id && x.date === k))) return;
+      d.done.push({ id: doneId, eventId: ev.id, title: ev.title, kind: kindOf(ev), date: k, at: new Date().toISOString() });
+      if (ev.repeat) {
+        const found = d.events.find(e => e.id === ev.id);
+        if (found && !(found.skip || []).includes(k)) found.skip = [...(found.skip || []), k].sort();
+      } else {
+        d.events = d.events.filter(e => e.id !== ev.id);
+      }
+    };
+    const undoDone = (doneId, ev, k) => d => {
+      d.done = (d.done || []).filter(x => x.id !== doneId);
+      if (ev.repeat) {
+        const found = d.events.find(e => e.id === ev.id);
+        if (found && found.skip) {
+          found.skip = found.skip.filter(day => day !== k);
+          if (!found.skip.length) delete found.skip;
+        }
+      } else if (!d.events.some(e => e.id === ev.id)) {
+        d.events.push(clone(ev));
+      }
+    };
 
     // ---- rendering
 
@@ -877,6 +990,7 @@
       if (!evs.length) return h('ul', { class: 'evs' }, h('li', { class: 'empty' }, '没有安排'));
       return h('ul', { class: 'evs' }, evs.map(ev =>
         h('li', { class: 'ev' },
+          h('button', { type: 'button', class: 'done-btn', title: '完成', 'aria-label': `完成「${ev.title}」`, onclick: () => finish(ev, k) }),
           h('button', { type: 'button', class: 'ev-btn', style: `--c:${colorOf(ev)}`, title: KINDS[kindOf(ev)].name, onclick: () => openEditor(ev, k) },
             h('span', { class: 'time' }, timeText(ev)),
             h('span', { class: 'title' }, ev.title),
@@ -950,17 +1064,70 @@
       $('#grid').replaceChildren(...out);
     }
 
+    function monthDone(month) {
+      return (state.data.done || [])
+        .filter(x => x.date.slice(0, 7) === month)
+        .sort((a, b) => a.date.localeCompare(b.date) || (a.at || '').localeCompare(b.at || ''));
+    }
+
+    function praiseText(items, when) {
+      const n = items.length;
+      const period = when || '这个月';
+      const count = kind => items.filter(it => kindOf(it) === kind).length;
+      const parts = [
+        ['deep', '深度工作'],
+        ['due', '截止'],
+        ['fixed', '固定安排'],
+        ['admin', '杂事'],
+        ['life', '生活'],
+        ['free', '留白'],
+      ].flatMap(([key, name]) => count(key) ? [`${name} ${count(key)} 件`] : []);
+      const detail = parts.join('，');
+      let lead = n === 1 ? `你把「${items[0].title}」做完了。` : `${period}你做完了 ${n} 件事${detail ? '：' + detail : ''}。`;
+      const deep = count('deep');
+      const due = count('due');
+      if (due && deep) lead += '截止接住了，深度的时间也没有空过去。';
+      else if (due) lead += '到点的事你接住了。';
+      else if (deep >= 3) lead += '深度的时间一块一块都落地了。';
+      else if (n >= 8) lead += '一件一件做完，站得很稳。';
+      else if (n === 1) lead += '这一件也算数。';
+      else lead += '做完的都留在这里了。';
+      return lead;
+    }
+
+    function doneItem(it) {
+      return h('li', null,
+        h('span', { class: 'time' }, md(it.date)),
+        h('span', { class: 'title' }, it.title),
+        h('span', { class: 'kind', style: `--c:${KINDS[kindOf(it)].color}` }, KINDS[kindOf(it)].name));
+    }
+
+    function renderRecap() {
+      const items = monthDone(state.month);
+      const section = $('#recap');
+      section.hidden = !items.length;
+      if (!items.length) { $('#recapList').replaceChildren(); return; }
+      const monthNum = Number(state.month.slice(5));
+      const label = state.month === state.today.slice(0, 7) ? '这个月' : `${monthNum}月`;
+      $('#recapLabel').textContent = `${label}完成了 ${items.length} 件`;
+      $('#recapLine').textContent = praiseText(items, label);
+      $('#recapList').replaceChildren(...items.map(doneItem));
+    }
+
     function render() {
       $('#setupBanner').hidden = !!state.token;
       renderNext();
       renderDue();
       renderMonth();
+      renderRecap();
+      maybeMonthlyPraise();
     }
 
     function shiftMonth(n) {
       const [y, m] = state.month.split('-').map(Number);
       state.month = keyOf(new Date(y, m - 1 + n, 1)).slice(0, 7);
       renderMonth();
+      renderRecap();
     }
 
     $('#legend').append(...Object.keys(KINDS).map(key =>
@@ -1011,6 +1178,8 @@
       E.repeat.value = !ev || !ev.repeat ? '' : ev.repeat === 'weekly' && ev.every === 2 ? 'biweekly' : ev.repeat;
       E.until.value = (ev && ev.until) || '';
       E.note.value = (ev && ev.note) || '';
+      $('#completeBtn').hidden = !ev;
+      $('#completeBtn').textContent = ev && ev.repeat ? '完成这次' : '完成';
       $('#deleteOne').hidden = !(ev && ev.repeat);
       $('#deleteAll').hidden = !ev;
       $('#deleteAll').textContent = ev && ev.repeat ? '全部删除' : '删除';
@@ -1064,6 +1233,10 @@
       if (date.slice(0, 7) !== state.month && !repeat) { state.month = date.slice(0, 7); renderMonth(); }
     });
 
+    $('#completeBtn').addEventListener('click', () => {
+      const { ev, k } = editing;
+      finish(ev, k);
+    });
     $('#deleteAll').addEventListener('click', () => {
       const { ev } = editing;
       editor.close();
@@ -1136,7 +1309,74 @@
 
     $('#prevMonth').addEventListener('click', () => shiftMonth(-1));
     $('#nextMonth').addEventListener('click', () => shiftMonth(1));
-    $('#thisMonth').addEventListener('click', () => { state.month = state.today.slice(0, 7); renderMonth(); });
+    $('#thisMonth').addEventListener('click', () => { state.month = state.today.slice(0, 7); renderMonth(); renderRecap(); });
+
+    // ---- praise
+
+    const praiseDialog = $('#praise');
+    let undoTarget = null;
+    let suppressRecap = false;
+
+    function prevMonth(ym) {
+      const [y, m] = ym.split('-').map(Number);
+      return keyOf(new Date(y, m - 2, 1)).slice(0, 7);
+    }
+
+    function openPraise({ mode, kicker, body, items, undo }) {
+      praiseDialog.dataset.mode = mode;
+      $('#praiseKicker').hidden = !kicker;
+      $('#praiseKicker').textContent = kicker || '';
+      $('#praiseBody').textContent = body;
+      const list = $('#praiseList');
+      list.hidden = !items || !items.length;
+      list.replaceChildren(...(items || []).map(doneItem));
+      $('#praiseUndo').hidden = !undo;
+      if (!praiseDialog.open) praiseDialog.showModal();
+    }
+
+    function finish(ev, k) {
+      if (!state.token) { openSettings('先连接 GitHub 才能保存。'); return; }
+      if (editor.open) editor.close();
+      if (dayDialog.open) dayDialog.close();
+      const doneId = newId();
+      const snapshot = clone(ev);
+      undoTarget = { doneId, event: snapshot, date: k };
+      suppressRecap = true;
+      change(markDone(snapshot, k, doneId), `完成「${ev.title}」(${k})`);
+      suppressRecap = false;
+      openPraise({ mode: 'once', body: `「${ev.title}」做完了。`, undo: true });
+    }
+
+    function undoFinish() {
+      if (!undoTarget) { praiseDialog.close(); return; }
+      const { doneId, event, date } = undoTarget;
+      undoTarget = null;
+      praiseDialog.close();
+      change(undoDone(doneId, event, date), `撤销完成「${event.title}」`);
+    }
+
+    function maybeMonthlyPraise() {
+      if (suppressRecap) return;
+      const prev = prevMonth(state.today.slice(0, 7));
+      if (store.get('schedule.recap') === prev) return;
+      if (state.token && !state.remote) return;   // wait until the GitHub copy is in
+      if (praiseDialog.open) return;
+      const items = monthDone(prev);
+      store.set('schedule.recap', prev);
+      if (!items.length) return;
+      const [y, m] = prev.split('-');
+      openPraise({
+        mode: 'month',
+        kicker: `${y}年${Number(m)}月`,
+        body: praiseText(items, `${Number(m)}月`),
+        items,
+      });
+    }
+
+    $('#praiseClose').addEventListener('click', () => praiseDialog.close());
+    $('#praiseUndo').addEventListener('click', undoFinish);
+    praiseDialog.addEventListener('click', e => { if (e.target === praiseDialog) praiseDialog.close(); });
+    praiseDialog.addEventListener('close', () => { undoTarget = null; });
 
     // Roll over at midnight, and pick up edits made on other devices when the tab comes back.
     function tick() {
