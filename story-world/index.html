@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Story World 白模预演</title>
+<style>
+:root{--bg:#111;--panel:#181a1d;--panel2:#1e2125;--line:#2b2f34;--text:#ddd;--muted:#9a9ea4;--accent:#8cf;--ok:#7c7;--warn:#e9b85a;--err:#e66}
+*{box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Helvetica Neue",Helvetica,Arial,sans-serif;margin:0;background:var(--bg);color:var(--text);line-height:1.5}
+.wrap{max-width:1500px;margin:0 auto;padding:20px 24px 60px}
+h1{font-size:22px;margin:0 0 6px}h2{font-size:17px;margin:34px 0 10px;border-bottom:1px solid var(--line);padding-bottom:5px}
+a{color:var(--accent)}p.note{color:var(--muted);font-size:13.5px;max-width:1100px;margin:6px 0}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--muted);margin:10px 0 4px}
+.flow span{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:2px 8px;color:var(--text)}
+.tabs{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 18px}
+.tab{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 12px;cursor:pointer;display:flex;gap:10px;align-items:center;color:var(--text);font:inherit;text-align:left}
+.tab img{width:96px;height:55px;object-fit:cover;border-radius:3px;background:#000}
+.tab b{display:block;font-size:14px}.tab small{color:var(--muted);font-size:12px}
+.tab.on{border-color:var(--accent);background:#16212a}
+.videos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+figure{margin:0}figcaption{font-size:12px;color:var(--muted);margin-top:3px}
+video{width:100%;aspect-ratio:1344/768;background:#000;border:1px solid var(--line);display:block;cursor:pointer}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 4px;font-size:13px}
+.controls button,.controls select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:4px;padding:4px 10px;font:inherit;cursor:pointer}
+.controls button:hover{border-color:#456}
+#scrub{flex:1;min-width:200px;accent-color:var(--accent)}
+#frameinfo{font-variant-numeric:tabular-nums;color:var(--muted);min-width:330px}
+.clipinfo{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;margin-top:8px;font-size:13.5px}
+.clipinfo .t{font-size:15px;font-weight:600}.clipinfo .s{color:var(--muted);margin-top:3px}
+.grid2{display:grid;grid-template-columns:minmax(0,auto) minmax(320px,1fr);gap:18px;align-items:start;margin-top:8px}
+.planbox{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px}
+.planbar{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted);margin-bottom:6px;flex-wrap:wrap}
+.planbar button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:4px;padding:2px 8px;font:inherit;cursor:pointer}
+.planbar button.on{border-color:var(--accent);color:var(--accent)}
+canvas{display:block}
+#tip{position:absolute;pointer-events:none;background:#000d;border:1px solid #444;border-radius:4px;padding:3px 7px;font-size:12px;display:none;white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.cards{display:flex;flex-direction:column;gap:8px}
+.card{display:flex;gap:10px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:6px;padding:8px;cursor:pointer;text-align:left;color:var(--text);font:inherit}
+.card img{width:150px;height:86px;object-fit:cover;border-radius:3px;background:#000;flex:none}
+.card .h{font-weight:600;font-size:14px}.card .m{font-size:12px;color:var(--muted)}.card .d{font-size:12px;color:#b8bcc2;margin-top:2px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card.on{background:#16212a;border-color:var(--c)}
+.md{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 22px 14px;font-size:14px;max-width:1100px}
+.md h1{font-size:19px;margin:14px 0 6px}.md h2{font-size:16px;margin:18px 0 6px;border:0}.md h3{font-size:15px;margin:14px 0 4px}
+.md table{border-collapse:collapse;font-size:13px;margin:8px 0}.md td,.md th{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+.md code{background:var(--panel2);padding:0 4px;border-radius:3px}.md ul{padding-left:22px}
+details summary{cursor:pointer;color:var(--accent);font-size:13.5px}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 12px;font-size:12px;color:var(--muted)}
+.stat b{display:block;font-size:18px;color:var(--text);font-variant-numeric:tabular-nums}
+.badge{display:inline-block;border-radius:4px;padding:1px 8px;font-size:12px;margin-right:6px}
+.badge.ok{background:#173017;color:var(--ok)}.badge.warn{background:#33280f;color:var(--warn)}.badge.err{background:#3a1616;color:var(--err)}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px;font-size:12px;overflow:auto;color:#c9cdd2;white-space:pre-wrap}
+table.out{border-collapse:collapse;font-size:13px;max-width:1100px}table.out td{border:1px solid var(--line);padding:4px 10px;vertical-align:top}
+table.out td:first-child{white-space:nowrap;color:var(--accent);font-family:ui-monospace,Menlo,monospace;font-size:12px}
+kbd{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:0 4px;font-size:11px}
+@media (max-width:900px){.wrap{padding:14px 12px 40px}.videos{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}#frameinfo{min-width:0}.card img{width:110px;height:63px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Story World：故事脚本 → 白模世界 → 每个镜头的白模与深度</h1>
+<p class="note">一个故事有 4–8 个镜头，全部发生在同一个连续世界里。流水线从故事中提取场景，在 Blender 里建成一个大世界（所有镜头共用同一份几何，重访同一地点时完全一致），再按每个镜头的相机轨迹逐帧渲染无颜色的白模视频和深度视频，作为视频生成模型的几何控制信号。</p>
+<div class="flow"><span>设定</span>→<span>story.md（LLM 写）</span>→<span>scene.json + clips.json（LLM 提取）</span>→<span>校验 / 自动修复</span>→<span>Blender 建模</span>→<span>白模 + 深度 + 相机参数</span></div>
+<div class="tabs" id="tabs"></div>
+
+<section>
+  <div class="videos">
+    <figure><video id="vwb" muted playsinline loop preload="auto"></video><figcaption>白模（Workbench 单色灰，世界空间光照：同一面在不同镜头里灰度一致）</figcaption></figure>
+    <figure><video id="vdepth" muted playsinline loop preload="auto"></video><figcaption>深度：255·(1 − log z / log 80)，越亮越近，1 m 内饱和，天空为 0</figcaption></figure>
+  </div>
+  <div class="controls">
+    <button id="bplay" title="空格">▶ 播放</button>
+    <button id="bprev" title="←">‹ 帧</button><button id="bnext" title="→">帧 ›</button>
+    <input type="range" id="scrub" min="0" max="1" value="0" step="1">
+    <select id="rate"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option></select>
+    <span id="frameinfo"></span>
+  </div>
+  <div class="clipinfo" id="clipinfo"></div>
+</section>
+
+<section class="grid2">
+  <div class="planbox" id="planbox">
+    <div class="planbar">俯视平面图（北朝上，网格 1 m）
+      <button id="vfit" class="on">聚焦本镜头</button><button id="vall">全图</button>
+      <span style="margin-left:auto">悬停看物体，点路径切换镜头</span></div>
+    <canvas id="plan"></canvas>
+    <div class="legend" id="legend"></div>
+    <div id="tip"></div>
+  </div>
+  <div>
+    <div class="cards" id="cards"></div>
+    <p class="note" style="margin-top:10px"><kbd>空格</kbd> 播放/暂停 · <kbd>←</kbd><kbd>→</kbd> 逐帧 · <kbd>[</kbd><kbd>]</kbd> 上/下一个镜头</p>
+  </div>
+</section>
+
+<h2>世界与校验</h2>
+<div class="stats" id="stats"></div>
+<div id="report"></div>
+
+<h2>故事脚本</h2>
+<details open><summary>展开 / 收起 story.md</summary><div class="md" id="story"></div></details>
+
+<h2>每个镜头的输出文件</h2>
+<table class="out">
+<tr><td>whitebox.mp4 / depth.mp4</td><td>1344×768，24 fps，帧数为 17n+5（对齐 H3 窗口）。本页播放的是压缩版。</td></tr>
+<tr><td>frames/depth16_XXXX.png</td><td>16 位相机空间深度，单位毫米，天空为 0。可配合相机参数反投影到世界坐标。</td></tr>
+<tr><td>camera.json</td><td>逐帧 eye / at / 焦距 / fx, cx, cy / c2w（OpenCV 与 Blender 两种约定），以及人物轨迹。世界坐标：米，x 东、y 北、z 上。</td></tr>
+<tr><td>plan.png / report.txt</td><td>校验器输出：平面图与问题清单（相机穿墙、撞物、出画区、急停，家具穿插、门口堵塞等）。</td></tr>
+</table>
+<p class="note">代码：<code>~/blender_world/story_world</code>（Mac，Blender 5.2.2）；数据副本：<code>MSVG/exp_data/1021_story_whitebox</code>。</p>
+</div>
+
+<script>
+const PALETTE=['#d62728','#2f8fd8','#3cb44b','#a97cd8','#ff8c1a','#17becf','#e377c2','#c49c94'];
+const CAT={seat:'#8a7556',furniture:'#6f6352',wall:'#5c5f7a',light:'#9a8a3a',decor:'#4f7048',outdoor:'#3f6b3a',structure:'#5a5a5a',generic:'#5f6470',flat:'#3a362c'};
+const MODE={keys:'关键帧',orbit:'环绕',follow:'跟拍'};
+const $=id=>document.getElementById(id);
+const vwb=$('vwb'),vdp=$('vdepth'),cv=$('plan'),ctx=cv.getContext('2d');
+let S=null,clip=null,ci=0,frame=0,viewAll=false,view=null,scale=1,hoverObj=null,stories=[];
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function inline(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/(^|[^*])\*([^*]+)\*/g,'$1<i>$2</i>')}
+function md(src){
+  const L=src.split('\n');let h='',i=0;
+  while(i<L.length){const l=L[i];
+    if(/^\s*$/.test(l)){i++;continue}
+    let m=l.match(/^(#{1,4})\s+(.*)/);if(m){h+=`<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`;i++;continue}
+    if(/^\s*\|/.test(l)){let rows=[];while(i<L.length&&/^\s*\|/.test(L[i])){rows.push(L[i]);i++}
+      h+='<table>';rows.forEach((r,k)=>{if(/^\s*\|[\s:|-]+\|\s*$/.test(r))return;const cells=r.trim().replace(/^\||\|$/g,'').split('|');
+        h+='<tr>'+cells.map(c=>k===0?`<th>${inline(c.trim())}</th>`:`<td>${inline(c.trim())}</td>`).join('')+'</tr>'});h+='</table>';continue}
+    if(/^\s*([-*]|\d+\.)\s+/.test(l)){h+='<ul>';while(i<L.length&&/^\s*([-*]|\d+\.)\s+/.test(L[i])){h+='<li>'+inline(L[i].replace(/^\s*([-*]|\d+\.)\s+/,''))+'</li>';i++}h+='</ul>';continue}
+    let p=[];while(i<L.length&&!/^\s*$/.test(L[i])&&!/^(#{1,4})\s/.test(L[i])&&!/^\s*\|/.test(L[i])&&!/^\s*([-*]|\d+\.)\s+/.test(L[i])){p.push(L[i]);i++}
+    h+='<p>'+inline(p.join(' '))+'</p>'}
+  return h}
+
+/* ---------------------------------------------------------------- stories */
+async function boot(){
+  const idx=await (await fetch('data/index.json')).json();stories=idx.stories;
+  $('tabs').innerHTML=stories.map(s=>`<button class="tab" data-n="${s.name}">${s.poster?`<img src="${s.poster}" alt="">`:''}<span><b>${esc(s.title)}</b><small>${s.stats.clips} 个镜头 · ${s.stats.seconds} s · ${s.stats.objects} 个物体</small></span></button>`).join('');
+  document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>loadStory(b.dataset.n,0));
+  const [n,c]=decodeURIComponent(location.hash.slice(1)).split('/');
+  const s=stories.find(x=>x.name===n)||stories[0];
+  await loadStory(s.name,c);
+}
+async function loadStory(name,cid){
+  S=await (await fetch(`data/${name}.json`)).json();
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.n===name));
+  $('story').innerHTML=md(S.story_md);
+  const st=S.stats;
+  $('stats').innerHTML=[['镜头',st.clips],['总时长',st.seconds+' s'],['总帧数',st.frames],['区域',st.areas],['门窗洞',st.openings],['物体',st.objects],['几何部件',st.parts]].map(([k,v])=>`<div class="stat"><b>${v}</b>${k}</div>`).join('');
+  const nerr=+((S.report.find(l=>l.startsWith('ERRORS'))||'(0)').match(/\((\d+)\)/)||[0,0])[1];
+  const nw=+((S.report.find(l=>l.startsWith('WARNINGS'))||'(0)').match(/\((\d+)\)/)||[0,0])[1];
+  $('report').innerHTML=`<span class="badge ${nerr?'err':'ok'}">${nerr} 个错误</span><span class="badge ${nw?'warn':'ok'}">${nw} 个警告</span><details style="margin-top:8px"><summary>校验报告 report.txt</summary><pre>${esc(S.report.join('\n'))}</pre></details>`;
+  $('cards').innerHTML=S.clips.map((c,k)=>`<button class="card" data-k="${k}" style="--c:${PALETTE[k%PALETTE.length]}"><img src="${c.media.poster}" alt="" loading="lazy"><div><div class="h">${c.id} · ${esc(c.title)}</div><div class="m">${(c.frames/c.fps).toFixed(1)} s · ${c.frames} 帧 · ${lensText(c)} · ${MODE[c.mode]||c.mode}${c.track?' · 对准 '+c.track:''}</div><div class="d">${esc(c.story)}</div></div></button>`).join('');
+  document.querySelectorAll('.card').forEach(b=>b.onclick=()=>selectClip(+b.dataset.k,true));
+  const k=Math.max(0,S.clips.findIndex(c=>c.id===cid));
+  selectClip(k,false);
+}
+function lensText(c){if(typeof c.lens==='number')return c.lens+' mm';const a=Math.min(...c.lens),b=Math.max(...c.lens);return `${a}–${b} mm`}
+function lensAt(c,i){return typeof c.lens==='number'?c.lens:c.lens[i]}
+
+/* ---------------------------------------------------------------- clip + video sync */
+function selectClip(k,play){
+  ci=k;clip=S.clips[k];frame=0;
+  document.querySelectorAll('.card').forEach(b=>b.classList.toggle('on',+b.dataset.k===k));
+  history.replaceState(null,'',`#${S.name}/${clip.id}`);
+  vwb.pause();vdp.pause();vwb.src=clip.media.wb;vdp.src=clip.media.depth;vwb.playbackRate=vdp.playbackRate=+$('rate').value;
+  $('scrub').max=clip.frames-1;$('scrub').value=0;
+  const act=Object.keys(clip.actors);
+  $('clipinfo').innerHTML=`<div class="t" style="color:${PALETTE[k%PALETTE.length]}">${clip.id} · ${esc(clip.title)}</div><div class="s">${esc(clip.story)}</div><div class="s">相机：${MODE[clip.mode]||clip.mode}${clip.track?'，对准 '+clip.track:''} · ${lensText(clip)} · ${clip.frames} 帧 @ ${clip.fps} fps${act.length?' · 人物：'+act.join('、'):''}${clip.render_s!=null?` · 渲染 ${clip.render_s} s`:''}</div>`;
+  view=viewAll?worldView():clipView();
+  sizeCanvas();draw();
+  if(play)vwb.play();
+}
+vwb.addEventListener('play',()=>{vdp.currentTime=vwb.currentTime;vdp.play();$('bplay').textContent='❚❚ 暂停'});
+vwb.addEventListener('pause',()=>{vdp.pause();vdp.currentTime=vwb.currentTime;$('bplay').textContent='▶ 播放'});
+vwb.addEventListener('seeked',()=>{vdp.currentTime=vwb.currentTime;onTime()});
+vwb.addEventListener('loadeddata',()=>{vdp.currentTime=vwb.currentTime;onTime()});
+vdp.addEventListener('click',()=>toggle());vwb.addEventListener('click',()=>toggle());
+function toggle(){vwb.paused?vwb.play():vwb.pause()}
+function seekFrame(i){if(!clip)return;i=Math.max(0,Math.min(clip.frames-1,i));vwb.pause();const t=(i+0.5)/clip.fps;vwb.currentTime=t;vdp.currentTime=t;frame=i;$('scrub').value=i;draw();info()}
+$('bplay').onclick=toggle;$('bprev').onclick=()=>seekFrame(frame-1);$('bnext').onclick=()=>seekFrame(frame+1);
+$('scrub').oninput=e=>seekFrame(+e.target.value);
+$('rate').onchange=e=>{vwb.playbackRate=vdp.playbackRate=+e.target.value};
+function onTime(){
+  if(!clip)return;const i=Math.min(clip.frames-1,Math.floor(vwb.currentTime*clip.fps+1e-3));
+  if(!vwb.paused&&Math.abs(vdp.currentTime-vwb.currentTime)>0.08)vdp.currentTime=vwb.currentTime;
+  if(i!==frame){frame=i;$('scrub').value=i;draw()}info()}
+function loop(){onTime();requestAnimationFrame(loop)}
+function info(){
+  if(!clip)return;const e=clip.eye[frame],a=clip.at[frame],L=lensAt(clip,frame);
+  const p=clip.eye[Math.max(0,frame-1)],v=frame?Math.hypot(e[0]-p[0],e[1]-p[1],e[2]-p[2])*clip.fps:0;
+  const yaw=(Math.atan2(a[0]-e[0],a[1]-e[1])*180/Math.PI+360)%360;
+  $('frameinfo').textContent=`帧 ${frame}/${clip.frames-1} · ${(frame/clip.fps).toFixed(2)} s · ${L} mm（水平视角 ${(2*Math.atan(18/L)*180/Math.PI).toFixed(0)}°）· 机高 ${e[2].toFixed(2)} m · 朝向 ${yaw.toFixed(0)}° · ${v.toFixed(2)} m/s`}
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'&&e.target.type!=='range')return;
+  if(e.code==='Space'){e.preventDefault();toggle()}else if(e.key==='ArrowLeft'){e.preventDefault();seekFrame(frame-1)}else if(e.key==='ArrowRight'){e.preventDefault();seekFrame(frame+1)}
+  else if(e.key===']'&&S)selectClip((ci+1)%S.clips.length,true);else if(e.key==='['&&S)selectClip((ci-1+S.clips.length)%S.clips.length,true)});
+
+/* ---------------------------------------------------------------- plan */
+function worldView(){const b=S.bounds;return [b[0]-0.6,b[1]-0.6,b[2]+0.6,b[3]+0.6]}
+function clipView(){
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const add=(x,y)=>{x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)};
+  clip.eye.forEach(p=>add(p[0],p[1]));clip.at.forEach((p,i)=>{if(i%6===0)add(p[0],p[1])});
+  Object.values(clip.actors).forEach(a=>a.xy.forEach(p=>add(p[0],p[1])));
+  const pad=2.5;x0-=pad;y0-=pad;x1+=pad;y1+=pad;const w=x1-x0,h=y1-y0,m=Math.max(w,h*1.15,9);
+  const cx=(x0+x1)/2,cy=(y0+y1)/2,b=worldView();
+  let v=[cx-m/2,cy-m/2/1.15,cx+m/2,cy+m/2/1.15];
+  return [Math.max(v[0],b[0]),Math.max(v[1],b[1]),Math.min(v[2],b[2]),Math.min(v[3],b[3])]}
+function sizeCanvas(){
+  const box=$('planbox'),maxW=Math.min(box.parentElement.clientWidth*0.62,900),maxH=Math.min(window.innerHeight*0.78,760);
+  const w=view[2]-view[0],h=view[3]-view[1];scale=Math.min((window.innerWidth<900?box.clientWidth-22:maxW)/w,maxH/h);
+  const W=Math.round(w*scale),H=Math.round(h*scale),dpr=window.devicePixelRatio||1;
+  cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0)}
+const X=x=>(x-view[0])*scale,Y=y=>(view[3]-y)*scale;
+function path(pts,close){ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])));if(close)ctx.closePath()}
+function draw(){
+  if(!S||!view)return;const W=cv.width,H=cv.height;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#141618';ctx.fillRect(0,0,W,H);ctx.restore();
+  S.areas.forEach(a=>{const r=a.rect;ctx.fillStyle=a.outdoor?'#1b2620':'#24272c';ctx.fillRect(X(r[0]),Y(r[3]),(r[2]-r[0])*scale,(r[3]-r[1])*scale)});
+  ctx.strokeStyle='#ffffff0d';ctx.lineWidth=1;ctx.beginPath();
+  for(let x=Math.ceil(view[0]);x<=view[2];x++){ctx.moveTo(X(x),0);ctx.lineTo(X(x),cv.height)}
+  for(let y=Math.ceil(view[1]);y<=view[3];y++){ctx.moveTo(0,Y(y));ctx.lineTo(cv.width,Y(y))}ctx.stroke();
+  ctx.font='11px -apple-system,sans-serif';ctx.fillStyle='#6d7279';S.areas.forEach(a=>ctx.fillText(a.id,X(a.rect[0])+5,Y(a.rect[3])+13));
+  const objs=[...S.objects].sort((a,b)=>(a.type==='rug'?-1:0)-(b.type==='rug'?-1:0)||a.bottom-b.bottom);
+  objs.forEach(o=>{const col=CAT[o.cat]||CAT.generic,hi=o===hoverObj;
+    o.polys.forEach((p,j)=>{path(p,true);if(o.over[j]){ctx.setLineDash([3,3]);ctx.strokeStyle=hi?'#fff':col+'cc';ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([])}
+      else{ctx.fillStyle=hi?'#7fa7c9':col;ctx.fill();ctx.strokeStyle='#00000066';ctx.lineWidth=0.6;ctx.stroke()}})});
+  ctx.fillStyle='#d9dadc';S.walls.forEach(p=>{path(p,true);ctx.fill()});
+  ctx.fillStyle='#6fa8dc';S.leaves.forEach(p=>{path(p,true);ctx.fill()});
+  S.openings.forEach(o=>{if(o.type!=='window')return;ctx.strokeStyle='#5ab0ff';ctx.lineWidth=3;path([o.a,o.b]);ctx.stroke()});
+  // all clip paths
+  S.clips.forEach((c,k)=>{if(k===ci)return;ctx.strokeStyle=PALETTE[k%PALETTE.length]+'55';ctx.lineWidth=1.5;path(c.eye);ctx.stroke()});
+  if(!clip)return;const col=PALETTE[ci%PALETTE.length];
+  // actors: full paths dashed, current positions
+  Object.entries(clip.actors).forEach(([id,a],j)=>{const ac=['#f0a','#0dc','#fc3','#9af'][j%4];
+    ctx.setLineDash([4,4]);ctx.strokeStyle=ac+'99';ctx.lineWidth=1.5;path(a.xy);ctx.stroke();ctx.setLineDash([]);
+    const p=a.xy[frame],hd=a.heading[frame]*Math.PI/180,r=a.pose[frame]==='sit'?5:6;
+    ctx.fillStyle=ac;ctx.beginPath();ctx.arc(X(p[0]),Y(p[1]),r,0,7);ctx.fill();
+    ctx.strokeStyle=ac;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X(p[0]),Y(p[1]));ctx.lineTo(X(p[0]+0.45*Math.sin(hd)),Y(p[1]+0.45*Math.cos(hd)));ctx.stroke();
+    ctx.fillStyle=ac;ctx.font='bold 12px -apple-system,sans-serif';ctx.fillText(id+(a.pose[frame]==='sit'?'（坐）':''),X(p[0])+8,Y(p[1])-8)});
+  // selected camera path
+  ctx.strokeStyle=col;ctx.lineWidth=2.5;path(clip.eye);ctx.stroke();
+  ctx.lineWidth=1;ctx.strokeStyle=col+'aa';path(clip.eye.slice(0,frame+1));ctx.lineWidth=4;ctx.stroke();
+  // live camera: FOV wedge
+  const e=clip.eye[frame],a=clip.at[frame],L=lensAt(clip,frame),half=Math.atan(18/L),yaw=Math.atan2(a[0]-e[0],a[1]-e[1]);
+  const R=Math.min(4.5,Math.max(2.2,Math.hypot(a[0]-e[0],a[1]-e[1])));
+  ctx.beginPath();ctx.moveTo(X(e[0]),Y(e[1]));for(let t=-1;t<=1.001;t+=0.1){const g=yaw+t*half;ctx.lineTo(X(e[0]+R*Math.sin(g)),Y(e[1]+R*Math.cos(g)))}ctx.closePath();
+  ctx.fillStyle=col+'33';ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=1.2;ctx.stroke();
+  ctx.setLineDash([2,3]);ctx.strokeStyle='#ffffffaa';ctx.beginPath();ctx.moveTo(X(e[0]),Y(e[1]));ctx.lineTo(X(a[0]),Y(a[1]));ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(X(a[0]),Y(a[1]),2.5,0,7);ctx.fill();
+  ctx.fillStyle=col;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(X(e[0]),Y(e[1]),6.5,0,7);ctx.fill();ctx.stroke();
+  // scale bar + north
+  const Hc=cv.height/(window.devicePixelRatio||1);ctx.fillStyle='#141618cc';ctx.fillRect(6,Hc-38,Math.max(scale,30)+14,32);
+  ctx.fillStyle='#bbb';ctx.fillRect(12,Hc-16,scale,3);ctx.font='11px sans-serif';ctx.fillText('1 m',12,Hc-22);
+  const Wc=cv.width/(window.devicePixelRatio||1);ctx.strokeStyle='#bbb';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(Wc-18,40);ctx.lineTo(Wc-18,14);ctx.lineTo(Wc-23,21);ctx.moveTo(Wc-18,14);ctx.lineTo(Wc-13,21);ctx.stroke();ctx.fillText('N',Wc-22,53)}
+function legend(){$('legend').innerHTML=[['#d9dadc','墙'],['#5ab0ff','窗'],['#6fa8dc','门扇'],[CAT.furniture,'家具'],[CAT.seat,'座椅/床'],[CAT.decor,'植物/摆件'],[CAT.outdoor,'室外物'],['#888','虚线：2 m 以上（吊灯、树冠、楼上）']].map(([c,t])=>`<span><i style="background:${c}"></i>${t}</span>`).join('')}
+function inPoly(x,y,p){let c=false;for(let i=0,j=p.length-1;i<p.length;j=i++){if(((p[i][1]>y)!==(p[j][1]>y))&&(x<(p[j][0]-p[i][0])*(y-p[i][1])/(p[j][1]-p[i][1])+p[i][0]))c=!c}return c}
+cv.addEventListener('mousemove',ev=>{if(!S)return;const r=cv.getBoundingClientRect(),x=view[0]+(ev.clientX-r.left)/scale,y=view[3]-(ev.clientY-r.top)/scale;
+  let hit=null;for(const o of [...S.objects].reverse()){if(o.type==='rug')continue;if(o.polys.some((p,j)=>!o.over[j]&&inPoly(x,y,p))){hit=o;break}}
+  if(!hit)hit=S.objects.find(o=>o.type==='rug'&&o.polys.some(p=>inPoly(x,y,p)))||null;
+  const tip=$('tip');
+  if(hit){tip.style.display='block';tip.textContent=`${hit.id} · ${hit.type} · 高 ${hit.bottom}–${hit.top} m`;tip.style.left=(ev.clientX-r.left+18)+'px';tip.style.top=(ev.clientY-r.top+10)+'px'}else tip.style.display='none';
+  if(hit!==hoverObj){hoverObj=hit;draw()}});
+cv.addEventListener('mouseleave',()=>{$('tip').style.display='none';if(hoverObj){hoverObj=null;draw()}});
+cv.addEventListener('click',ev=>{if(!S)return;const r=cv.getBoundingClientRect(),x=view[0]+(ev.clientX-r.left)/scale,y=view[3]-(ev.clientY-r.top)/scale;
+  let best=null,bd=0.6;S.clips.forEach((c,k)=>c.eye.forEach(p=>{const d=Math.hypot(p[0]-x,p[1]-y);if(d<bd){bd=d;best=k}}));
+  if(best!==null&&best!==ci)selectClip(best,true)});
+$('vfit').onclick=()=>{viewAll=false;$('vfit').classList.add('on');$('vall').classList.remove('on');view=clipView();sizeCanvas();draw()};
+$('vall').onclick=()=>{viewAll=true;$('vall').classList.add('on');$('vfit').classList.remove('on');view=worldView();sizeCanvas();draw()};
+window.addEventListener('resize',()=>{if(view){sizeCanvas();draw()}});
+legend();boot().then(loop).catch(e=>{document.querySelector('.wrap').insertAdjacentHTML('afterbegin',`<pre>加载失败：${esc(e)}</pre>`)});
+</script>
+</body>
+</html>

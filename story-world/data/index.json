@@ -1,0 +1,32 @@
+{
+ "stories": [
+  {
+   "name": "bookshop",
+   "title": "拾光旧书店的一天",
+   "stats": {
+    "areas": 6,
+    "objects": 60,
+    "parts": 2586,
+    "openings": 11,
+    "clips": 7,
+    "frames": 1089,
+    "seconds": 45.4
+   },
+   "poster": "media/bookshop/c01_poster.jpg"
+  },
+  {
+   "name": "noodle_shop",
+   "title": "雨停之前",
+   "stats": {
+    "areas": 8,
+    "objects": 44,
+    "parts": 111,
+    "openings": 4,
+    "clips": 4,
+    "frames": 1346,
+    "seconds": 56.1
+   },
+   "poster": "media/noodle_shop/c01_poster.jpg"
+  }
+ ]
+}
