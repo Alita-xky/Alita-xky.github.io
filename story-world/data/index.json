@@ -12,7 +12,25 @@
     "frames": 1089,
     "seconds": 45.4
    },
+   "one_take": false,
+   "beats": 0,
    "poster": "media/bookshop/c01_poster.jpg"
+  },
+  {
+   "name": "bookshop_onetake",
+   "title": "拾光旧书店·一镜到底",
+   "stats": {
+    "areas": 6,
+    "objects": 60,
+    "parts": 2586,
+    "openings": 11,
+    "clips": 1,
+    "frames": 1321,
+    "seconds": 55.0
+   },
+   "one_take": true,
+   "beats": 6,
+   "poster": "media/bookshop_onetake/take_poster.jpg"
   },
   {
    "name": "noodle_shop",
@@ -26,6 +44,8 @@
     "frames": 1346,
     "seconds": 56.1
    },
+   "one_take": false,
+   "beats": 0,
    "poster": "media/noodle_shop/c01_poster.jpg"
   }
  ]

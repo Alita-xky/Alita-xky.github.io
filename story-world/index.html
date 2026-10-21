@@ -26,6 +26,13 @@ video{width:100%;aspect-ratio:1344/768;background:#000;border:1px solid var(--li
 .controls button:hover{border-color:#456}
 #scrub{flex:1;min-width:200px;accent-color:var(--accent)}
 #frameinfo{font-variant-numeric:tabular-nums;color:var(--muted);min-width:330px}
+.tl{position:relative;height:40px;margin:2px 0 4px;font-size:11px;user-select:none}
+.tl .row{position:absolute;left:0;right:0;height:17px}.tl .row.w{top:21px}
+.tl .seg{position:absolute;top:0;height:17px;border-radius:3px;overflow:hidden;white-space:nowrap;padding:1px 5px;color:#111;cursor:pointer;font-weight:600}
+.tl .win{position:absolute;top:0;height:17px;border:1px solid #5a6;border-radius:3px;background:#5a62;color:#9c9;padding:0 4px;white-space:nowrap;overflow:hidden}
+.tl .ov{position:absolute;top:0;height:17px;background:repeating-linear-gradient(45deg,#e9b85a88 0 4px,transparent 4px 8px)}
+.tl .now{position:absolute;top:-2px;width:2px;height:44px;background:#fff;pointer-events:none}
+.tl .lab{position:absolute;left:-2px;top:-14px;color:var(--muted);font-size:10.5px}
 .clipinfo{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;margin-top:8px;font-size:13.5px}
 .clipinfo .t{font-size:15px;font-weight:600}.clipinfo .s{color:var(--muted);margin-top:3px}
 .grid2{display:grid;grid-template-columns:minmax(0,auto) minmax(320px,1fr);gap:18px;align-items:start;margin-top:8px}
@@ -76,8 +83,9 @@ kbd{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padd
     <button id="bprev" title="←">‹ 帧</button><button id="bnext" title="→">帧 ›</button>
     <input type="range" id="scrub" min="0" max="1" value="0" step="1">
     <select id="rate"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option></select>
-    <span id="frameinfo"></span>
+    <span><span id="frameinfo"></span><span id="wininfo" style="color:#9c9"></span></span>
   </div>
+  <div class="tl" id="tl" style="display:none"></div>
   <div class="clipinfo" id="clipinfo"></div>
 </section>
 
@@ -119,7 +127,7 @@ const CAT={seat:'#8a7556',furniture:'#6f6352',wall:'#5c5f7a',light:'#9a8a3a',dec
 const MODE={keys:'关键帧',orbit:'环绕',follow:'跟拍'};
 const $=id=>document.getElementById(id);
 const vwb=$('vwb'),vdp=$('vdepth'),cv=$('plan'),ctx=cv.getContext('2d');
-let S=null,clip=null,ci=0,frame=0,viewAll=false,view=null,scale=1,hoverObj=null,stories=[];
+let S=null,clip=null,ci=0,frame=0,viewAll=false,view=null,scale=1,hoverObj=null,stories=[],curBeat=-2;
 
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function inline(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/(^|[^*])\*([^*]+)\*/g,'$1<i>$2</i>')}
@@ -139,7 +147,7 @@ function md(src){
 /* ---------------------------------------------------------------- stories */
 async function boot(){
   const idx=await (await fetch('data/index.json')).json();stories=idx.stories;
-  $('tabs').innerHTML=stories.map(s=>`<button class="tab" data-n="${s.name}">${s.poster?`<img src="${s.poster}" alt="">`:''}<span><b>${esc(s.title)}</b><small>${s.stats.clips} 个镜头 · ${s.stats.seconds} s · ${s.stats.objects} 个物体</small></span></button>`).join('');
+  $('tabs').innerHTML=stories.map(s=>`<button class="tab" data-n="${s.name}">${s.poster?`<img src="${s.poster}" alt="">`:''}<span><b>${esc(s.title)}</b><small>${s.one_take?`一镜到底 · ${s.beats} 段`:`${s.stats.clips} 个镜头`} · ${s.stats.seconds} s · ${s.stats.objects} 个物体</small></span></button>`).join('');
   document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>loadStory(b.dataset.n,0));
   const [n,c]=decodeURIComponent(location.hash.slice(1)).split('/');
   const s=stories.find(x=>x.name===n)||stories[0];
@@ -154,6 +162,10 @@ async function loadStory(name,cid){
   const nerr=+((S.report.find(l=>l.startsWith('ERRORS'))||'(0)').match(/\((\d+)\)/)||[0,0])[1];
   const nw=+((S.report.find(l=>l.startsWith('WARNINGS'))||'(0)').match(/\((\d+)\)/)||[0,0])[1];
   $('report').innerHTML=`<span class="badge ${nerr?'err':'ok'}">${nerr} 个错误</span><span class="badge ${nw?'warn':'ok'}">${nw} 个警告</span><details style="margin-top:8px"><summary>校验报告 report.txt</summary><pre>${esc(S.report.join('\n'))}</pre></details>`;
+  const OT=S.clips.length===1&&S.clips[0].beats&&S.clips[0].beats.length;
+  if(OT){const c0=S.clips[0];$('cards').innerHTML=c0.beats.map((b,k)=>`<button class="card" data-b="${k}" style="--c:${PALETTE[k%PALETTE.length]}"><img src="${b.poster}" alt="" loading="lazy"><div><div class="h">${b.id} · ${esc(b.title)}</div><div class="m">${b.t0.toFixed(1)}–${b.t1.toFixed(1)} s · 窗口 ${c0.windows.filter(w=>w.beats.includes(b.id)).map(w=>w.id).join('、')}</div><div class="d">${esc(b.story)}</div></div></button>`).join('');
+    document.querySelectorAll('.card').forEach(el=>el.onclick=()=>{const b=c0.beats[+el.dataset.b];seekFrame(Math.round(b.t0*c0.fps));vwb.play()});
+    selectClip(0,false);return}
   $('cards').innerHTML=S.clips.map((c,k)=>`<button class="card" data-k="${k}" style="--c:${PALETTE[k%PALETTE.length]}"><img src="${c.media.poster}" alt="" loading="lazy"><div><div class="h">${c.id} · ${esc(c.title)}</div><div class="m">${(c.frames/c.fps).toFixed(1)} s · ${c.frames} 帧 · ${lensText(c)} · ${MODE[c.mode]||c.mode}${c.track?' · 对准 '+c.track:''}</div><div class="d">${esc(c.story)}</div></div></button>`).join('');
   document.querySelectorAll('.card').forEach(b=>b.onclick=()=>selectClip(+b.dataset.k,true));
   const k=Math.max(0,S.clips.findIndex(c=>c.id===cid));
@@ -164,7 +176,7 @@ function lensAt(c,i){return typeof c.lens==='number'?c.lens:c.lens[i]}
 
 /* ---------------------------------------------------------------- clip + video sync */
 function selectClip(k,play){
-  ci=k;clip=S.clips[k];frame=0;
+  ci=k;clip=S.clips[k];frame=0;curBeat=-2;$('wininfo').textContent='';
   document.querySelectorAll('.card').forEach(b=>b.classList.toggle('on',+b.dataset.k===k));
   history.replaceState(null,'',`#${S.name}/${clip.id}`);
   vwb.pause();vdp.pause();vwb.src=clip.media.wb;vdp.src=clip.media.depth;vwb.playbackRate=vdp.playbackRate=+$('rate').value;
@@ -172,9 +184,17 @@ function selectClip(k,play){
   const act=Object.keys(clip.actors);
   $('clipinfo').innerHTML=`<div class="t" style="color:${PALETTE[k%PALETTE.length]}">${clip.id} · ${esc(clip.title)}</div><div class="s">${esc(clip.story)}</div><div class="s">相机：${MODE[clip.mode]||clip.mode}${clip.track?'，对准 '+clip.track:''} · ${lensText(clip)} · ${clip.frames} 帧 @ ${clip.fps} fps${act.length?' · 人物：'+act.join('、'):''}${clip.render_s!=null?` · 渲染 ${clip.render_s} s`:''}</div>`;
   view=viewAll?worldView():clipView();
-  sizeCanvas();draw();
+  buildTimeline();sizeCanvas();draw();
   if(play)vwb.play();
 }
+function beatAt(i){if(!clip||!clip.beats)return -1;const t=i/clip.fps;return clip.beats.findIndex((b,k)=>t>=b.t0-1e-6&&(t<b.t1||k===clip.beats.length-1))}
+function buildTimeline(){
+  const tl=$('tl');if(!clip.beats||!clip.beats.length){tl.style.display='none';return}
+  tl.style.display='block';const T=(clip.frames-1)/clip.fps,F=clip.frames,pc=x=>(100*x).toFixed(3)+'%';
+  let h='<div class="row">'+clip.beats.map((b,k)=>`<div class="seg" data-k="${k}" title="${esc(b.title)}" style="left:${pc(b.t0/T)};width:calc(${pc((b.t1-b.t0)/T)} - 2px);background:${PALETTE[k%PALETTE.length]}">${b.id} ${esc(b.title)}</div>`).join('')+'</div>';
+  h+='<div class="row w"><span class="lab" style="top:7px;left:auto;right:100%;margin-right:4px"></span>'+clip.windows.map((w,k)=>{let o='';const nx=clip.windows[k+1];if(nx)o=`<div class="ov" style="left:${pc(nx.start/F)};width:${pc((w.end-nx.start)/F)}" title="重叠 ${w.end-nx.start} 帧"></div>`;
+    return `<div class="win" style="left:${pc(w.start/F)};width:calc(${pc((w.end-w.start)/F)} - 2px)" title="${w.id}: 帧 ${w.start}–${w.end-1}">H3 ${w.id} · ${w.end-w.start} 帧</div>`+o}).join('')+'</div><div class="now" id="tlnow"></div>';
+  tl.innerHTML=h;tl.querySelectorAll('.seg').forEach(el=>el.onclick=()=>{seekFrame(Math.round(clip.beats[+el.dataset.k].t0*clip.fps));vwb.play()})}
 vwb.addEventListener('play',()=>{vdp.currentTime=vwb.currentTime;vdp.play();$('bplay').textContent='❚❚ 暂停'});
 vwb.addEventListener('pause',()=>{vdp.pause();vdp.currentTime=vwb.currentTime;$('bplay').textContent='▶ 播放'});
 vwb.addEventListener('seeked',()=>{vdp.currentTime=vwb.currentTime;onTime()});
@@ -194,6 +214,11 @@ function info(){
   if(!clip)return;const e=clip.eye[frame],a=clip.at[frame],L=lensAt(clip,frame);
   const p=clip.eye[Math.max(0,frame-1)],v=frame?Math.hypot(e[0]-p[0],e[1]-p[1],e[2]-p[2])*clip.fps:0;
   const yaw=(Math.atan2(a[0]-e[0],a[1]-e[1])*180/Math.PI+360)%360;
+  if(clip.beats&&clip.beats.length){const k=beatAt(frame),b=clip.beats[k];const wins=clip.windows.filter(w=>frame>=w.start&&frame<w.end).map(w=>w.id).join('+');
+    $('tlnow').style.left=(100*frame/(clip.frames-1)).toFixed(3)+'%';
+    if(k!==curBeat){curBeat=k;document.querySelectorAll('.card').forEach(el=>el.classList.toggle('on',+el.dataset.b===k));
+      $('clipinfo').innerHTML=`<div class="t" style="color:${PALETTE[k%PALETTE.length]}">一镜到底 · ${b.id} ${esc(b.title)}（${b.t0.toFixed(1)}–${b.t1.toFixed(1)} s）</div><div class="s">${esc(b.story)}</div><div class="s">整段 ${clip.frames} 帧 @ ${clip.fps} fps，无剪辑 · 相机分 ${clip.beats.length} 段平滑衔接 · 生成时切成 ${clip.windows.length} 个 H3 窗口（17n+5 帧，相邻重叠作锚帧）</div>`}
+    $('wininfo').textContent=' · 窗口 '+wins}
   $('frameinfo').textContent=`帧 ${frame}/${clip.frames-1} · ${(frame/clip.fps).toFixed(2)} s · ${L} mm（水平视角 ${(2*Math.atan(18/L)*180/Math.PI).toFixed(0)}°）· 机高 ${e[2].toFixed(2)} m · 朝向 ${yaw.toFixed(0)}° · ${v.toFixed(2)} m/s`}
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'&&e.target.type!=='range')return;
   if(e.code==='Space'){e.preventDefault();toggle()}else if(e.key==='ArrowLeft'){e.preventDefault();seekFrame(frame-1)}else if(e.key==='ArrowRight'){e.preventDefault();seekFrame(frame+1)}
@@ -241,7 +266,9 @@ function draw(){
     ctx.strokeStyle=ac;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X(p[0]),Y(p[1]));ctx.lineTo(X(p[0]+0.45*Math.sin(hd)),Y(p[1]+0.45*Math.cos(hd)));ctx.stroke();
     ctx.fillStyle=ac;ctx.font='bold 12px -apple-system,sans-serif';ctx.fillText(id+(a.pose[frame]==='sit'?'（坐）':''),X(p[0])+8,Y(p[1])-8)});
   // selected camera path
-  ctx.strokeStyle=col;ctx.lineWidth=2.5;path(clip.eye);ctx.stroke();
+  if(clip.beats&&clip.beats.length){clip.beats.forEach((b,k)=>{const a=Math.round(b.t0*clip.fps),z=Math.min(clip.frames,Math.round(b.t1*clip.fps)+1);
+      ctx.strokeStyle=PALETTE[k%PALETTE.length];ctx.lineWidth=2.5;path(clip.eye.slice(a,z));ctx.stroke();const p=clip.eye[a];ctx.fillStyle=PALETTE[k%PALETTE.length];ctx.font='bold 11px -apple-system,sans-serif';ctx.fillText(b.id,X(p[0])+6,Y(p[1])+12)})}
+  else{ctx.strokeStyle=col;ctx.lineWidth=2.5;path(clip.eye);ctx.stroke()}
   ctx.lineWidth=1;ctx.strokeStyle=col+'aa';path(clip.eye.slice(0,frame+1));ctx.lineWidth=4;ctx.stroke();
   // live camera: FOV wedge
   const e=clip.eye[frame],a=clip.at[frame],L=lensAt(clip,frame),half=Math.atan(18/L),yaw=Math.atan2(a[0]-e[0],a[1]-e[1]);
