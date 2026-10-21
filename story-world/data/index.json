@@ -13,6 +13,7 @@
     "seconds": 45.4
    },
    "one_take": false,
+   "h3": 0,
    "beats": 0,
    "poster": "media/bookshop/c01_poster.jpg"
   },
@@ -29,6 +30,7 @@
     "seconds": 55.0
    },
    "one_take": true,
+   "h3": 0,
    "beats": 6,
    "poster": "media/bookshop_onetake/take_poster.jpg"
   },
@@ -45,8 +47,26 @@
     "seconds": 56.1
    },
    "one_take": false,
+   "h3": 0,
    "beats": 0,
    "poster": "media/noodle_shop/c01_poster.jpg"
+  },
+  {
+   "name": "garage_nunchaku",
+   "title": "车库双截棍",
+   "stats": {
+    "areas": 1,
+    "objects": 48,
+    "parts": 72,
+    "openings": 1,
+    "clips": 4,
+    "frames": 717,
+    "seconds": 29.9
+   },
+   "one_take": false,
+   "h3": 5,
+   "beats": 0,
+   "poster": "media/garage_nunchaku/b01_poster.jpg"
   }
  ]
 }

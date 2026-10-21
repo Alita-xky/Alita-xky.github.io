@@ -63,6 +63,16 @@ pre{background:var(--panel);border:1px solid var(--line);border-radius:6px;paddi
 table.out{border-collapse:collapse;font-size:13px;max-width:1100px}table.out td{border:1px solid var(--line);padding:4px 10px;vertical-align:top}
 table.out td:first-child{white-space:nowrap;color:var(--accent);font-family:ui-monospace,Menlo,monospace;font-size:12px}
 kbd{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:0 4px;font-size:11px}
+.h3sec{margin-top:18px}.h3sec h3{font-size:15px;margin:0 0 4px}
+.h3bar{display:flex;gap:8px;align-items:center;margin:6px 0 10px;flex-wrap:wrap}
+.h3bar button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:4px;padding:4px 10px;font:inherit;cursor:pointer}
+.h3grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:12px}
+.h3card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px}
+.h3card video{aspect-ratio:1344/768}.h3card .t{font-weight:600;font-size:14px;margin:6px 0 2px}
+.h3card .c{font-size:12px;color:var(--muted)}.h3card .n{font-size:12.5px;color:#c4c8cd;margin-top:4px}
+.chip{display:inline-block;border-radius:10px;padding:0 8px;font-size:11.5px;margin:4px 4px 0 0;border:1px solid var(--line)}
+.chip.good{background:#173017;color:var(--ok)}.chip.mid{background:#33280f;color:var(--warn)}.chip.bad{background:#3a1616;color:var(--err)}.chip.none{color:var(--muted)}
+.tagh3{display:inline-block;background:#1d2a3a;color:var(--accent);border-radius:3px;padding:0 5px;font-size:11px;margin-left:6px}
 @media (max-width:900px){.wrap{padding:14px 12px 40px}.videos{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}#frameinfo{min-width:0}.card img{width:110px;height:63px}}
 </style>
 </head>
@@ -82,11 +92,19 @@ kbd{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padd
     <button id="bplay" title="空格">▶ 播放</button>
     <button id="bprev" title="←">‹ 帧</button><button id="bnext" title="→">帧 ›</button>
     <input type="range" id="scrub" min="0" max="1" value="0" step="1">
+    <select id="view" title="左右两个视频显示什么"></select>
     <select id="rate"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option></select>
     <span><span id="frameinfo"></span><span id="wininfo" style="color:#9c9"></span></span>
   </div>
   <div class="tl" id="tl" style="display:none"></div>
   <div class="clipinfo" id="clipinfo"></div>
+  <div class="h3sec" id="h3sec" style="display:none">
+    <h2 style="margin-top:22px">H3 生成结果（同一 prompt、同一 seed，只改控制信号）</h2>
+    <p class="note" id="h3sum"></p>
+    <div class="h3bar"><button id="h3sync">▶ 全部从头同步播放（含上方白模）</button><button id="h3stop">❚❚ 全部暂停</button>
+      <span class="note" style="margin:0">同步播放时只有第一个结果出声；单个视频可以自己点开声音</span></div>
+    <div class="h3grid" id="h3grid"></div>
+  </div>
 </section>
 
 <section class="grid2">
@@ -147,7 +165,7 @@ function md(src){
 /* ---------------------------------------------------------------- stories */
 async function boot(){
   const idx=await (await fetch('data/index.json')).json();stories=idx.stories;
-  $('tabs').innerHTML=stories.map(s=>`<button class="tab" data-n="${s.name}">${s.poster?`<img src="${s.poster}" alt="">`:''}<span><b>${esc(s.title)}</b><small>${s.one_take?`一镜到底 · ${s.beats} 段`:`${s.stats.clips} 个镜头`} · ${s.stats.seconds} s · ${s.stats.objects} 个物体</small></span></button>`).join('');
+  $('tabs').innerHTML=stories.map(s=>`<button class="tab" data-n="${s.name}">${s.poster?`<img src="${s.poster}" alt="">`:''}<span><b>${esc(s.title)}</b><small>${s.one_take?`一镜到底 · ${s.beats} 段`:`${s.stats.clips} 个镜头`} · ${s.stats.seconds} s · ${s.stats.objects} 个物体${s.h3?`<span class="tagh3">H3 ×${s.h3}</span>`:''}</small></span></button>`).join('');
   document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>loadStory(b.dataset.n,0));
   const [n,c]=decodeURIComponent(location.hash.slice(1)).split('/');
   const s=stories.find(x=>x.name===n)||stories[0];
@@ -166,11 +184,32 @@ async function loadStory(name,cid){
   if(OT){const c0=S.clips[0];$('cards').innerHTML=c0.beats.map((b,k)=>`<button class="card" data-b="${k}" style="--c:${PALETTE[k%PALETTE.length]}"><img src="${b.poster}" alt="" loading="lazy"><div><div class="h">${b.id} · ${esc(b.title)}</div><div class="m">${b.t0.toFixed(1)}–${b.t1.toFixed(1)} s · 窗口 ${c0.windows.filter(w=>w.beats.includes(b.id)).map(w=>w.id).join('、')}</div><div class="d">${esc(b.story)}</div></div></button>`).join('');
     document.querySelectorAll('.card').forEach(el=>el.onclick=()=>{const b=c0.beats[+el.dataset.b];seekFrame(Math.round(b.t0*c0.fps));vwb.play()});
     selectClip(0,false);return}
-  $('cards').innerHTML=S.clips.map((c,k)=>`<button class="card" data-k="${k}" style="--c:${PALETTE[k%PALETTE.length]}"><img src="${c.media.poster}" alt="" loading="lazy"><div><div class="h">${c.id} · ${esc(c.title)}</div><div class="m">${(c.frames/c.fps).toFixed(1)} s · ${c.frames} 帧 · ${lensText(c)} · ${MODE[c.mode]||c.mode}${c.track?' · 对准 '+c.track:''}</div><div class="d">${esc(c.story)}</div></div></button>`).join('');
+  $('cards').innerHTML=S.clips.map((c,k)=>`<button class="card" data-k="${k}" style="--c:${PALETTE[k%PALETTE.length]}"><img src="${c.media.poster}" alt="" loading="lazy"><div><div class="h">${c.id} · ${esc(c.title)}${h3runs(c.id).length?`<span class="tagh3">H3 ×${h3runs(c.id).length}</span>`:''}${Object.keys(c.actor_media||{}).length?'<span class="tagh3">人物</span>':''}</div><div class="m">${(c.frames/c.fps).toFixed(1)} s · ${c.frames} 帧 · ${lensText(c)} · ${MODE[c.mode]||c.mode}${c.track?' · 对准 '+c.track:''}</div><div class="d">${esc(c.story)}</div></div></button>`).join('');
   document.querySelectorAll('.card').forEach(b=>b.onclick=()=>selectClip(+b.dataset.k,true));
   const k=Math.max(0,S.clips.findIndex(c=>c.id===cid));
   selectClip(k,false);
 }
+const VIEWS={base:['白模 | 深度','wb','depth','白模（Workbench 单色灰，世界空间光照）','深度：255·(1 − log z / log 80)，越亮越近，1 m 内饱和'],
+  act:['白模+人物 | 深度+人物','a:whitebox','a:depth','白模 + GVHMR 人体（SMPL-X）','深度（含人体）——喂给 H3 ControlNet 的深度控制'],
+  pose:['白模+人物 | 骨架','a:whitebox','a:pose','白模 + GVHMR 人体','OpenPose-18 骨架（被场景挡住的关节已去掉）——骨架控制'],
+  mask:['骨架 | 人物遮罩','a:pose','a:mask','OpenPose-18 骨架','人物遮罩——骨架控制只在白色区域起作用']};
+function src(k){return k.startsWith('a:')?clip.actor_media[k.slice(2)]:clip.media[k]}
+function buildViews(){const has=clip.actor_media&&clip.actor_media.whitebox;const keep=$('view').value;
+  $('view').innerHTML=Object.entries(VIEWS).filter(([k])=>k==='base'||has).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join('');
+  $('view').value=has&&keep&&VIEWS[keep]?keep:(has?'act':'base');$('view').style.display=has?'':'none'}
+function setView(k,fresh){const v=VIEWS[k]||VIEWS.base,t=vwb.currentTime,pl=!vwb.paused;
+  vwb.src=src(v[1]);vdp.src=src(v[2]);document.querySelectorAll('.videos figcaption')[0].textContent=v[3];document.querySelectorAll('.videos figcaption')[1].textContent=v[4];
+  if(!fresh){vwb.addEventListener('loadedmetadata',()=>{vwb.currentTime=t;vdp.currentTime=t;if(pl)vwb.play()},{once:true})}}
+function h3runs(cid){return ((S&&S.h3&&S.h3.runs)||[]).filter(r=>r.clip===cid)}
+function chip(k,v){const c={'好':'good','中':'mid','弱':'mid','差':'bad','无':'none'}[v]||'none';return `<span class="chip ${c}">${esc(k)}：${esc(v)}</span>`}
+function buildH3(){const runs=h3runs(clip.id);$('h3sec').style.display=runs.length?'':'none';if(!runs.length)return;
+  $('h3sum').textContent=S.h3.summary||'';
+  $('h3grid').innerHTML=runs.map((r,i)=>`<div class="h3card"><video class="h3v" src="${r.video}" poster="${r.poster}" controls playsinline preload="metadata" ${i?'muted':''}></video>
+    <div class="t">${esc(r.title)}</div><div class="c">控制信号：${esc(r.cues)}</div><div>${Object.entries(r.tags||{}).map(([k,v])=>chip(k,v)).join('')}</div><div class="n">${esc(r.notes)}</div></div>`).join('')}
+$('h3sync').onclick=()=>{const vs=[...document.querySelectorAll('.h3v')];vwb.pause();vwb.currentTime=0;vdp.currentTime=0;
+  vs.forEach((v,i)=>{v.pause();v.currentTime=0;v.muted=i>0});setTimeout(()=>{vwb.play();vs.forEach(v=>v.play())},150)};
+$('h3stop').onclick=()=>{vwb.pause();document.querySelectorAll('.h3v').forEach(v=>v.pause())};
+$('view').onchange=e=>setView(e.target.value,false);
 function lensText(c){if(typeof c.lens==='number')return c.lens+' mm';const a=Math.min(...c.lens),b=Math.max(...c.lens);return `${a}–${b} mm`}
 function lensAt(c,i){return typeof c.lens==='number'?c.lens:c.lens[i]}
 
@@ -179,7 +218,8 @@ function selectClip(k,play){
   ci=k;clip=S.clips[k];frame=0;curBeat=-2;$('wininfo').textContent='';
   document.querySelectorAll('.card').forEach(b=>b.classList.toggle('on',+b.dataset.k===k));
   history.replaceState(null,'',`#${S.name}/${clip.id}`);
-  vwb.pause();vdp.pause();vwb.src=clip.media.wb;vdp.src=clip.media.depth;vwb.playbackRate=vdp.playbackRate=+$('rate').value;
+  vwb.pause();vdp.pause();buildViews();setView($('view').value,true);vwb.playbackRate=vdp.playbackRate=+$('rate').value;
+  buildH3();
   $('scrub').max=clip.frames-1;$('scrub').value=0;
   const act=Object.keys(clip.actors);
   $('clipinfo').innerHTML=`<div class="t" style="color:${PALETTE[k%PALETTE.length]}">${clip.id} · ${esc(clip.title)}</div><div class="s">${esc(clip.story)}</div><div class="s">相机：${MODE[clip.mode]||clip.mode}${clip.track?'，对准 '+clip.track:''} · ${lensText(clip)} · ${clip.frames} 帧 @ ${clip.fps} fps${act.length?' · 人物：'+act.join('、'):''}${clip.render_s!=null?` · 渲染 ${clip.render_s} s`:''}</div>`;
