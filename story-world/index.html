@@ -190,13 +190,14 @@ async function loadStory(name,cid){
   selectClip(k,false);
 }
 const VIEWS={base:['白模 | 深度','wb','depth','白模（Workbench 单色灰，世界空间光照）','深度：255·(1 − log z / log 80)，越亮越近，1 m 内饱和'],
-  act:['白模+人物 | 深度+人物','a:whitebox','a:depth','白模 + GVHMR 人体（SMPL-X）','深度（含人体）——喂给 H3 ControlNet 的深度控制'],
+  zoe:['白模+人物 | 深度（新编码）','a:whitebox','a:depth_zoe','白模 + GVHMR 人体（SMPL-X）','深度，ZoeDepth 格式（逐帧 2–85 百分位拉伸，近白远黑）——ControlNet 训练时的格式，推荐喂给 H3'],
+  act:['白模+人物 | 深度（旧对数编码）','a:whitebox','a:depth','白模 + GVHMR 人体（SMPL-X）','深度，旧的固定对数编码（1–80 m）——人体与背景对比很弱'],
   pose:['白模+人物 | 骨架','a:whitebox','a:pose','白模 + GVHMR 人体','OpenPose-18 骨架（被场景挡住的关节已去掉）——骨架控制'],
   mask:['骨架 | 人物遮罩','a:pose','a:mask','OpenPose-18 骨架','人物遮罩——骨架控制只在白色区域起作用']};
 function src(k){return k.startsWith('a:')?clip.actor_media[k.slice(2)]:clip.media[k]}
 function buildViews(){const has=clip.actor_media&&clip.actor_media.whitebox;const keep=$('view').value;
-  $('view').innerHTML=Object.entries(VIEWS).filter(([k])=>k==='base'||has).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join('');
-  $('view').value=has&&keep&&VIEWS[keep]?keep:(has?'act':'base');$('view').style.display=has?'':'none'}
+  $('view').innerHTML=Object.entries(VIEWS).filter(([k])=>k==='base'||(has&&(k!=='zoe'||clip.actor_media.depth_zoe))).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join('');
+  $('view').value=has&&keep&&VIEWS[keep]&&(keep!=='zoe'||clip.actor_media.depth_zoe)?keep:(has?(clip.actor_media.depth_zoe?'zoe':'act'):'base');$('view').style.display=has?'':'none'}
 function setView(k,fresh){const v=VIEWS[k]||VIEWS.base,t=vwb.currentTime,pl=!vwb.paused;
   vwb.src=src(v[1]);vdp.src=src(v[2]);document.querySelectorAll('.videos figcaption')[0].textContent=v[3];document.querySelectorAll('.videos figcaption')[1].textContent=v[4];
   if(!fresh){vwb.addEventListener('loadedmetadata',()=>{vwb.currentTime=t;vdp.currentTime=t;if(pl)vwb.play()},{once:true})}}
