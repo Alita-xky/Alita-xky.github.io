@@ -18,21 +18,21 @@
    "poster": "media/bookshop/c01_poster.jpg"
   },
   {
-   "name": "bookshop_onetake",
+   "name": "bookshop_onetake_v3",
    "title": "拾光旧书店·一镜到底",
    "stats": {
     "areas": 6,
     "objects": 60,
-    "parts": 2586,
+    "parts": 2584,
     "openings": 11,
     "clips": 1,
     "frames": 1321,
     "seconds": 55.0
    },
    "one_take": true,
-   "h3": 3,
+   "h3": 1,
    "beats": 6,
-   "poster": "media/bookshop_onetake/take_poster.jpg"
+   "poster": "media/bookshop_onetake_v3/take_poster.jpg"
   },
   {
    "name": "noodle_shop",

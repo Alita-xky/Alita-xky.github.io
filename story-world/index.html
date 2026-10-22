@@ -63,7 +63,9 @@ pre{background:var(--panel);border:1px solid var(--line);border-radius:6px;paddi
 table.out{border-collapse:collapse;font-size:13px;max-width:1100px}table.out td{border:1px solid var(--line);padding:4px 10px;vertical-align:top}
 table.out td:first-child{white-space:nowrap;color:var(--accent);font-family:ui-monospace,Menlo,monospace;font-size:12px}
 kbd{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:0 4px;font-size:11px}
-.h3sec{margin-top:18px}.h3sec h3{font-size:15px;margin:0 0 4px}
+.h3sec{margin-top:18px}
+.pipe{border-collapse:collapse;width:100%;font-size:13px;margin:8px 0 14px}.pipe th,.pipe td{border:1px solid var(--line);padding:6px 8px;vertical-align:top;text-align:left}.pipe th{background:var(--panel2);white-space:nowrap}
+.pipe td:first-child{white-space:nowrap;font-weight:600}.pipewrap{overflow-x:auto}.h3sec h3{font-size:15px;margin:0 0 4px}
 .h3bar{display:flex;gap:8px;align-items:center;margin:6px 0 10px;flex-wrap:wrap}
 .h3bar button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:4px;padding:4px 10px;font:inherit;cursor:pointer}
 .h3grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:12px}
@@ -101,6 +103,7 @@ kbd{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padd
   <div class="h3sec" id="h3sec" style="display:none">
     <h2 style="margin-top:22px" id="h3title">H3 生成结果（同一 prompt、同一 seed，只改控制信号）</h2>
     <p class="note" id="h3sum"></p>
+    <div id="h3pipe"></div>
     <div class="h3bar"><button id="h3sync">▶ 全部从头同步播放（含上方白模）</button><button id="h3stop">❚❚ 全部暂停</button>
       <span class="note" style="margin:0">同步播放时只有第一个结果出声；单个视频可以自己点开声音</span></div>
     <div id="h3full"></div>
@@ -210,6 +213,9 @@ function buildH3(){const runs=h3runs(clip.id),fc=S&&S.h3&&S.h3.fullcut;$('h3sec'
   const figs=((S&&S.h3&&S.h3.figures)||[]).filter(f=>f.clip===clip.id);
   $('h3figs').innerHTML=figs.map(f=>`<div class="h3card" style="margin-top:12px"><div class="t" style="margin-top:0">${esc(f.title)}</div><img src="${f.image}" style="max-width:100%;height:auto;display:block"><div class="n">${esc(f.notes||'')}</div></div>`).join('');
   $('h3title').textContent=(S.h3&&S.h3.title)||'H3 生成结果（同一 prompt、同一 seed，只改控制信号）';
+  const ins=(S.h3&&S.h3.inputs)||[],pipe=(S.h3&&S.h3.pipeline)||[];
+  $('h3pipe').innerHTML=(ins.length?`<h3>输入</h3><div class="pipewrap"><table class="pipe"><tr><th>项</th><th>内容</th></tr>${ins.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.detail)}</td></tr>`).join('')}</table></div>`:'')+
+    (pipe.length?`<h3>流水线</h3><div class="pipewrap"><table class="pipe"><tr><th>步骤</th><th>输入</th><th>输出</th><th>做法</th></tr>${pipe.map(x=>`<tr><td>${esc(x.step)}</td><td>${esc(x.input)}</td><td>${esc(x.output)}</td><td>${esc(x.how)}</td></tr>`).join('')}</table></div>`:'');
   if(!runs.length){$('h3grid').innerHTML='';return}
   $('h3sum').textContent=S.h3.summary||'';
   $('h3grid').innerHTML=runs.map((r,i)=>`<div class="h3card"><video class="h3v" src="${r.video}" poster="${r.poster}" controls playsinline preload="metadata" ${i?'muted':''}></video>
