@@ -103,6 +103,7 @@ kbd{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padd
     <p class="note" id="h3sum"></p>
     <div class="h3bar"><button id="h3sync">▶ 全部从头同步播放（含上方白模）</button><button id="h3stop">❚❚ 全部暂停</button>
       <span class="note" style="margin:0">同步播放时只有第一个结果出声；单个视频可以自己点开声音</span></div>
+    <div id="h3full"></div>
     <div class="h3grid" id="h3grid"></div>
   </div>
 </section>
@@ -203,7 +204,9 @@ function setView(k,fresh){const v=VIEWS[k]||VIEWS.base,t=vwb.currentTime,pl=!vwb
   if(!fresh){vwb.addEventListener('loadedmetadata',()=>{vwb.currentTime=t;vdp.currentTime=t;if(pl)vwb.play()},{once:true})}}
 function h3runs(cid){return ((S&&S.h3&&S.h3.runs)||[]).filter(r=>r.clip===cid)}
 function chip(k,v){const c={'好':'good','中':'mid','弱':'mid','差':'bad','无':'none'}[v]||'none';return `<span class="chip ${c}">${esc(k)}：${esc(v)}</span>`}
-function buildH3(){const runs=h3runs(clip.id);$('h3sec').style.display=runs.length?'':'none';if(!runs.length)return;
+function buildH3(){const runs=h3runs(clip.id),fc=S&&S.h3&&S.h3.fullcut;$('h3sec').style.display=(runs.length||fc)?'':'none';
+  $('h3full').innerHTML=fc?`<div class="h3card" style="margin-bottom:12px"><div class="t" style="margin-top:0">${esc(fc.title)}</div><video src="${fc.video}" controls playsinline preload="metadata" style="max-width:900px"></video><div class="n">${esc(fc.notes)}</div></div>`:'';
+  if(!runs.length){$('h3grid').innerHTML='';return}
   $('h3sum').textContent=S.h3.summary||'';
   $('h3grid').innerHTML=runs.map((r,i)=>`<div class="h3card"><video class="h3v" src="${r.video}" poster="${r.poster}" controls playsinline preload="metadata" ${i?'muted':''}></video>
     <div class="t">${esc(r.title)}</div><div class="c">控制信号：${esc(r.cues)}</div><div>${Object.entries(r.tags||{}).map(([k,v])=>chip(k,v)).join('')}</div><div class="n">${esc(r.notes)}</div></div>`).join('')}
