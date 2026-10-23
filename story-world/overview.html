@@ -32,13 +32,15 @@ svg text{font-family:inherit}
 .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:10px 0}
 .kpi div{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:8px 10px}
 .kpi small{display:block;color:var(--muted);font-size:12px}
+code{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:0 4px;font-size:12.5px}
+details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 </style>
 </head>
 <body>
 <div class="wrap">
 <h1>一镜到底：从一段剧本到分钟级、带对白的连续镜头</h1>
 <div class="muted small">研究概览 · 更新于 2026-10-23 · 逐镜头白模、深度和各故事的完整结果见 <a href="index.html">Story World 查看器</a></div>
-<div class="nav"><a href="#status">现在的状态</a><a href="#task">任务</a><a href="#method">方法图</a><a href="#best">最好结果</a><a href="#novelty">和别人相比</a><a href="#problems">现在的问题</a><a href="#bugs">试过的方法与 bug</a><a href="#next">下一步</a><a href="#refs">参考文献</a></div>
+<div class="nav"><a href="#status">现在的状态</a><a href="#task">任务</a><a href="#method">方法图</a><a href="#h3input">给 H3 的输入</a><a href="#best">最好结果</a><a href="#refmotion">refmotion：双截棍探索</a><a href="#novelty">和别人相比</a><a href="#problems">现在的问题</a><a href="#bugs">试过的方法与 bug</a><a href="#next">下一步</a><a href="#refs">参考文献</a></div>
 
 <h2 id="status">现在的状态</h2>
 <div class="box status">
@@ -100,6 +102,37 @@ svg text{font-family:inherit}
 <div class="small muted">蓝框：生成主线；黄框：检查与回退；绿框：跨窗口记忆。还靠人工的部分：每个窗口的 H3 prompt 目前手写（按 H3 官方六段式）；两段穿门跟拍是手动改成“沿人物路线跟拍”（规则已写进规划规范）。</div>
 </div>
 
+<h2 id="h3input">给 H3 的输入（每个 15 秒窗口）</h2>
+<div class="grid3" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">
+<figure><img src="media/overview/in_depth.jpg" alt="深度控制"><figcaption><b>① 深度控制视频</b>：白模渲染、ControlNet 训练格式（逐帧 2–85 百分位拉伸，近亮远暗）。人物是灰色占位人偶。</figcaption></figure>
+<figure><img src="media/overview/in_memory.jpg" alt="记忆像素"><figcaption><b>② 场景记忆（保留像素）</b>：前面窗口生成过的墙和门，按白模精确深度和相机重投影过来；人所在区域挖掉（灰色）。</figcaption></figure>
+<figure><img src="media/overview/in_mask.jpg" alt="掩码"><figcaption><b>③ 记忆掩码</b>：黑色是保留记忆，白色是重新生成。与上一窗重叠的帧整帧为黑，保证接缝连续。</figcaption></figure>
+<figure><img src="media/overview/in_output.jpg" alt="输出"><figcaption><b>输出</b>（F2 w03 第 24 帧）：墙、门和记忆一致，人是新生成的。再加上 ④ 人物设定图、⑤ 音色片段、⑥ 文字 prompt。</figcaption></figure>
+</div>
+<div class="tw"><table>
+<tr><th>输入</th><th>内容</th><th>格式 / 参数</th></tr>
+<tr><td>底模与任务</td><td>w00：H3 基础版，任务 <code>v2av_control</code>（深度 + 文字）；w01 起：H3 参考版（transformer_ref），任务 <code>ref2av_control</code>，可以吃参考图、音频、视频</td><td>MiniMax-H3，音视频联合生成；我们给参考版补接了 inpaint 通道（原本只有基础版有）</td></tr>
+<tr><td>① 控制视频</td><td>深度，人物为占位人偶（或 SMPL）</td><td>Fun-ControlNet-Union-2.0，强度 1.0，作用于全部去噪步。支持多路融合，写法 <code>路径=强度@起:止#区域掩码</code>，例如 SMPL 深度 <code>@0:0.375</code>（只在前 3 步）+ 占位深度 <code>@0.375:1</code></td></tr>
+<tr><td>②③ 场景记忆</td><td>保留像素视频 + 掩码（黑 = 保留，白 = 生成）；被遮处填 ImageNet 均值灰</td><td>挂在第一路深度控制上。F2 里非重叠帧平均有 w01 9%、w02 约 0%（走廊和后院之前没见过）、w03 13%（最多 62%）的像素来自记忆；重叠帧 100%</td></tr>
+<tr><td>④ 参考图 &lt;Picture N&gt;</td><td>每人一张两视角设定图（CLIP 核验身份）</td><td><code>REF_IMAGE</code>；同一人只给一张，避免被画成两个人</td></tr>
+<tr><td>⑤ 参考音频 &lt;Audio N&gt;</td><td>每人第一句台词的音频（whisper 词级对齐切出）</td><td><code>REF_AUDIO</code>，在 prompt 里写成“某人的音色参考”</td></tr>
+<tr><td>参考视频 &lt;Video N&gt;（可选）</td><td>动作参考，例如 SMPL 灰模从目标相机渲染</td><td><code>REF_VIDEO</code>，必须去掉音轨，否则也会被当成音频参考；多人加人物图时灰模外观会泄露</td></tr>
+<tr><td>⑥ 文字 prompt</td><td>w00 用“镜头描述 + 声音”格式；w01 起用 Ref2VA 六段式：subject_definitions / summary / retention_analysis / detailed_description / overall_soundscape / non_diegetic_music</td><td>台词写法 <code>(S1) … says: &lt;d&gt;[Chinese] …&lt;/d&gt;</code>，时间点写 <code>At 00:12.900,</code>。目前按剧本手写模板，记忆库自动填入参考编号和音色描述</td></tr>
+<tr><td>采样</td><td>8 步加速 LoRA（基础版 fl2v、参考版 ref2v 各自的 turbo 8-step），shift 6/3 与 12/3，seed 43</td><td>1344×768，24 fps，362 帧（17n+5，约 15 s）；4 张昇腾 910B2 张量并行，每窗口约 10–15 分钟</td></tr>
+</table></div>
+<details class="box"><summary>F2 w03 自动填好的 prompt（节选）</summary>
+<pre style="white-space:pre-wrap;font-size:12.5px;color:var(--muted)">subject_definitions:
+&lt;Subject 1&gt; is Yu in &lt;Picture 1&gt; (2 views of the same single person, side by side), a young woman in her early twenties with shoulder-length black hair, a cream knit sweater, light-blue jeans, white sneakers and a canvas tote bag on her shoulder, with the exact face, hair, build and clothes as seen in &lt;Picture 1&gt;.
+&lt;Subject 2&gt; is Old Zhou in &lt;Picture 2&gt; (2 views of the same single person, side by side), the shop owner, a man in his sixties with short grey hair and round reading glasses, a dark brown cardigan over a white shirt and grey trousers, …
+&lt;Audio 1&gt; is the voice-timbre reference for &lt;Subject 2&gt; (S1).
+&lt;Audio 2&gt; is the voice-timbre reference for &lt;Subject 1&gt; (S2).
+
+summary:
+[reference generation + audio reference] One unbroken eye-level shot circling a wooden bench in the small back yard of an old bookshop, where &lt;Subject 2&gt; gives &lt;Subject 1&gt; a mended old book and she thanks him; …
+
+detailed_description:
+… At 00:02.800, &lt;Subject 2&gt; (S1) hands &lt;Subject 1&gt; the book and, using the warm, slightly husky old man's voice timbre referenced from &lt;Audio 1&gt;, says: &lt;d&gt;[Chinese] 这本书我修好了，送给你。&lt;/d&gt; At 00:06.000, &lt;Subject 1&gt; (S2) smiles and, using the clear, light young woman's voice timbre referenced from &lt;Audio 2&gt;, says: &lt;d&gt;[Chinese] 谢谢周叔！&lt;/d&gt; They are the only 2 people; no text or lettered signs appear.</pre></details>
+
 <h2 id="best">最好的结果：F2（书店一镜到底，55 秒）</h2>
 <div class="grid2">
 <figure><video src="media/bookshop_onetake_v3/h3_take_F2.mp4" poster="media/bookshop_onetake_v3/h3_take_F2.jpg" controls playsinline preload="metadata"></video>
@@ -120,6 +153,53 @@ svg text{font-family:inherit}
 <figure><div style="display:grid"><img src="media/overview/wb_960.jpg" alt="白模"><img src="media/overview/gen_960.jpg" alt="成片"></div><figcaption>40 s 穿过后门：门框、树、两人的位置一致</figcaption></figure>
 <figure><div style="display:grid"><img src="media/overview/wb_1250.jpg" alt="白模"><img src="media/overview/gen_1250.jpg" alt="成片"></div><figcaption>52 s 回看后门：走廊和书店和前面窗口一致</figcaption></figure>
 </div>
+
+<h2 id="refmotion">refmotion 探索：车库双截棍（多镜头案例）</h2>
+<div class="box">
+<b>用户原话：</b>“地下车库里，晚上，一个男人在空车位上练双截棍。镜头一开始离他很远，慢慢推近到他的手。然后他停下来，走向自己的车，镜头跟着他。最后他上车，镜头在车前面固定不动。大概半分钟，可以剪辑。”<br>
+<b>流程：</b>
+<ol>
+<li>规划器判断“双截棍”是复杂器械动作，文字生成不可靠，需要找参考视频。</li>
+<li><code>search_ref</code> 用中文关键词搜 B 站，Claude 看帧打分：单人、静止机位、全身入镜、动作匹配。</li>
+<li>选中教学片段 <a href="https://www.bilibili.com/video/BV1zukGYCE83">BV1zukGYCE83</a> 的 52–63 s（得分 6/10）。</li>
+<li>GVHMR 提取 SMPL-X，刚性对齐放进车库白模的空车位中央。</li>
+<li>按镜头渲染深度、骨架、人物掩码，交给 H3。</li>
+</ol>
+所有版本用同一个 prompt、同一个 seed 43、260 帧（10.8 s），只改控制信号。逐帧对照和完整短片见 <a href="index.html#garage_nunchaku/b01">查看器</a>。
+</div>
+<div class="grid3" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">
+<figure><img src="media/overview/g_ref.jpg" alt="参考片段"><figcaption><b>自动搜到的参考片段</b>（B 站教学视频）</figcaption></figure>
+<figure><img src="media/overview/g_wb_smpl.jpg" alt="SMPL 进白模"><figcaption><b>GVHMR → SMPL-X</b>，放进车库白模，与镜头推近同步</figcaption></figure>
+<figure><img src="media/overview/g_boxdepth.jpg" alt="占位深度"><figcaption><b>D 方案的深度</b>：人只是占位人偶</figcaption></figure>
+<figure><img src="media/overview/g_motionref.jpg" alt="灰模动作参考"><figcaption><b>D 方案的动作参考视频</b>：SMPL 灰模，从同一相机渲染、灰底</figcaption></figure>
+</div>
+<h3>11 个版本（每张上半为第 100 帧看布局，下半为第 240 帧看结尾特写和双截棍）</h3>
+<div class="grid3" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
+<figure><img src="media/overview/g_run_B.jpg" alt="B"><figcaption><b>B 纯文字</b>（深度里只有车库）：布局对、道具自然；动作是 H3 自编的，人偏远<br><span class="tag t-bad">动作无</span></figcaption></figure>
+<figure><img src="media/overview/g_run_C.jpg" alt="C"><figcaption><b>C 人体深度（旧对数编码）</b>：布局和道具好，但动作几乎没跟参考（人在旧编码里看不清）<br><span class="tag t-mid">动作弱</span></figcaption></figure>
+<figure><img src="media/overview/g_run_A.jpg" alt="A"><figcaption><b>A 深度 + 全程骨架</b>：动作最像参考，但布局变成长车道、双截棍成了一团布、脸怪<br><span class="tag t-bad">布局/道具差</span></figcaption></figure>
+<figure><img src="media/overview/g_run_D30.jpg" alt="D30"><figcaption><b>骨架只在前 30% 步</b>：动作跟上，布局仍然跑偏，说明布局在第 0 步就定了<br><span class="tag t-bad">布局差</span></figcaption></figure>
+<figure><img src="media/overview/g_run_D50.jpg" alt="D50"><figcaption><b>骨架只在前 50% 步</b>：双截棍画对了（两节黑棍 + 链子），布局仍然跑偏<br><span class="tag t-bad">布局差</span></figcaption></figure>
+<figure><img src="media/overview/g_run_G1.jpg" alt="G1"><figcaption><b>骨架只在第 2–3 步</b>：进来太晚，动作基本没跟上<br><span class="tag t-mid">动作弱</span></figcaption></figure>
+<figure><img src="media/overview/g_run_G2.jpg" alt="G2"><figcaption><b>骨架只在第 1–3 步</b>：四项都对，是旧编码下最好的折中（第 0 步定布局 → 1–3 步定动作 → 后半段补道具）<br><span class="tag t-ok">旧编码最佳</span></figcaption></figure>
+<figure><img src="media/overview/g_run_Az.jpg" alt="Az"><figcaption><b>新编码深度 + 全程骨架</b>：布局好了，但棍像一小截链子、脸僵，骨架仍伤画质<br><span class="tag t-mid">道具中</span></figcaption></figure>
+<figure><img src="media/overview/g_run_Cz.jpg" alt="Cz"><figcaption><b>C′ 新编码人体深度，不给骨架</b>：布局、动作、推镜、写实双截棍四项都对，画面最自然<br><span class="tag t-ok">当时最佳</span></figcaption></figure>
+<figure><img src="media/overview/g_run_D10.jpg" alt="D10"><figcaption><b>占位深度 1.0 + 灰模参考视频</b>（同伴的 D 做法）：动作同样跟得紧，结尾举手更贴参考；双截棍不明显<br><span class="tag t-ok">动作好</span></figcaption></figure>
+<figure><img src="media/overview/g_run_D07.jpg" alt="D07"><figcaption><b>占位深度 0.7 + 灰模参考视频</b>：动作跟得紧，结尾手里出现了双截棍<br><span class="tag t-ok">单人带道具推荐</span></figcaption></figure>
+</div>
+<div class="box"><h3>结论</h3><ol>
+<li><b>深度编码决定人能不能被看见</b>：旧的固定对数编码里，人和背景只差 13–83 级灰；换成 ControlNet 训练格式后差 70–230 级。只给深度（C′）就能同时拿到布局、动作、推镜和道具。</li>
+<li><b>骨架是双刃剑</b>：动作最像，但会改变整体布局、把道具画坏、让脸变僵。8 步去噪的分工是：第 0 步定布局，第 1–3 步定肢体动作，后半段补细节和道具。所以骨架只放在第 1–3 步最好，这也是“早期参考 SMPL、后期放开”这个想法的依据。</li>
+<li><b>动作和布局可以分开给</b>：占位深度管位置和体量，SMPL 灰模参考视频管动作（同伴的 D 做法）。单人时有效，深度强度 0.7 还能画出道具。但在书店的多人测试里，同时给人物参考图时灰模外观会泄露，需要换参考形式。</li>
+<li><b>GVHMR 只有人体、没有器械</b>：双截棍只能靠文字和模型去补。参考视角和目标视角不同，靠“先恢复 3D、再按目标相机渲染”来解决。</li>
+<li><b>后三段（b02–b04）没有参考动作</b>，只给车库深度加文字，动作和镜头都按 plan 生成。但跨镜头时人脸、车牌、柱子颜色、音量都会变，这正是后来做“记忆库”的起因。</li>
+<li><b>还没做</b>：
+<ul>
+<li>超过 15 秒的长动作拼接（stage_sequence 对齐加插值）；</li>
+<li>两人各自参考动作，或一人有参考、一人没有；</li>
+<li>同一人先做动作 A 再做动作 B 的衔接。</li>
+</ul></li>
+</ol></div>
 
 <h2 id="novelty">和别人相比</h2>
 <div class="tw"><table>
