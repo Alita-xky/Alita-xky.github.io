@@ -81,6 +81,7 @@ kbd{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padd
 <body>
 <div class="wrap">
 <h1>Story World：故事脚本 → 白模世界 → 每个镜头的白模与深度</h1>
+<a href="overview.html" style="display:block;background:var(--panel);border:1px solid var(--accent);border-radius:8px;padding:10px 14px;margin:10px 0 14px;text-decoration:none;color:var(--text)"><b style="color:var(--accent)">项目概览 →</b> 一镜到底：任务、方法图、和相关工作相比的创新点、最好结果（F2，55 秒）、现在的问题、试过的方法与 bug、下一步</a>
 <p class="note">一个故事有 4–8 个镜头，全部发生在同一个连续世界里。流水线从故事中提取场景，在 Blender 里建成一个大世界（所有镜头共用同一份几何，重访同一地点时完全一致），再按每个镜头的相机轨迹逐帧渲染无颜色的白模视频和深度视频，作为视频生成模型的几何控制信号。</p>
 <div class="flow"><span>设定</span>→<span>story.md（LLM 写）</span>→<span>scene.json + clips.json（LLM 提取）</span>→<span>校验 / 自动修复</span>→<span>Blender 建模</span>→<span>白模 + 深度 + 相机参数</span></div>
 <div class="tabs" id="tabs"></div>

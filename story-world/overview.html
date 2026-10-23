@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一镜到底项目概览</title>
+<style>
+:root{--bg:#111;--panel:#181a1d;--panel2:#1e2125;--line:#2b2f34;--text:#ddd;--muted:#9a9ea4;--accent:#8cf;--ok:#7c7;--warn:#e9b85a;--err:#e66}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 16px 60px}
+h1{font-size:24px;margin:0 0 6px}h2{font-size:19px;margin:38px 0 12px;border-bottom:1px solid var(--line);padding-bottom:6px}
+h3{font-size:16px;margin:18px 0 8px}
+a{color:var(--accent)}
+.muted{color:var(--muted)}.small{font-size:13px}
+.nav{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}.nav a{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:3px 10px;text-decoration:none;font-size:13px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0}
+.status{border-left:4px solid var(--accent)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+figure img,figure video{width:100%;display:block;background:#000}
+figcaption{padding:8px 10px;font-size:13px;color:var(--muted)}figcaption b{color:var(--text)}
+.pair{display:grid;grid-template-columns:1fr 1fr}
+table{border-collapse:collapse;width:100%;font-size:13.5px}th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{background:var(--panel2);white-space:nowrap}
+.tw{overflow-x:auto;margin:8px 0}
+.tag{display:inline-block;border-radius:3px;padding:0 6px;font-size:12px;margin-right:4px;white-space:nowrap}
+.t-ok{background:#1f3a24;color:#9e9}.t-mid{background:#3a3220;color:#ec8}.t-bad{background:#3d2022;color:#f99}.t-new{background:#1d3040;color:#9cf}
+ol,ul{padding-left:22px}li{margin:3px 0}
+svg text{font-family:inherit}
+.big{font-size:22px;font-weight:600}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:10px 0}
+.kpi div{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:8px 10px}
+.kpi small{display:block;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>一镜到底：从一段剧本到分钟级、带对白的连续镜头</h1>
+<div class="muted small">研究概览 · 更新于 2026-10-23 · 逐镜头白模、深度和各故事的完整结果见 <a href="index.html">Story World 查看器</a></div>
+<div class="nav"><a href="#status">现在的状态</a><a href="#task">任务</a><a href="#method">方法图</a><a href="#best">最好结果</a><a href="#novelty">和别人相比</a><a href="#problems">现在的问题</a><a href="#bugs">试过的方法与 bug</a><a href="#next">下一步</a><a href="#refs">参考文献</a></div>
+
+<h2 id="status">现在的状态</h2>
+<div class="box status">
+<ul>
+<li><b>最好结果：</b>F2，书店一镜到底，55 秒、4 个 H3 窗口串成一条不切的镜头，带对白和环境声。<b>空间已验证正确</b>：店门、过道、书架、工作间、后院和回看后门，都和白模的位置、朝向、遮挡一致。</li>
+<li><b>正在做：</b>人物朝向与调度。老周“反坐在椅子上”的根因已经找到：调度让他必须看身后的人。正在验证“调度规则 + 带朝向的占位人偶 + 自动朝向描述”能否解决。</li>
+<li><b>对比实验：</b>6 个开源基线的权重已全部下载到 NPU 机器（238 GB），包括 LTX-2.3、HY-WorldPlay、Wan2.2 VACE，以及同底模的 RAVEN 自回归 H3；还没做冒烟测试。MosaiChunk 的代码已拉取，需要移植到 NPU。</li>
+<li><b>下一步重点：</b>更好的记忆库，以及 refmotion（走路、坐下等日常动作的 SMPL 动作库；“早期去噪参考 SMPL、后期放开”）。</li>
+</ul>
+</div>
+
+<h2 id="task">任务</h2>
+<div class="grid2">
+<div class="box">
+<h3>输入 → 输出</h3>
+<ul>
+<li><b>输入：</b>一段剧本，粗糙的也可以，由规划器补全。可选：参考动作视频、人物照片、参考声音。本例只有剧本。</li>
+<li><b>输出：</b>分钟级、<b>单条连续镜头</b>（一镜到底，中间不剪辑）、带对白和环境声的写实视频。相机可以在一个完整的 3D 空间里穿门过廊，并回到之前去过的地方。</li>
+</ul>
+</div>
+<div class="box">
+<h3>难在哪里</h3>
+<ul>
+<li>视频模型一次最多生成约 15 秒，分钟级只能分窗口生成，窗口之间要无缝。</li>
+<li>相机回到老地方时，墙、书架、人物、声音都要和之前一致（“记忆”）。</li>
+<li>空间和物理要合理：相机不穿墙，人不穿家具，人数和身份不能乱。</li>
+<li>动作要符合剧本或参考动作，又不能僵。</li>
+</ul>
+</div>
+</div>
+
+<h2 id="method">方法图（当前版本）</h2>
+<div class="box" style="overflow-x:auto">
+<svg viewBox="0 0 1140 470" width="100%" style="min-width:860px" role="img" aria-label="流水线示意图">
+<defs><marker id="ar" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#8cf"/></marker>
+<marker id="ar2" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#e9b85a"/></marker></defs>
+<g font-size="13" fill="#ddd">
+<rect x="10" y="20" width="150" height="70" rx="8" fill="#1e2125" stroke="#8cf"/><text x="85" y="48" text-anchor="middle" font-weight="600">剧本（文字）</text><text x="85" y="68" text-anchor="middle" fill="#9a9ea4" font-size="12">可选：参考动作/人/声音</text>
+<rect x="200" y="20" width="200" height="70" rx="8" fill="#1e2125" stroke="#8cf"/><text x="300" y="44" text-anchor="middle" font-weight="600">① LLM 规划（Claude）</text><text x="300" y="62" text-anchor="middle" fill="#9a9ea4" font-size="12">scene.json：房间/门窗/家具</text><text x="300" y="78" text-anchor="middle" fill="#9a9ea4" font-size="12">clips.json：人物路线/相机分段</text>
+<rect x="440" y="20" width="220" height="70" rx="8" fill="#1e2125" stroke="#e9b85a"/><text x="550" y="44" text-anchor="middle" font-weight="600">② 校验器（射线检查）</text><text x="550" y="62" text-anchor="middle" fill="#9a9ea4" font-size="12">穿墙 / 镜头近处遮挡 / 被拍的人被挡</text><text x="550" y="78" text-anchor="middle" fill="#9a9ea4" font-size="12">人物身体碰撞 / 速度急停</text>
+<path d="M440 80 C 420 110, 400 110, 380 90" stroke="#e9b85a" fill="none" marker-end="url(#ar2)"/><text x="410" y="122" text-anchor="middle" fill="#e9b85a" font-size="12">报错 → LLM 修</text>
+<rect x="700" y="20" width="200" height="70" rx="8" fill="#1e2125" stroke="#8cf"/><text x="800" y="44" text-anchor="middle" font-weight="600">③ Blender 白模渲染</text><text x="800" y="62" text-anchor="middle" fill="#9a9ea4" font-size="12">度量深度 → ControlNet 格式</text><text x="800" y="78" text-anchor="middle" fill="#9a9ea4" font-size="12">人物 = 占位人偶；切 15 s 窗口</text>
+<rect x="940" y="20" width="190" height="70" rx="8" fill="#1e2125" stroke="#8cf"/><text x="1035" y="44" text-anchor="middle" font-weight="600">refmotion（可选）</text><text x="1035" y="62" text-anchor="middle" fill="#9a9ea4" font-size="12">参考视频 → GVHMR → SMPL</text><text x="1035" y="78" text-anchor="middle" fill="#9a9ea4" font-size="12">无参考 → 文字 / 网上搜</text>
+<line x1="160" y1="55" x2="198" y2="55" stroke="#8cf" marker-end="url(#ar)"/><line x1="400" y1="55" x2="438" y2="55" stroke="#8cf" marker-end="url(#ar)"/><line x1="660" y1="55" x2="698" y2="55" stroke="#8cf" marker-end="url(#ar)"/><line x1="940" y1="55" x2="902" y2="55" stroke="#8cf" marker-end="url(#ar)"/>
+<rect x="200" y="170" width="300" height="96" rx="8" fill="#1e2125" stroke="#8cf"/><text x="350" y="196" text-anchor="middle" font-weight="600">④ 逐窗口生成：MiniMax-H3</text><text x="350" y="216" text-anchor="middle" fill="#9a9ea4" font-size="12">+ ControlNet-Union-2.0（深度）+ 8 步加速</text><text x="350" y="234" text-anchor="middle" fill="#9a9ea4" font-size="12">w00：深度 + 文字</text><text x="350" y="252" text-anchor="middle" fill="#9a9ea4" font-size="12">w01…：+ 场景记忆 + 设定图 + 音色片段</text>
+<path d="M800 90 L800 140 L350 140 L350 168" stroke="#8cf" fill="none" marker-end="url(#ar)"/>
+<rect x="560" y="170" width="250" height="96" rx="8" fill="#1e2125" stroke="#e9b85a"/><text x="685" y="196" text-anchor="middle" font-weight="600">⑤ 先校验再入库</text><text x="685" y="216" text-anchor="middle" fill="#9a9ea4" font-size="12">YOLO 数人数 vs 规划可见人数</text><text x="685" y="234" text-anchor="middle" fill="#9a9ea4" font-size="12">（台词 whisper、身份 CLIP）</text><text x="685" y="252" text-anchor="middle" fill="#e9b85a" font-size="12">不合格 → 换 seed 重跑，取最好</text>
+<line x1="500" y1="218" x2="558" y2="218" stroke="#8cf" marker-end="url(#ar)"/>
+<rect x="870" y="160" width="260" height="210" rx="8" fill="#1e2125" stroke="#7c7"/><text x="1000" y="186" text-anchor="middle" font-weight="600">⑥ 记忆库（不训练）</text>
+<text x="884" y="214" font-size="12.5"><tspan font-weight="600" fill="#7c7">场景</tspan>：生成画面配上白模精确深度</text><text x="884" y="232" font-size="12.5" fill="#9a9ea4">和相机 → 重投影到后续窗口，</text><text x="884" y="250" font-size="12.5" fill="#9a9ea4">作 ControlNet inpaint 的保留像素</text>
+<text x="884" y="278" font-size="12.5"><tspan font-weight="600" fill="#7c7">人物</tspan>：YOLO 找人 + CLIP 判身份</text><text x="884" y="296" font-size="12.5" fill="#9a9ea4">→ 每人一张两视角设定图</text>
+<text x="884" y="324" font-size="12.5"><tspan font-weight="600" fill="#7c7">音色</tspan>：whisper 对齐台词</text><text x="884" y="342" font-size="12.5" fill="#9a9ea4">→ 每人第一句的音频片段</text>
+<line x1="810" y1="218" x2="868" y2="218" stroke="#7c7" marker-end="url(#ar)"/>
+<path d="M1000 370 L1000 400 L350 400 L350 268" stroke="#7c7" fill="none" marker-end="url(#ar)"/><text x="680" y="420" text-anchor="middle" fill="#7c7" font-size="12.5">下一个窗口（人物区域挖掉；重叠帧整帧保留，保证接缝连续）</text>
+<rect x="10" y="300" width="250" height="80" rx="8" fill="#1e2125" stroke="#8cf"/><text x="135" y="328" text-anchor="middle" font-weight="600">⑦ 拼接 → 55 s 一镜到底</text><text x="135" y="348" text-anchor="middle" fill="#9a9ea4" font-size="12">去掉窗口重叠帧，视频 + 音轨</text><text x="135" y="366" text-anchor="middle" fill="#9a9ea4" font-size="12">⑧ 评测：接缝/回看/身份/音色/台词</text>
+<path d="M200 250 L135 250 L135 298" stroke="#8cf" fill="none" marker-end="url(#ar)"/>
+</g>
+</svg>
+<div class="small muted">蓝框：生成主线；黄框：检查与回退；绿框：跨窗口记忆。还靠人工的部分：每个窗口的 H3 prompt 目前手写（按 H3 官方六段式）；两段穿门跟拍是手动改成“沿人物路线跟拍”（规则已写进规划规范）。</div>
+</div>
+
+<h2 id="best">最好的结果：F2（书店一镜到底，55 秒）</h2>
+<div class="grid2">
+<figure><video src="media/bookshop_onetake_v3/h3_take_F2.mp4" poster="media/bookshop_onetake_v3/h3_take_F2.jpg" controls playsinline preload="metadata"></video>
+<figcaption><b>输入只有一段剧本。</b>小雨进店挑书 → 穿过店堂进工作间 → 老周说话 → 两人穿过走廊到后院 → 坐上长椅，老周送书；镜头最后回看后门，望进走廊和书店。查看逐帧白模、深度、窗口划分：<a href="index.html#bookshop_onetake_v3/take">查看器</a></figcaption></figure>
+<div>
+<div class="kpi">
+<div><small>接缝 PSNR（无记忆 → F2）</small><span class="big">10 → 20–25 dB</span><small>无记忆时等于硬切</small></div>
+<div><small>回看同一处的误差（/255）</small><span class="big">49 → 11</span><small>结尾回看书店</small></div>
+<div><small>同一人隔窗音色相似度</small><span class="big">0.65/0.56 → 0.88/0.69</span><small>老周 / 小雨（resemblyzer）</small></div>
+<div><small>台词</small><span class="big">4 / 4 说对</span><small>whisper 字对齐 0.89–1.0；时间晚 1–5 s</small></div>
+</div>
+<figure><img src="media/overview/char_sheets.jpg" alt="记忆库的人物设定图"><figcaption><b>记忆库自动挑出的人物设定图</b>（CLIP 核验身份，每人一张、两个视角），作为后续窗口的参考图。</figcaption></figure>
+</div>
+</div>
+<h3>空间对不对：白模（上）vs 成片（下），同一时刻</h3>
+<div class="grid3">
+<figure><div style="display:grid"><img src="media/overview/wb_300.jpg" alt="白模"><img src="media/overview/gen_300.jpg" alt="成片"></div><figcaption>12.5 s 书架墙：位置、远近一致</figcaption></figure>
+<figure><div style="display:grid"><img src="media/overview/wb_960.jpg" alt="白模"><img src="media/overview/gen_960.jpg" alt="成片"></div><figcaption>40 s 穿过后门：门框、树、两人的位置一致</figcaption></figure>
+<figure><div style="display:grid"><img src="media/overview/wb_1250.jpg" alt="白模"><img src="media/overview/gen_1250.jpg" alt="成片"></div><figcaption>52 s 回看后门：走廊和书店和前面窗口一致</figcaption></figure>
+</div>
+
+<h2 id="novelty">和别人相比</h2>
+<div class="tw"><table>
+<tr><th>工作</th><th>做什么</th><th>几何从哪来</th><th>跨段记忆</th><th>声音</th><th>一镜到底</th><th>代码</th></tr>
+<tr><td><a href="https://arxiv.org/abs/2606.31946">World Narrative Model</a> 2026-06</td><td>LLM 写 Blender 脚本搭 4D 白模，渲染后交给 Seedance 2.0；检查碰撞、穿模、遮挡</td><td>白模（RGB 作条件）</td><td>无</td><td>无</td><td>否</td><td>无</td></tr>
+<tr><td><a href="https://fal.ai/h3-max-3d-to-video">H3 Max 3D-to-Video</a>（fal）</td><td>人工搭 Blender 白模 → H3 后训练版</td><td>人工白模</td><td>无</td><td>有</td><td>≤15 s</td><td>仅 API</td></tr>
+<tr><td><a href="https://arxiv.org/abs/2510.14945">3DScenePrompt</a> ICLR'26</td><td>动态 SLAM 重建静态点云，投影作条件；全量微调</td><td>估计（SLAM）</td><td>场景</td><td>无</td><td>续写</td><td>未见</td></tr>
+<tr><td><a href="https://arxiv.org/abs/2602.14941">AnchorWeave</a> / <a href="https://arxiv.org/abs/2604.18215">Memorize When Needed</a> / <a href="https://arxiv.org/abs/2503.03751">GEN3C</a></td><td>局部点云检索 / 相机感知记忆门控 / 3D cache</td><td>估计</td><td>场景（需训练）</td><td>无</td><td>续写</td><td>有</td></tr>
+<tr><td><a href="https://arxiv.org/abs/2610.02153">MosaiChunk</a> 2026-10</td><td>H3 自回归版 + 历史 KV 拼接记忆，只训路由器</td><td>无</td><td>KV（需训练）</td><td>无</td><td>长视频</td><td>有</td></tr>
+<tr><td><a href="https://arxiv.org/abs/2606.21661">UnityShots</a> 2026-06</td><td>LTX-2.3 多镜头音视频，长短期记忆槽 + 说话人参考</td><td>无</td><td>人物 + 音色（需训练）</td><td>有</td><td>否（多镜头）</td><td>有</td></tr>
+<tr><td><a href="https://arxiv.org/abs/2502.08639">CineMaster</a> 2025</td><td>Blender 里放 3D 方盒 + 相机，渲染方盒深度作控制</td><td>3D 方盒</td><td>无</td><td>无</td><td>否</td><td>未声明</td></tr>
+<tr><td><b>我们</b></td><td>剧本 → LLM 搭世界 + 射线校验 → 深度 + 占位人偶 → H3 分窗口 → 三模态记忆 + 校验重跑</td><td><b>白模精确几何</b></td><td><b>场景 + 人物 + 音色，不训练</b></td><td>有</td><td><b>是，55 s</b></td><td>—</td></tr>
+</table></div>
+<div class="box">
+<h3>创新点（逐条核对过相关工作）</h3>
+<ol>
+<li><span class="tag t-new">没找到先例</span><b>精确几何、不训练的场景记忆。</b>别人的几何记忆都靠估计的深度和位姿，大多要训练；AnchorWeave 自己的消融显示，估计误差会让全局点云错位（PSNR 16.3 vs 21.0）。我们用白模的精确深度和相机直接重投影，加在冻结的音视频模型上。</li>
+<li><span class="tag t-new">组合没找到</span><b>同一份白模几何同时驱动三件事</b>：控制信号、记忆重投影、镜头可见性校验（视线、近处遮挡、身体碰撞）。WNM、CineMaster、CinemaTraj 各做了其中一部分。</li>
+<li><span class="tag t-mid">部分已有</span><b>一镜到底的三模态记忆 + 先校验再入库。</b>人物加音色有 UnityShots、JoyAI-Echo；校验后重生成有 FilmWorld；场景、人物、音色三者加几何、用在连续镜头上没找到。</li>
+<li><span class="tag t-mid">部分已有</span><b>占位深度管布局、参考动作管动作</b>（同伴的发现）：CineMaster 只有方盒深度，UniMoCa 用人体渲染。</li>
+<li><span class="tag t-mid">通用规律</span><b>SMPL 只在早期去噪步生效：</b>“早期定运动、后期定外观”已有多篇论文支持，适合作为消融，不宜单独当贡献。</li>
+</ol>
+<div class="small muted">“效果是否更好”还不能下结论：论文多在 RealEstate10K 一类基准上报 PSNR/SSIM/LPIPS，设置不同。需要在我们的剧本基准上跑同底模（P0、RAVEN、MosaiChunk、H3 Max 3D-to-Video）和有代码的记忆方法（Memorize When Needed、AnchorWeave、StoryMem），并按论文的指标对齐。</div>
+</div>
+
+<h2 id="problems">现在的问题</h2>
+<div class="grid2">
+<figure><img src="media/overview/prob_reversed.jpg" alt="老周反坐"><figcaption><b>老周反坐在椅子上、腿穿过椅背（F2，31.7 s）。</b>根因在调度：小雨站在老周身后，prompt 又写“抬头看小雨说话”，他只能整个人转 180°；深度里的椅子仍朝着书桌，人偶又是前后对称的“蜡烛”。同一窗口跑 9 次：只加朝向描述，3/3 仍会转过来；带朝向的占位人偶 1/3 能做到“坐着侧头”。<span class="tag t-mid">正在修</span></figcaption></figure>
+<figure><img src="media/overview/prob_duplicate.jpg" alt="人物复制"><figcaption><b>人物被复制或替换。</b>同一窗口换 seed，出现两个老周、小雨被换成老头（3 个 seed 中有 2 个）。prompt 写清“镜头一直在小雨身后、老周背对镜头”之后，6 次都没再出现。<span class="tag t-mid">缓解</span></figcaption></figure>
+<figure><img src="media/overview/prob_doorway.jpg" alt="门口发虚平面"><figcaption><b>穿门时门框离镜头太近，右上角出现发虚的浅色平面（F2，25 s）。</b>这类近处遮挡在跟拍穿门时难以完全避免。<span class="tag t-mid">已知</span></figcaption></figure>
+<figure><img src="media/overview/prob_mannequin.jpg" alt="人偶外观泄露"><figcaption><b>多人加人物参考图时，SMPL 灰模参考视频的外观泄露：</b>小雨被画成白色假人，墙也被带成灰色绗缝纹理。单人、无人物图（车库案例）时没有这个问题。<span class="tag t-bad">此组合不可用</span></figcaption></figure>
+</div>
+<div class="box"><ul>
+<li><b>台词时间不准：</b>4 句都说对了，但比剧本里写的时间点晚 1–5 秒。H3 只是大致遵循 prompt 里的时间。</li>
+<li><b>画质偏软：</b>书脊字看不清，人脸略带蜡感，快速动作有拖影。8 步加速是主要原因之一：同伴用相同输入的 8 步 vs 50 步对比，50 步的人脸和手明显更清楚。另外分辨率只有 1344×768，记忆重投影也有轻微二次模糊。</li>
+<li><b>小雨没有正脸参考：</b>整段跟拍都在她身后，设定图里只有背影。</li>
+<li><b>评测指标还不够准：</b>俯拍加眼镜时 Haar 人脸检测认不出正脸，朝向要改用人体关键点判断；音色用的 resemblyzer 不是论文常用的 w2v-BERT。</li>
+</ul></div>
+
+<h2 id="bugs">试过的方法与 bug（教训）</h2>
+<div class="grid3">
+<figure><div class="pair"><img src="media/overview/bug_cut_a.jpg" alt="w00 结尾"><img src="media/overview/bug_cut_b.jpg" alt="w01 开头"></div><figcaption><b>不加记忆，窗口之间等于硬切</b>（P0，15 s 处前后两帧换了一家店）→ 场景记忆。</figcaption></figure>
+<figure><div class="pair"><img src="media/overview/bug_log80.jpg" alt="对数深度"><img src="media/overview/bug_zoe.jpg" alt="ZoeDepth 格式"></div><figcaption><b>对数深度编码里人几乎看不见</b>（左，人和背景只差 13–83 级灰）→ 改成 ControlNet 训练时的格式（右，差 70–230 级）。</figcaption></figure>
+<figure><img src="media/overview/bug_wallpanel.jpg" alt="穿墙怪板"><figcaption><b>相机在门口抄近路、视线穿墙</b>，画面出现悬空的半透明板 → 射线校验 + “沿人物路线跟拍”。</figcaption></figure>
+<figure><img src="media/overview/bug_three.jpg" alt="三人长椅"><figcaption><b>同一人给两张参考图 → 被画成两个人</b>，长椅上三个人；接缝锚定还把错误原样带进下一窗 → 每人一张设定图 + 先校验再入库。</figcaption></figure>
+<figure><img src="media/overview/bug_ghost.jpg" alt="半透明人"><figcaption><b>人不在深度里，站位漂移，和记忆保留的书架打架</b>，人变成半透明 → 深度里放占位人偶。</figcaption></figure>
+<figure><img src="media/overview/bug_midair.jpg" alt="坐在空气里"><figcaption><b>人坐在长椅旁的空气里</b>（同一原因）→ 占位人偶让人按规划坐到长椅上。</figcaption></figure>
+</div>
+<div class="tw"><table>
+<tr><th>尝试</th><th>现象 / bug</th><th>结论 / 处理</th></tr>
+<tr><td>骨架（pose）控制</td><td>即使限定区域、只在早期步，也会改变整体布局、伤画质</td><td>不用骨架；车库案例里只在第 1–3 步加骨架是旧编码下最好的折中</td></tr>
+<tr><td>SMPL 人体深度（动作段）</td><td>动作跟得紧，但同伴实验显示比“方盒 + 参考动作”僵</td><td>改用占位深度；“只在早期步参考 SMPL”在验证中</td></tr>
+<tr><td>LLM 修复回路</td><td>为通过“被拍的人被挡”检查，把看人改成看空间固定点（钻空子）</td><td>修复结果要人工复核；改为结构性的“沿人物路线跟拍”</td></tr>
+<tr><td>门扇</td><td>开着的门扇贴着镜头，被画成怪平面</td><td>跟拍经过的门去掉门扇</td></tr>
+<tr><td>人数校验</td><td>误判三次：橱窗玻璃后的人、中近景只拍到上半身、两人并坐时多出的大框</td><td>人数按区间判断，并对重叠框去重</td></tr>
+<tr><td>工程</td><td>共享 NPU 抢卡导致 HCCL 初始化失败；远端文件还没写完就拷贝；ssh 无声断开</td><td>发射前等卡空、失败自动重发；拷贝前等文件大小稳定；ssh 保活</td></tr>
+</table></div>
+
+<h2 id="next">下一步（可能的改进）</h2>
+<div class="box"><ol>
+<li><b>调度规则</b><span class="tag t-mid">进行中</span>：有对白时，听话的人必须在说话人朝向左右约 100° 以内；坐着的人不能要求他看身后。写进校验器，规划阶段就拦住。默认改用带朝向的占位人偶，prompt 自动写朝向（facing.py）。</li>
+<li><b>refmotion</b>：用 search_ref + GVHMR 建走路、坐下、递东西等日常动作的 SMPL 库。在有动作的镜头上比较“全程 SMPL 深度 / 只在前 3 步用 SMPL / 占位 + 文字”。多人时换掉会泄露外观的灰模参考视频（试骨架视频，或只给单人动作参考）。</li>
+<li><b>更好的记忆库</b>：
+<ul>
+<li>记忆按“对应区域”加权，而不是整帧硬保留，减少二次模糊。</li>
+<li>人物设定图主动补正脸，比如从侧面镜头或说话镜头里挑。</li>
+<li>音色记忆随台词增多而更新；台词时间用 whisper 校验，不合格就重跑。</li>
+</ul></li>
+<li><b>画质</b>：同一窗口 8 步 vs 50 步定量对比。如果差距大，最终版改用 50 步（4 窗约 4–5 小时）。</li>
+<li><b>对比实验与指标对齐</b>：
+<ul>
+<li>基线：同底模（P0、RAVEN、MosaiChunk、H3 Max 3D-to-Video），记忆类（Memorize When Needed、AnchorWeave），多镜头音视频（StoryMem、UnityShots、LTX-2.3），以及 WorldPlay、Wan VACE。</li>
+<li>指标：回看区域 PSNR/SSIM/LPIPS 加 MEt3R，DINOv2/ArcFace 身份，w2v-BERT 音色，台词 WER，TransNetV2 误剪辑检测。</li>
+<li>剧本基准扩到 3–5 个。</li>
+</ul></li>
+</ol></div>
+
+<h2 id="refs">参考文献（调研于 2026-10-22，摘录自论文摘要、项目页）</h2>
+<div class="small"><ul>
+<li>剧本 → 3D → 视频：<a href="https://arxiv.org/abs/2606.31946">World Narrative Model</a> · <a href="https://fal.ai/h3-max-3d-to-video">H3 Max 3D-to-Video</a> · <a href="https://arxiv.org/abs/2607.19038">FilmWorld</a> · <a href="https://arxiv.org/abs/2604.25318">Cutscene Agent</a> · <a href="https://arxiv.org/abs/2607.26910">CinemaTraj</a> · <a href="https://arxiv.org/abs/2502.08639">CineMaster</a></li>
+<li>空间记忆：<a href="https://arxiv.org/abs/2510.14945">3DScenePrompt</a> · <a href="https://arxiv.org/abs/2602.14941">AnchorWeave</a> · <a href="https://arxiv.org/abs/2603.17117">MosaicMem</a> · <a href="https://arxiv.org/abs/2604.18215">Memorize When Needed</a> · <a href="https://arxiv.org/abs/2604.13036">Lyra 2.0</a> · <a href="https://arxiv.org/abs/2512.14614">WorldPlay</a> · <a href="https://arxiv.org/abs/2610.02153">MosaiChunk</a> · <a href="https://arxiv.org/abs/2503.03751">GEN3C</a></li>
+<li>多镜头音视频与人物/音色：<a href="https://arxiv.org/abs/2606.21661">UnityShots</a> · <a href="https://arxiv.org/abs/2608.23383">JoyAI-Echo-1.5</a> · <a href="https://arxiv.org/abs/2605.23610">EM-Vid</a> · <a href="https://arxiv.org/abs/2512.19539">StoryMem</a> · <a href="https://arxiv.org/abs/2603.10256">ID-LoRA</a> · <a href="https://arxiv.org/abs/2605.20183">MSAVBench</a></li>
+<li>人体动作与 3D 代理：<a href="https://arxiv.org/abs/2504.14899">Uni3C</a> · <a href="https://arxiv.org/abs/2602.03796">3DiMo</a> · <a href="https://arxiv.org/abs/2608.01944">UniMoCa</a> · <a href="https://arxiv.org/abs/2412.07759">3DTrajMaster</a> · <a href="https://arxiv.org/abs/2501.03847">Diffusion as Shader</a> · <a href="https://arxiv.org/abs/2512.22175">早期步定运动（2512.22175）</a></li>
+</ul></div>
+</div>
+</body>
+</html>
