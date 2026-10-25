@@ -48,7 +48,7 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 <li><b>最好结果：</b>F2，书店一镜到底，55 秒、4 个 H3 窗口串成一条不切的镜头，带对白和环境声。<b>空间已验证正确</b>：店门、过道、书架、工作间、后院和回看后门，都和白模的位置、朝向、遮挡一致。</li>
 <li><b>正在做：</b>人物朝向与调度。老周“反坐在椅子上”的根因已经找到：调度让他必须看身后的人。正在验证“调度规则 + 带朝向的占位人偶 + 自动朝向描述”能否解决。</li>
 <li><b>对比实验：</b>6 个开源基线的权重已全部下载到 NPU 机器（238 GB），包括 LTX-2.3、HY-WorldPlay、Wan2.2 VACE，以及同底模的 RAVEN 自回归 H3；还没做冒烟测试。MosaiChunk 的代码已拉取，需要移植到 NPU。</li>
-<li><b>记忆库 v2（进行中）：</b>人物改成按视角存（4 方向 × 全身/近景，白模几何认人，SAM3 抠图），库已建好，待接入生成；场景改成把画面贴回白模、按把握程度决定照抄多少；动作记忆（把 Planner 标出的走路等片段存下来给后面复用）也在设计（见方法图绿框）。</li>
+<li><b>记忆库 v2（进行中）：</b>人物改成按视角存（4 方向 × 全身/近景，白模几何认人，SAM3 抠图），库已建好，待接入生成；场景改成把画面贴回白模，回到老地方时按拍摄角度决定沿用多少；动作记忆（把 Planner 标出的走路等片段存下来给后面复用）也在设计（见方法图绿框）。</li>
 <li><b>下一步重点：</b>记忆库 v2 接入并对比 F2，以及 refmotion（走路、坐下等日常动作的 SMPL 动作库；“早期去噪参考 SMPL、后期放开”）。</li>
 </ul>
 </div>
@@ -104,8 +104,8 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 <rect x="840" y="335" width="290" height="356" rx="8" fill="#1e2125" stroke="#7c7"/><text x="985" y="361" text-anchor="middle" font-weight="600">⑥ 记忆库（不训练）</text>
 <text x="854" y="389" font-size="12.5"><tspan font-weight="600" fill="#7c7">场景</tspan>  <tspan fill="#e9b85a" font-size="11.5">v2 设计中</tspan></text>
 <text x="854" y="407" font-size="12.5" fill="#9a9ea4">画面贴回白模，每处留最清楚的一次</text>
-<text x="854" y="425" font-size="12.5" fill="#9a9ea4">看得准的照抄，一般的只参考前几步</text>
-<text x="854" y="443" font-size="12.5" fill="#9a9ea4">没见过的自由画；剧情改动后作废</text>
+<text x="854" y="425" font-size="12.5" fill="#9a9ea4">回到老地方：角度接近的直接沿用，</text>
+<text x="854" y="443" font-size="12.5" fill="#9a9ea4">差得多的只粗略参考；剧情改了就作废</text>
 <text x="854" y="473" font-size="12.5"><tspan font-weight="600" fill="#7c7">人物</tspan>  <tspan fill="#7c7" font-size="11.5">新版已建库，待接入</tspan></text>
 <text x="854" y="491" font-size="12.5" fill="#9a9ea4">4 方向 × 全身/近景 = 8 格</text>
 <text x="854" y="509" font-size="12.5" fill="#9a9ea4">白模几何认人 + SAM3 抠图</text>
@@ -113,7 +113,7 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 <text x="854" y="545" font-size="12.5" fill="#9a9ea4">按下一窗口要的视角取 2–3 张</text>
 <text x="854" y="575" font-size="12.5"><tspan font-weight="600" fill="#7c7">动作</tspan>  <tspan fill="#e9b85a" font-size="11.5">设计中</tspan></text>
 <text x="854" y="593" font-size="12.5" fill="#9a9ea4">按 Planner 的时间段截下满意的动作</text>
-<text x="854" y="611" font-size="12.5" fill="#9a9ea4">（如瘸腿走路），抠出人存成片段</text>
+<text x="854" y="611" font-size="12.5" fill="#9a9ea4">（如瘸腿走路），存成这个人的片段</text>
 <text x="854" y="629" font-size="12.5" fill="#9a9ea4">之后同一动作 → 作 ref video 输入</text>
 <text x="854" y="659" font-size="12.5"><tspan font-weight="600" fill="#7c7">音色</tspan>  <tspan fill="#7c7" font-size="11.5">F2 已用</tspan></text>
 <text x="854" y="677" font-size="12.5" fill="#9a9ea4">whisper 对齐 → 每人一句台词</text>
@@ -139,8 +139,8 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 <h3 style="margin-top:0">Scene memory（场景记忆） <span class="tag t-mid">v2 设计中</span></h3>
 <ol>
 <li><b>记什么：</b>每个窗口生成完，把画面里的墙、书架、地面“贴”回白模上对应的位置，相当于给白模刷上颜色。同一块墙被拍到很多次，只留拍得最清楚的那一次（离得近、正对着拍、没糊、旁边没人）。从记忆里抄过来的画面不再写回去，免得越抄越糊。</li>
-<li><b>怎么用：</b>拍下一个窗口前，先沿这个窗口的相机路线把“刷了颜色的白模”渲染一遍，得到一段记忆视频，再按把握程度分三种：以前拍得清楚、角度也接近的地方，整段照抄；角度差得多或以前拍得一般的地方，只在生成的前几步参考，先定颜色和布局，细节让模型自己补；没见过的地方，让模型自由画。人所在的区域不记也不抄。</li>
-<li><b>跟着剧本变：</b>剧本里写了开门、拿走书、开灯，这之后对应的地方不再照抄旧样子。也可以在正式开拍前，先让镜头空场走一遍要去的地方，把记忆提前填好，这样第一次到的地方也有依据。</li>
+<li><b>怎么用：</b>拍下一个窗口前，先沿这个窗口的相机路线把“刷了颜色的白模”渲染一遍，看看画面里哪些地方以前拍过。以前从差不多的角度拍过、也拍得清楚的地方，直接沿用记忆里的样子；以前只从很不一样的角度拍过的地方，记忆只用来定大致的颜色和布局（只在生成的前几步参考），细节让模型重新画；以前没拍过的地方，让模型自由画。人所在的区域不记，也不沿用。</li>
+<li><b>跟着剧本变：</b>剧本里写了开门、拿走书、开灯，这之后对应的地方不再沿用旧样子。也可以在正式开拍前，先让镜头空场走一遍要去的地方，把记忆提前填好，这样第一次到的地方也有依据。</li>
 </ol>
 <div class="small muted">F2 用的是 v1：关键帧重投影，有记忆的像素整段硬锁（inpaint）。</div>
 </div>
@@ -156,11 +156,11 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 <div class="box">
 <h3 style="margin-top:0">Motion memory（动作记忆） <span class="tag t-mid">设计中</span></h3>
 <ol>
-<li><b>记什么：</b>Planner 里已经写好每个人每一刻在做什么（走路、坐下、站着）。某个动作第一次生成得满意后，比如第一段里一个人瘸着腿走路，就按 Planner 给的时间段把这段截下来，用 SAM3 把人抠出来、背景换成灰色，存成这个人的“走路片段”，并记下是从哪个方向拍的（侧面、正面、背面）。挑看得清楚的一段：全身在画面里、没被挡、至少走了两三步。</li>
+<li><b>记什么：</b>Planner 里已经写好每个人每一刻在做什么（走路、坐下、站着）。某个动作第一次生成得满意后，比如第一段里一个人瘸着腿走路，就按 Planner 给的时间段把这段截下来，存成这个人的“走路片段”，并记下是从哪个方向拍的（侧面、正面、背面）。挑看得清楚的一段：全身在画面里、没被挡、至少走了两三步。</li>
 <li><b>怎么用：</b>后面的 clip 里 Planner 说这个人又在走路，就把这段片段作为 ref video 一起给 H3，prompt 里说明“按参考视频里的步态走”，优先给拍摄方向接近的那段。这样每一段的瘸腿走法都是同一种，而不是每段重新编一种。</li>
 <li><b>和动作参考的关系：</b>第一段的动作可以来自参考视频（上面的 Motion-reference preprocessing）；之后的 clip 不用每次重新做，直接从记忆里取已经生成好的片段，人的样子也是同一个。</li>
 </ol>
-<div class="small muted">要先验证：H3 会不会把参考视频里的背景或镜头运动也抄过来（之前灰色人偶参考就出现过外观泄漏），所以先抠成灰底再给。</div>
+<div class="small muted">要先验证：H3 会不会把参考视频里的背景或镜头运动也一起带过来。</div>
 </div>
 <div class="box">
 <h3 style="margin-top:0">Voice memory（音色记忆） <span class="tag t-ok">F2 已用</span></h3>
