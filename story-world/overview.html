@@ -129,6 +129,15 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 <h3>模块说明</h3>
 <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(420px,1fr))">
 <div class="box">
+<h3 style="margin-top:0">Planner <span class="tag t-ok">已实现</span></h3>
+<ol>
+<li>LLM（Claude）根据剧本生成 scene.json（房间、门窗、家具的布局）和 clips.json（每个 clip 中人物的路线、动作、朝向，以及 camera trajectory）。</li>
+<li>Validator 在白模中做射线检查：camera 穿墙、镜头近处遮挡、被拍人物被挡、人物身体碰撞、速度突变；不合格的条目返回 LLM 修改，直到全部通过。</li>
+<li>Blender 沿 camera trajectory 渲染白模，得到每帧的 metric depth（转成 ControlNet 格式）、camera 参数，以及每个人物的位置和 subject orientation；人物在 depth 中用占位人偶（box）表示，整条镜头按 15 s 切成窗口。</li>
+</ol>
+<div class="small muted">还靠人工：每个窗口的 H3 prompt 目前手写；两段穿门跟拍是手动改成“沿人物路线跟拍”。</div>
+</div>
+<div class="box">
 <h3 style="margin-top:0">Motion-reference preprocessing <span class="tag t-mid">① 已实现 · ② 设计中</span></h3>
 <ol>
 <li>在 Planner 生成每个 clip 的 camera trajectory 后，对包含 reference 的 clip，截取对应时间段的 camera trajectory 和 subject orientation，用这条 camera trajectory 拍摄 GVHMR 给出的 3D SMPL motion，得到灰模动作视频。</li>
@@ -138,35 +147,34 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 <div class="box">
 <h3 style="margin-top:0">Scene memory（场景记忆） <span class="tag t-mid">v2 设计中</span></h3>
 <ol>
-<li><b>记什么：</b>每个窗口生成完，把画面里的墙、书架、地面“贴”回白模上对应的位置，相当于给白模刷上颜色。同一块墙被拍到很多次，只留拍得最清楚的那一次（离得近、正对着拍、没糊、旁边没人）。从记忆里抄过来的画面不再写回去，免得越抄越糊。</li>
-<li><b>怎么用：</b>拍下一个窗口前，先沿这个窗口的相机路线把“刷了颜色的白模”渲染一遍，看看画面里哪些地方以前拍过。以前从差不多的角度拍过、也拍得清楚的地方，直接沿用记忆里的样子；以前只从很不一样的角度拍过的地方，记忆只用来定大致的颜色和布局（只在生成的前几步参考），细节让模型重新画；以前没拍过的地方，让模型自由画。人所在的区域不记，也不沿用。</li>
-<li><b>跟着剧本变：</b>剧本里写了开门、拿走书、开灯，这之后对应的地方不再沿用旧样子。也可以在正式开拍前，先让镜头空场走一遍要去的地方，把记忆提前填好，这样第一次到的地方也有依据。</li>
+<li>每个窗口生成后，利用该窗口的 camera trajectory 和白模的 metric depth，把生成帧中的场景像素投影回白模表面；每个表面位置只保留最清晰的一次观测（距离近、视线正对、无模糊、没有人物遮挡），从记忆中沿用的像素不再写回。</li>
+<li>生成下一个窗口时，沿它的 camera trajectory 渲染已记录的白模表面，得到记忆画面：从相近角度观测过的区域直接沿用；只从差异较大的角度观测过的区域，以 Timestep-Aware 的方式只在早期去噪步参考（定颜色和布局，细节由模型生成）；没观测过的区域由模型自由生成；人物区域不记录也不沿用。</li>
+<li>Planner 中的剧情事件（开门、取书、开灯）发生后，对应区域的记忆失效。</li>
 </ol>
-<div class="small muted">F2 用的是 v1：关键帧重投影，有记忆的像素整段硬锁（inpaint）。</div>
+<div class="small muted">F2 用的是 v1：关键帧重投影，有记忆的像素整段保留（inpaint）。</div>
 </div>
 <div class="box">
 <h3 style="margin-top:0">Character memory（人物记忆） <span class="tag t-new">已建库，待接入</span></h3>
 <ol>
-<li><b>记什么：</b>Planner 里知道每一刻每个人站在哪、朝哪边，所以画面里哪个人是谁直接按位置对上，不靠长相猜。用 SAM3 把人连同随身的包一起抠出来，按“从哪个方向拍的”（前、左、后、右）和“离得远近”（全身、近景）放进 8 个格子。DINOv2 只用来检查“这人还像不像他自己”，不像的不收。</li>
-<li><b>开拍前：</b>先让 H3 生成每个角色在灰色影棚里原地转一圈的视频，每一帧朝哪边是已知的，直接把 8 个格子填上。</li>
-<li><b>怎么用：</b>拍下一个窗口前，按它的相机路线算出每个人会从哪个方向、多远被拍到，挑最对得上的 2–3 张拼成一张参考图给 H3；要露正脸时再加一张正脸。</li>
+<li>开拍前用 H3 为每个角色生成一段原地转身一周的 casting 视频，每帧的 orientation 已知，预先填满该角色的视角格。</li>
+<li>每个窗口生成后，依据 Planner 中人物位置与 camera 的相对关系，把检测到的人绑定到对应角色；用 SAM3 分割出人物（含随身物品），按相对 camera 的 orientation（前 / 左 / 后 / 右）和距离（全身 / 近景）存入 4 × 2 的视角格；DINOv2 只用来检查这个人是否仍与该角色一致，不一致的不入库。</li>
+<li>生成下一个窗口时，根据它的 camera trajectory 计算每个角色会以哪些 orientation 和距离出现，取最匹配的 2–3 张拼成一张参考图，作为 REF_IMAGE 给到 H3。</li>
 </ol>
 <div class="small muted">F2 用的是 v1：CLIP 判身份，每人固定一张两视角设定图。</div>
 </div>
 <div class="box">
 <h3 style="margin-top:0">Motion memory（动作记忆） <span class="tag t-mid">设计中</span></h3>
 <ol>
-<li><b>记什么：</b>Planner 里已经写好每个人每一刻在做什么（走路、坐下、站着）。某个动作第一次生成得满意后，比如第一段里一个人瘸着腿走路，就按 Planner 给的时间段把这段截下来，存成这个人的“走路片段”，并记下是从哪个方向拍的（侧面、正面、背面）。挑看得清楚的一段：全身在画面里、没被挡、至少走了两三步。</li>
-<li><b>怎么用：</b>后面的 clip 里 Planner 说这个人又在走路，就把这段片段作为 ref video 一起给 H3，prompt 里说明“按参考视频里的步态走”，优先给拍摄方向接近的那段。这样每一段的瘸腿走法都是同一种，而不是每段重新编一种。</li>
-<li><b>和动作参考的关系：</b>第一段的动作可以来自参考视频（上面的 Motion-reference preprocessing）；之后的 clip 不用每次重新做，直接从记忆里取已经生成好的片段，人的样子也是同一个。</li>
+<li>Planner 中已规定每个人物在各时间段的动作（走路、坐下、站立）。某段动作第一次生成得满意后（例如第一个 clip 中的瘸腿走路），按 Planner 给出的时间段截取这段视频，连同它相对 camera 的 orientation，存入该人物的动作记忆。</li>
+<li>之后的 clip 中，Planner 规定该人物再次做同一动作时，取 orientation 最接近的片段作为 REF_VIDEO 给到 H3，使人物在每个 clip 中保持同样的动作风格。</li>
 </ol>
 <div class="small muted">要先验证：H3 会不会把参考视频里的背景或镜头运动也一起带过来。</div>
 </div>
 <div class="box">
 <h3 style="margin-top:0">Voice memory（音色记忆） <span class="tag t-ok">F2 已用</span></h3>
 <ol>
-<li><b>记什么：</b>用 whisper 把生成的声音和剧本台词对上，截下每个人说的第一句。</li>
-<li><b>怎么用：</b>之后的窗口把这句作为参考音频（REF_AUDIO）给 H3，prompt 里用 <code>&lt;Audio N&gt;</code> 指明是谁在说话。</li>
+<li>每个窗口生成后，用 whisper 将生成音频与剧本台词对齐，截取每个角色说的第一句，存入音色记忆。</li>
+<li>之后的窗口将这句作为 REF_AUDIO 给到 H3，并在 prompt 中用 <code>&lt;Audio N&gt;</code> 绑定说话人。</li>
 </ol>
 </div>
 </div>
