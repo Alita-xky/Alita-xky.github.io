@@ -39,19 +39,128 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 <body>
 <div class="wrap">
 <h1>一镜到底：从一段剧本到分钟级、带对白的连续镜头</h1>
-<div class="muted small">研究概览 · 更新于 2026-10-25 · 逐镜头白模、深度和各故事的完整结果见 <a href="index.html">Story World 查看器</a></div>
-<div class="nav"><a href="#status">现在的状态</a><a href="#task">任务</a><a href="#method">方法图</a><a href="#h3input">给 H3 的输入</a><a href="#best">最好结果</a><a href="#refmotion">refmotion：双截棍探索</a><a href="#novelty">和别人相比</a><a href="#problems">现在的问题</a><a href="#bugs">试过的方法与 bug</a><a href="#next">下一步</a><a href="#refs">参考文献</a></div>
+<div class="muted small">研究概览 · 更新于 2026-10-27 · 逐镜头白模、深度和各故事的完整结果见 <a href="index.html">Story World 查看器</a></div>
+<div class="nav"><a href="#status">现在的状态</a><a href="#merged">合并后的完整流程</a><a href="#task">任务</a><a href="#method">方法图</a><a href="#h3input">给 H3 的输入</a><a href="#best">最长结果 F2</a><a href="#refmotion">refmotion：双截棍探索</a><a href="#novelty">和别人相比</a><a href="#problems">现在的问题</a><a href="#bugs">试过的方法与 bug</a><a href="#next">下一步</a><a href="#refs">参考文献</a></div>
 
 <h2 id="status">现在的状态</h2>
 <div class="box status">
 <ul>
-<li><b>最好结果：</b>F2，书店一镜到底，55 秒、4 个 H3 窗口串成一条不切的镜头，带对白和环境声。<b>空间已验证正确</b>：店门、过道、书架、工作间、后院和回看后门，都和白模的位置、朝向、遮挡一致。</li>
-<li><b>正在做：</b>人物朝向与调度。老周“反坐在椅子上”的根因已经找到：调度让他必须看身后的人。正在验证“调度规则 + 带朝向的占位人偶 + 自动朝向描述”能否解决。</li>
+<li><b>合并完成（10-27）：</b>搭档的动作参考预处理已接进我们的流水线。<b>后院跳舞 M1</b> 是第一条所有模块都在用、从头跑到尾的结果：跳舞明显比不给参考时像，没有带上原舞者的长相。第 2 段有场景记忆带来的瑕疵，正在修。每一步的输入、控制和常见问题见<a href="#merged">下一节</a>。</li>
+<li><b>最长的结果：</b>F2，书店一镜到底，55 秒、4 个 H3 窗口串成一条不切的镜头，带对白和环境声。<b>空间已验证正确</b>：店门、过道、书架、工作间、后院和回看后门，都和白模的位置、朝向、遮挡一致。</li>
+<li><b>人物朝向（未解决）：</b>深度表达不了人面朝哪边（SMPL 正面和背面的轮廓一样）。10-27 试过：prompt 写朝向、姿态控制、搭档的灰模参考视频。要么修好一个人、另一个人被画错，要么画面坏掉，要么显存不够。剩下两条路：按人分区域绑定，或在规划阶段避开难拍的站位。</li>
 <li><b>对比实验：</b>6 个开源基线的权重已全部下载到 NPU 机器（238 GB），包括 LTX-2.3、HY-WorldPlay、Wan2.2 VACE，以及同底模的 RAVEN 自回归 H3；还没做冒烟测试。MosaiChunk 的代码已拉取，需要移植到 NPU。</li>
-<li><b>记忆库 v2（进行中）：</b>人物改成按视角存（4 方向 × 全身/近景，白模几何认人，SAM3 抠图），库已建好，待接入生成；场景改成把画面贴回白模，回到老地方时按拍摄角度决定沿用多少；动作记忆（把 Planner 标出的走路等片段存下来给后面复用）也在设计（见方法图绿框）。</li>
-<li><b>下一步重点：</b>记忆库 v2 接入并对比 F2，以及 refmotion（走路、坐下等日常动作的 SMPL 动作库；“早期去噪参考 SMPL、后期放开”）。</li>
+<li><b>记忆库 v2：</b>人物记忆新版已接入生成（4 方向 × 全身/近景，每格最多 2 张，留和描述最像的，要说话的人带正脸）。场景记忆实测“8 个去噪步都开”最好（只开前几步或后几步，接缝和回看都更差）。动作记忆已实现，还没在生成里验证。</li>
+<li><b>下一步重点：</b>①场景记忆入库前加几何检查（同一位置从不同角度看颜色要一致），修掉 M1 第 2 段的白块和双长椅；②书店全模块版 I1 正在跑后两段，跑完和 F2 对比；③人物朝向。</li>
 </ul>
 </div>
+
+<h2 id="merged">合并后的完整流程：后院跳舞（M1，25 秒一镜到底）</h2>
+<div class="box status">
+<p style="margin:0 0 6px">这是我和搭档的部分合并后，第一条<b>所有模块都在用、从头跑到尾</b>的结果：Planner 和白模、搭档的动作参考预处理、人物记忆（开拍前试镜 + 4×2 视角库）、场景记忆、音色记忆、人数检查。</p>
+<p style="margin:0"><b>输入</b>：三句话的剧本 + 一段参考舞蹈视频（AIST 舞蹈库 aist_dance_1 的 1–5 秒）。<b>剧情</b>：清晨，小雨从书店后门走进后院，在院子中间开心地跳一小段街舞，喊“太好了，我考上了！”，走到大树下的长椅坐下，给妈妈打电话“妈，我考上了，录取通知刚到！”。镜头最后回身，看向后门和她跳舞的地方。</p>
+</div>
+<div class="grid2">
+<figure><video src="media/yard_dance/m1_take.mp4" poster="media/yard_dance/m1_take.jpg" controls playsinline preload="metadata"></video>
+<figcaption><b>成片 M1</b>：两个 H3 窗口（0–15 秒、14.2–25 秒）接成一条，带对白和环境声。前 15 秒（含跳舞）干净；15 秒之后有场景记忆带来的瑕疵：右下地上的白块、墙上的弯钩、两条长椅。原因见本节最后的“还没解决”。</figcaption></figure>
+<figure><video src="media/yard_dance/dance_cmp.mp4" poster="media/yard_dance/dance_cmp.jpg" controls playsinline preload="metadata" loop></video>
+<figcaption><b>跳舞那 4 秒（5–9 秒）对比</b>。左：搭档的预处理输出（原舞者，已换成我们镜头的机位）；中：<b>M0</b>，其他都一样，只是不给动作参考；右：<b>M1</b>，给动作参考。M0 只会原地张开手臂晃；M1 跟着参考侧身、屈膝下蹲、大步跨开、抬腿，节奏对得上。M1 没有带上原舞者的帽子、T 恤和摄影棚。缺点是动作幅度比原舞者小。</figcaption></figure>
+</div>
+
+<h3>每一步：输入什么、送进哪里、怎么控制</h3>
+<div class="tw"><table>
+<tr><th style="width:120px">步骤</th><th>输入</th><th>送进哪里</th><th>控制（怎么管、管哪几步）</th><th>输出</th></tr>
+<tr><td><b>① 剧本 → 规划</b></td>
+<td>中文剧本（3 句话）；参考舞蹈视频</td>
+<td>写成两个规划文件：<code>scene.json</code>（院子布局：后门、窗、大树、长椅、石桌石凳、盆栽、院墙）和 <code>clips.json</code>（小雨每一刻在哪、面朝哪、何时坐下；“5.0–9.0 秒在原地跳参考视频的 1–5 秒”；相机分 5 段的轨迹）。然后送校验器做射线检查。</td>
+<td>校验器检查：相机穿墙、镜头前被挡、被拍的人被挡、人撞家具、速度突变。有错就改，直到 0 错误。</td>
+<td>25 秒（601 帧，24 fps）的一镜到底计划</td></tr>
+<tr><td><b>② 参考舞蹈 → 3D 动作</b></td>
+<td>参考舞蹈视频</td>
+<td>GVHMR（从普通视频估计 3D 人体姿态），再换算到场景坐标</td>
+<td>—</td>
+<td>每帧的 SMPL 人体姿态，挂到小雨 5.0–9.0 秒的位置上，在规划的地方原地跳</td></tr>
+<tr><td><b>③ Blender 渲染白模</b></td>
+<td>①的规划 + ②的动作</td>
+<td>Blender，沿相机轨迹逐帧渲染</td>
+<td>—</td>
+<td><b>a. 深度控制视频</b>：白模的深度，人用一个方块人偶表示，跟着 SMPL 的重心和身高走，只表示“人在哪、多高”。编码和 ControlNet 训练时一样：每帧按 2%–85% 分位拉伸，近白远黑，天空涂黑。<br><b>b. 灰模动作视频</b>：小雨的 SMPL 灰色人体，用同一条相机轨迹拍，灰底。<br><b>c.</b> 每帧的相机参数和精确深度，给记忆库和人数检查用。<br><b>d. 切窗</b>：w00 = 第 0–361 帧，w01 = 第 341–600 帧，重叠 21 帧。</td></tr>
+<tr><td><b>④ 动作参考预处理</b><br><span class="tag t-new">搭档的方法，原样调用</span></td>
+<td><code>&lt;Video 1&gt;</code>：原舞蹈视频 1.00–5.04 秒（去掉音轨）<br><code>&lt;Video 2&gt;</code>：③b 灰模视频里跳舞的那段（镜头第 120–216 帧，补到 124 帧，最后一帧定住）<br>文字：搭档的六段式 prompt，只把相机那句改成我们的机位</td>
+<td>H3 参考版（Ref2VA，任务 <code>ref2av</code>，不接 ControlNet），入口是搭档的 <code>infer_h3_step_attention.py</code></td>
+<td><b>分步注意力（S09）</b>：第 1–4 步只许看 <code>&lt;Video 2&gt;</code>（灰模：机位、构图、姿势），第 5–8 步只许看 <code>&lt;Video 1&gt;</code>（原视频：自然的动态、节奏、重心）。用搭档的配置：8 步加速 LoRA，4 卡序列并行，seed 43。</td>
+<td>原舞者在<b>我们这个镜头的机位</b>下跳同一段舞（RGB，124 帧，静音）。约 19 分钟。</td></tr>
+<tr><td><b>⑤ 开拍前试镜</b><br><span class="muted small">（之前已做好，本例复用）</span></td>
+<td>小雨的文字描述</td>
+<td>H3（深度控制 + 文字）：灰色影棚里，人站着或坐在转凳上，原地转一圈，175 帧</td>
+<td>转台的深度视频，所以每帧的朝向是已知的</td>
+<td>SAM3 抠出人像，按朝向存进小雨的 4×2 格（前/左/后/右 × 全身/近景）。每格最多 2 张，留和文字描述最像的（CLIP 打分）。</td></tr>
+<tr><td><b>⑥ 生成第 1 段</b><br>w00，0–15 秒</td>
+<td>· 深度控制视频（③a）<br>· <code>&lt;Picture 1&gt;</code> 小雨参考图：按 w00 的相机轨迹，算出她 65% 时间正面、22% 右侧、12% 左侧出镜，从库里选 3 张拼成一张；她这段要说话，所以一定带正脸<br>· <code>&lt;Video 1&gt;</code> ④的动作参考<br>· 文字 prompt（六段式）<br>· 没有场景记忆，也没有参考音频（第一段）</td>
+<td>H3 参考版（任务 <code>ref2av_control</code>）：深度进 ControlNet-Union-2.0；参考图、参考视频进 H3 的参考输入（<code>REF_IMAGE</code>、<code>REF_VIDEO</code>）；文字进 prompt</td>
+<td>深度：强度 1.0，8 步都起作用。动作参考：8 步都可读。prompt 由程序自动填：人物定义；“<code>&lt;Video 1&gt;</code> 只取动作和节奏，不要表演者的外观和房间”；台词“At 00:09.600 … 太好了，我考上了！”。<br>采样：8 步加速 LoRA，不用 CFG，seed 43，1344×768，362 帧，4 张昇腾 910B2 张量并行。<br><b>检查</b>：YOLO 数人，和规划里该看到的人数比；不合格换 seed 44、45 重跑，取最好的。</td>
+<td>15 秒视频 + 声音。62 个检查帧，0 帧多人、0 帧少人，一次通过。约 20 分钟。</td></tr>
+<tr><td><b>⑦ 第 1 段入库</b></td>
+<td>第 1 段的成片</td>
+<td>三个记忆库</td>
+<td><b>人物</b>：SAM3 抠人；按 3D 规划认人（“这个位置上的就是小雨”，不靠看脸）；DINOv2 检查还像不像她，像才入格。<br><b>音色</b>：whisper 对齐剧本。<br><b>场景</b>：每帧画面和精确深度、相机一起存成关键帧。</td>
+<td>人物：36 张都通过（0 张可疑），库里现在 8 张，占 4/8 格。<br>音色：在 9.0–10.85 秒听到“太好了我考上了”，截成小雨的音色片段。<br>场景：62 个关键帧。</td></tr>
+<tr><td><b>⑧ 生成第 2 段</b><br>w01，14.2–25 秒</td>
+<td>· 深度控制视频<br>· <b>场景记忆</b>：w00 拍到的墙、地面、门，按精确深度投影到 w01 的每一帧，得到“记忆画面 + 掩码”。黑 = 沿用，白 = 重画；人所在的区域一律挖掉，交给模型。和上一段重叠的 21 帧整帧沿用。<br>· <code>&lt;Picture 1&gt;</code>：w01 里她 94% 时间从左侧出镜，所以选 2 张左侧 + 1 张正脸<br>· <code>&lt;Audio 1&gt;</code>：⑦截的音色片段<br>· 没有动作参考（这段不跳舞）</td>
+<td>同⑥。另外：记忆画面和掩码进 ControlNet 的 inpaint 通道，跟深度拼在同一路里；音频进 H3 的参考音频（<code>REF_AUDIO</code>）</td>
+<td>记忆：8 步都起作用。这一段平均 83% 的可见表面在 w00 见过，69% 的像素沿用记忆。<br>prompt 写“用 <code>&lt;Audio 1&gt;</code> 的音色说：妈，我考上了，录取通知刚到！”。<br>采样和检查同⑥。</td>
+<td>10.8 秒视频 + 声音。45 个检查帧，0 帧多人、0 帧少人，一次通过。约 20 分钟。<br>台词：whisper 听到“妈我考上了力气通知刚到”（“录取”说得不清），2.6 秒开口（计划 3.8 秒）。和第 1 段那句的音色相似度 0.84（resemblyzer；M0 是 0.76；以前测的不同人之间约 0.55）。</td></tr>
+<tr><td><b>⑨ 拼接</b></td>
+<td>两段视频</td>
+<td>ffmpeg</td>
+<td>去掉 w01 的前 21 帧（和 w00 重叠），画面直接接上；声音在接缝处交叉淡化 0.2 秒</td>
+<td>601 帧，25 秒</td></tr>
+</table></div>
+
+<h3>中间产物</h3>
+<div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr))">
+<figure><video src="media/yard_dance/cue_vs_out.mp4" poster="media/yard_dance/cue_vs_out.jpg" controls playsinline preload="metadata"></video>
+<figcaption><b>③a 深度控制视频（上）vs 成片（下）</b>，整条 25 秒。墙、门、树、长椅的位置和远近来自白模；颜色、材质、人的样子由 H3 生成。人在深度里只是一个方块。</figcaption></figure>
+<figure><img src="media/yard_dance/sheets.jpg" alt="人物参考图">
+<figcaption><b>⑥⑧ 人物记忆选出的参考图</b>。上：给 w00 的，正面 + 两侧（她主要正面出镜）；下：给 w01 的，两张左侧 + 正面（她主要从左侧出镜）。每次只给一张拼图：同一个人分成几张图给，会被画成几个人。</figcaption></figure>
+<figure style="grid-column:1/-1"><img src="media/yard_dance/mref_strip.jpg" alt="动作参考预处理">
+<figcaption><b>④ 动作参考预处理</b>。上：原舞蹈视频；中：灰模，从我们镜头的机位拍；下：搭档的方法生成的 RGB 动作参考。三行动作一一对应：第 80 帧张开双臂，第 95 帧抬腿。</figcaption></figure>
+<figure style="grid-column:1/-1"><img src="media/yard_dance/memory_w01.jpg" alt="场景记忆">
+<figcaption><b>⑧ 场景记忆</b>（w01 的某一帧）。左：从 w00 投影过来的记忆画面（灰色 = 没见过或者是人）；中：掩码（黑 = 沿用，白 = 重画）；右：成片。右下角地上的白块就是记忆带来的错：第 1 段把石桌画得比白模里的大，多出来的桌面按白模的深度投影，落到了后面的地上，又被第 2 段原样沿用。</figcaption></figure>
+</div>
+<div class="box small"><b>⑦ 音色记忆截出的片段</b>（第 1 段 9.0–10.85 秒，whisper 对齐）：<audio src="media/yard_dance/yu_voice.m4a" controls preload="none" style="vertical-align:middle;height:30px"></audio> 第 2 段用这个音色说“妈，我考上了，录取通知刚到！”。</div>
+
+<h3>别人可能会问</h3>
+<div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr))">
+<div class="box">
+<p><b>问：白模（深度）到底管什么？</b><br>只管几何：墙、门、家具在哪、多远，人站在哪、多大。颜色、材质、光线、人的长相、动作细节都不管。强度 1.0，8 个去噪步都起作用。</p>
+<p><b>问：为什么深度里的人是方块，不是 SMPL 人体？</b><br>这是搭档的设计：动作只由动作参考视频给，深度里的人只占位置和身高，避免两路控制打架。另外实测发现，SMPL 深度里人的正面和背面轮廓几乎一样，本来就表达不了人面朝哪边。</p>
+<p><b>问：“分步注意力”是什么？要训练吗？</b><br>不训练，也不改模型权重。H3 的参考视频经 VAE 编码后，生成视频在注意力里可以“读”它。搭档的入口脚本在每个去噪步决定能不能读某个参考视频（1 = 能读，0 = 屏蔽），DiT 和 ControlNet 里都屏蔽。注意：屏蔽的只是这条注意力通路，H3 的多模态文字编码器（Qwen3-VL）还是能看到参考内容。</p>
+<p><b>问：为什么先看灰模、后看原视频（S09）？</b><br>前几步决定画面的布局、机位和姿势，所以先只看从我们机位拍的灰模；后几步决定细节和运动质感，所以再看真人原视频，把灰模的僵硬变成自然的动态。搭档设计了 S01–S14 多种开关方式（实际跑了 11 种），我们用的是其中的 S09：第 4 步后切换。</p>
+<p><b>问：为什么不把原舞蹈视频直接给主生成？</b><br>原视频是摄影棚正面全身、固定机位，和我们镜头的机位、远近都不一样，H3 会把机位也一起照抄。预处理先把这段舞“重拍”到我们的机位上，主生成就只需要照着跳。</p>
+<p><b>问：原舞者的长相会不会带过来？</b><br>预处理的输出仍然是原舞者（帽子、卡其 T 恤、摄影棚），这是设计如此。主生成时 prompt 写明“<code>&lt;Video 1&gt;</code> 只取动作和节奏，表演者的外观和房间不保留”，同时给小雨的人物参考图。逐帧看过：M1 里没有帽子、T 恤，也没有摄影棚。</p>
+</div>
+<div class="box">
+<p><b>问：场景记忆是把像素直接贴上去吗？</b><br>不是。记忆画面和掩码经 VAE 编码后，跟深度拼成同一路送进 ControlNet-Union-2.0 的 inpaint 通道（每个位置：深度特征 96 维 | 掩码 4 维 | 记忆画面特征 96 维）。模型会参考它，但最后的像素仍是模型自己画的。</p>
+<p><b>问：记忆为什么 8 步都开？你原来的想法是“前 4 步只看白模、后 4 步看全部”。</b><br>10-27 在书店第 4 段实测过：8 步都开，接缝 25.0 dB，回看误差 10.6；只开前 4 步，19.5 dB / 21.9；只开前 2 步，15.7 dB / 31.4；只开后 4 步更差，会出现贴片和多出来的人。所以 8 步都开。</p>
+<p><b>问：人物参考图怎么选？</b><br>每个人一个库，按“相机看他的方向（前/左/后/右）× 远近（全身/近景）”分 8 格，每格最多 2 张，留和文字描述最像的；后来的更像，就替换旧的。入库靠 3D 规划认人，不靠看脸；DINOv2 只用来筛“还像不像本人”。下一段要用时，按它的相机轨迹算出这个人会以哪些方向、远近出镜，挑最匹配的 2–3 张拼成一张图。要说话的人一定带正脸。</p>
+<p><b>问：音色怎么保持一致？</b><br>每段生成后，用 whisper 把声音和剧本台词对齐，截下每个人说的第一句。后面的段落把这句作为参考音频，prompt 里写“用 <code>&lt;Audio 1&gt;</code> 的音色说……”。</p>
+<p><b>问：怎么保证人数不出错？</b><br>每段生成后，YOLO 数画面里有几个人，和规划里此刻应该看得见的人数比。多人或少人的帧超过阈值，就换 seed 重跑（43 → 44 → 45），取最好的。</p>
+<p><b>问：算力和时间？</b><br>4 张昇腾 910B2。动作参考预处理约 19 分钟（124 帧），每个 15 秒窗口约 20 分钟（含加载模型），加上入库和检查几分钟。这条 25 秒的成片总共约 1 小时。</p>
+<p><b>问：哪些还靠人工？</b><br>这条测试的规划是手写的（场景复用书店后院），没有走 LLM 规划。每段 prompt 的主体是手写模板，人物、动作、音色的参考编号和描述由程序自动填。参考舞蹈已提前用 GVHMR 转成 SMPL。</p>
+<p><b>问：和搭档原来的设计比，改了什么？</b><br>他的入口脚本、配置、S09 开关、prompt 都原样使用，他的文件一个没改；只把 prompt 里相机那一句换成我们这个镜头的。我们加的是：自动从规划里找出“这一段里谁在什么时候做参考动作”，截出对应的灰模和原视频片段（不足 124 帧就补齐），把结果作为 <code>&lt;Video 1&gt;</code> 接进主生成，并自动写好 prompt。</p>
+</div>
+</div>
+<div class="box"><b>还没解决：</b><ol style="margin:6px 0 0">
+<li><b>场景记忆会把“第 1 段没按白模画的东西”投到错的表面上。</b>记忆是按白模的几何投影的，第 1 段画的东西如果和白模对不上，就会落到别的表面上，而且会被原样沿用：
+<ul>
+<li>石桌画大了，多出来的桌面落到地上，成了白块。</li>
+<li>长椅：白模里是带靠背的长椅，第 1 段画成了一条没靠背的长石凳；第 2 段过了重叠帧以后，按白模又画出一条带靠背的木椅，旧石凳还从记忆里留着。结果出现两条长椅，15 秒处能看出跳变。</li>
+</ul>
+接缝 PSNR（24.9 dB）只量重叠的 21 帧，量不出这个跳变。下一步打算在存入记忆前做检查：同一个位置从几个不同角度看，颜色一致才存，对不上的不存。</li>
+<li><b>舞蹈幅度比原舞者小。</b>主生成里动作参考 8 步都开，还没试“只在部分步开”。</li>
+<li><b>预处理慢</b>：每段约 19 分钟，因为搭档的配置开了 CPU offload。</li>
+<li>这是<b>单人</b>场景。两个人同时有参考动作还没测；两人场景里人的朝向问题仍未解决（见“现在的问题”）。</li>
+</ol></div>
 
 <h2 id="task">任务</h2>
 <div class="grid2">
@@ -93,7 +202,7 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 <text x="576" y="230" font-size="12.5">① 截取该 clip 的 camera trajectory + subject orientation，用它拍摄 SMPL motion</text>
 <text x="590" y="248" font-size="12.5" fill="#9a9ea4">→ 灰模动作视频（人与相机的相对关系和目标 clip 一致）</text>
 <text x="576" y="272" font-size="12.5">② 灰模动作 → H3，Timestep-Aware Gated Attention：早期看姿态、后期补细节</text>
-<text x="590" y="290" font-size="12.5" fill="#9a9ea4">→ 动作自然的 RGB 参考视频 <tspan fill="#e9b85a" font-size="11.5">（② 设计中）</tspan></text>
+<text x="590" y="290" font-size="12.5" fill="#9a9ea4">→ 动作自然的 RGB 参考视频 <tspan fill="#7c7" font-size="11.5">（已接入）</tspan></text>
 <path d="M800 112 L800 180" stroke="#c9a0ff" fill="none" marker-end="url(#ar3)"/><text x="808" y="168" fill="#c9a0ff" font-size="11.5">camera trajectory + orientation</text>
 <path d="M1035 112 L1035 180" stroke="#c9a0ff" fill="none" marker-end="url(#ar3)"/><text x="1043" y="168" fill="#c9a0ff" font-size="11.5">SMPL motion</text>
 <path d="M760 112 L760 162 L360 162 L360 343" stroke="#8cf" fill="none" marker-end="url(#ar)"/><text x="368" y="190" fill="#8cf" font-size="11.5">深度视频（box depth）</text>
@@ -106,12 +215,12 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 <text x="854" y="407" font-size="12.5" fill="#9a9ea4">画面贴回白模，每处留最清楚的一次</text>
 <text x="854" y="425" font-size="12.5" fill="#9a9ea4">回到老地方：角度接近的直接沿用，</text>
 <text x="854" y="443" font-size="12.5" fill="#9a9ea4">差得多的只粗略参考；剧情改了就作废</text>
-<text x="854" y="473" font-size="12.5"><tspan font-weight="600" fill="#7c7">人物</tspan>  <tspan fill="#7c7" font-size="11.5">新版已建库，待接入</tspan></text>
+<text x="854" y="473" font-size="12.5"><tspan font-weight="600" fill="#7c7">人物</tspan>  <tspan fill="#7c7" font-size="11.5">新版已接入</tspan></text>
 <text x="854" y="491" font-size="12.5" fill="#9a9ea4">4 方向 × 全身/近景 = 8 格</text>
 <text x="854" y="509" font-size="12.5" fill="#9a9ea4">白模几何认人 + SAM3 抠图</text>
 <text x="854" y="527" font-size="12.5" fill="#9a9ea4">DINO 只筛“像不像本人”</text>
 <text x="854" y="545" font-size="12.5" fill="#9a9ea4">按下一窗口要的视角取 2–3 张</text>
-<text x="854" y="575" font-size="12.5"><tspan font-weight="600" fill="#7c7">动作</tspan>  <tspan fill="#e9b85a" font-size="11.5">设计中</tspan></text>
+<text x="854" y="575" font-size="12.5"><tspan font-weight="600" fill="#7c7">动作</tspan>  <tspan fill="#e9b85a" font-size="11.5">已实现，待验证</tspan></text>
 <text x="854" y="593" font-size="12.5" fill="#9a9ea4">按 Planner 的时间段截下满意的动作</text>
 <text x="854" y="611" font-size="12.5" fill="#9a9ea4">（如瘸腿走路），存成这个人的片段</text>
 <text x="854" y="629" font-size="12.5" fill="#9a9ea4">之后同一动作 → 作 ref video 输入</text>
@@ -127,7 +236,7 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 </div>
 
 <h3>模块说明</h3>
-<div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(420px,1fr))">
+<div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr))">
 <div class="box">
 <h3 style="margin-top:0">Planner <span class="tag t-ok">已实现</span></h3>
 <ol>
@@ -138,7 +247,7 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 <div class="small muted">还靠人工：每个窗口的 H3 prompt 目前手写；两段穿门跟拍是手动改成“沿人物路线跟拍”。</div>
 </div>
 <div class="box">
-<h3 style="margin-top:0">Motion-reference preprocessing <span class="tag t-mid">① 已实现 · ② 设计中</span></h3>
+<h3 style="margin-top:0">Motion-reference preprocessing <span class="tag t-ok">已实现，已接入（10-27）</span></h3>
 <ol>
 <li>在 Planner 生成每个 clip 的 camera trajectory 后，对包含 reference 的 clip，截取对应时间段的 camera trajectory 和 subject orientation，用这条 camera trajectory 拍摄 GVHMR 给出的 3D SMPL motion，得到灰模动作视频。</li>
 <li>将灰模动作视频给到 H3，以 Timestep-Aware Gated Attention 的方式让模型在早期去噪步看姿态、后期补细节动态，生成动作自然、且符合目标 clip 中人与 camera 相对关系的 RGB 参考视频。主生成时该 clip 全程只给 box depth，动作由这段参考视频提供。</li>
@@ -154,7 +263,7 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 <div class="small muted">F2 用的是 v1：关键帧重投影，有记忆的像素整段保留（inpaint）。</div>
 </div>
 <div class="box">
-<h3 style="margin-top:0">Character memory（人物记忆） <span class="tag t-new">已建库，待接入</span></h3>
+<h3 style="margin-top:0">Character memory（人物记忆） <span class="tag t-ok">已接入（10-27）</span></h3>
 <ol>
 <li>开拍前用 H3 为每个角色生成一段原地转身一周的 casting 视频，每帧的 orientation 已知，预先填满该角色的视角格。</li>
 <li>每个窗口生成后，依据 Planner 中人物位置与 camera 的相对关系，把检测到的人绑定到对应角色；用 SAM3 分割出人物（含随身物品），按相对 camera 的 orientation（前 / 左 / 后 / 右）和距离（全身 / 近景）存入 4 × 2 的视角格；DINOv2 只用来检查这个人是否仍与该角色一致，不一致的不入库。</li>
@@ -163,7 +272,7 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 <div class="small muted">F2 用的是 v1：CLIP 判身份，每人固定一张两视角设定图。</div>
 </div>
 <div class="box">
-<h3 style="margin-top:0">Motion memory（动作记忆） <span class="tag t-mid">设计中</span></h3>
+<h3 style="margin-top:0">Motion memory（动作记忆） <span class="tag t-mid">已实现，待验证</span></h3>
 <ol>
 <li>Planner 中已规定每个人物在各时间段的动作（走路、坐下、站立）。某段动作第一次生成得满意后（例如第一个 clip 中的瘸腿走路），按 Planner 给出的时间段截取这段视频，连同它相对 camera 的 orientation，存入该人物的动作记忆。</li>
 <li>之后的 clip 中，Planner 规定该人物再次做同一动作时，取 orientation 最接近的片段作为 REF_VIDEO 给到 H3，使人物在每个 clip 中保持同样的动作风格。</li>
@@ -193,7 +302,7 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 <tr><td>②③ 场景记忆</td><td>保留像素视频 + 掩码（黑 = 保留，白 = 生成）；被遮处填 ImageNet 均值灰</td><td>挂在第一路深度控制上。F2 里非重叠帧平均有 w01 9%、w02 约 0%（走廊和后院之前没见过）、w03 13%（最多 62%）的像素来自记忆；重叠帧 100%</td></tr>
 <tr><td>④ 参考图 &lt;Picture N&gt;</td><td>每人一张两视角设定图（CLIP 核验身份）</td><td><code>REF_IMAGE</code>；同一人只给一张，避免被画成两个人</td></tr>
 <tr><td>⑤ 参考音频 &lt;Audio N&gt;</td><td>每人第一句台词的音频（whisper 词级对齐切出）</td><td><code>REF_AUDIO</code>，在 prompt 里写成“某人的音色参考”</td></tr>
-<tr><td>参考视频 &lt;Video N&gt;（可选）</td><td>动作参考，例如 SMPL 灰模从目标相机渲染</td><td><code>REF_VIDEO</code>，必须去掉音轨，否则也会被当成音频参考；多人加人物图时灰模外观会泄露</td></tr>
+<tr><td>参考视频 &lt;Video N&gt;（可选）</td><td>动作参考：搭档的预处理输出，即原动作从目标相机“重拍”后的 RGB 视频（见<a href="#merged">合并后的完整流程</a>④）</td><td><code>REF_VIDEO</code>，必须去掉音轨，否则也会被当成音频参考；多人加人物图时灰模外观会泄露</td></tr>
 <tr><td>⑥ 文字 prompt</td><td>w00 用“镜头描述 + 声音”格式；w01 起用 Ref2VA 六段式：subject_definitions / summary / retention_analysis / detailed_description / overall_soundscape / non_diegetic_music</td><td>台词写法 <code>(S1) … says: &lt;d&gt;[Chinese] …&lt;/d&gt;</code>，时间点写 <code>At 00:12.900,</code>。目前按剧本手写模板，记忆库自动填入参考编号和音色描述</td></tr>
 <tr><td>采样</td><td>8 步加速 LoRA（基础版 fl2v、参考版 ref2v 各自的 turbo 8-step），shift 6/3 与 12/3，seed 43</td><td>1344×768，24 fps，362 帧（17n+5，约 15 s）；4 张昇腾 910B2 张量并行，每窗口约 10–15 分钟</td></tr>
 </table></div>
@@ -210,7 +319,7 @@ summary:
 detailed_description:
 … At 00:02.800, &lt;Subject 2&gt; (S1) hands &lt;Subject 1&gt; the book and, using the warm, slightly husky old man's voice timbre referenced from &lt;Audio 1&gt;, says: &lt;d&gt;[Chinese] 这本书我修好了，送给你。&lt;/d&gt; At 00:06.000, &lt;Subject 1&gt; (S2) smiles and, using the clear, light young woman's voice timbre referenced from &lt;Audio 2&gt;, says: &lt;d&gt;[Chinese] 谢谢周叔！&lt;/d&gt; They are the only 2 people; no text or lettered signs appear.</pre></details>
 
-<h2 id="best">最好的结果：F2（书店一镜到底，55 秒）</h2>
+<h2 id="best">最长的结果：F2（书店一镜到底，55 秒，两个人）</h2>
 <div class="grid2">
 <figure><video src="media/bookshop_onetake_v3/h3_take_F2.mp4" poster="media/bookshop_onetake_v3/h3_take_F2.jpg" controls playsinline preload="metadata"></video>
 <figcaption><b>输入只有一段剧本。</b>小雨进店挑书 → 穿过店堂进工作间 → 老周说话 → 两人穿过走廊到后院 → 坐上长椅，老周送书；镜头最后回看后门，望进走廊和书店。查看逐帧白模、深度、窗口划分：<a href="index.html#bookshop_onetake_v3/take">查看器</a></figcaption></figure>
