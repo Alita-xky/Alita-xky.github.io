@@ -39,8 +39,8 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 <body>
 <div class="wrap">
 <h1>一镜到底：从一段剧本到分钟级、带对白的连续镜头</h1>
-<div class="muted small">研究概览 · 更新于 2026-10-30 · 本页只写当前方法和最新结果 P3 · 逐镜头白模和深度见 <a href="index.html">Story World 查看器</a></div>
-<div class="nav"><a href="#task">任务</a><a href="#method">方法：一个循环</a><a href="#round">这一轮改了什么</a><a href="#scene">场景记忆</a><a href="#prompt">prompt 也从白模来</a><a href="#actor">人物与动作</a><a href="#result">最新结果 P3</a><a href="#speed">速度与自动化</a><a href="#problems">现在的问题</a></div>
+<div class="muted small">研究概览 · 更新于 2026-10-30 · 本页只写当前方法和最新结果 P3 · 逐镜头白模和深度见 <a href="index.html">Story World 查看器</a> · 记忆库里存了什么、完整流程见 <a href="memory.html">记忆库与完整方法</a></div>
+<div class="nav"><a href="#task">任务</a><a href="#method">方法：一个循环</a><a href="#round">这一轮改了什么</a><a href="#scene">场景记忆</a><a href="#prompt">prompt 也从白模来</a><a href="#actor">人物与动作</a><a href="#result">最新结果 P3</a><a href="#speed">速度与自动化</a><a href="#problems">现在的问题</a><a href="memory.html"><b>记忆库与完整方法 →</b></a></div>
 
 <h2 id="task">任务</h2>
 <div class="box">
@@ -137,14 +137,15 @@ details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
 
 <h2 id="problems">现在的问题</h2>
 <ul>
+<li><b>第二段开头（15.1–15.5 秒）还会漂一下</b>：交接照抄刚结束，工作间门框侧面出现一根半透明的"鬼影柱子"。来自 P3 新加的表面贴图：那块门框第一眼是从远处斜着看到的，贴图里是条纹，被锁住后 H3 半照着画。P2 没有这个问题。详见<a href="memory.html#issues">记忆库页</a>。</li>
 <li><b>长椅前的地面回来会变</b>：第一次是小方砖，回来坐下时成了大块石板。原因在源头：那块地面第一次被看到时离得远、角度很斜，记下来本身就是糊的，锁得再久也只能锁住一块糊的地面。</li>
-<li><b>长椅回来变样</b>：长椅第一次只被侧着看到，记忆里是碎的；她坐的那块按白模深度画，H3 每次重画一张，颜色和腿都会变。</li>
+<li><b>长椅回来变样</b>：木头变浅，还多了黑色铁腿。长椅第一次只被侧着看到，记忆里是一块黑影；她要坐的长椅整块不约束（以前照抄会切出锯齿），只给一个方盒子的深度，H3 每次按自己的想法重画。</li>
 <li><b>小道具</b>：回来时盆栽旁多了一块白色小牌子。</li>
 <li><b>白模太简陋</b>：长椅、树、花盆都是方块和圆柱。H3 会照着深度图的形状画，所以不能拿粗糙的形状去补细节。</li>
 <li><b>脸</b>：全身镜头里脸只有几十个像素，转头会糊。</li>
 <li><b>速度</b>：40 秒约 65 分钟，其中 H3 每段重新加载约 2 分钟、去噪约 7.5 分钟。</li>
 </ul>
-<div class="box"><b>下一步</b>：① <b>白模换成真实模型</b>：长椅、树、花盆、铺地换成写实的 CC0 模型和材质，按规划的尺寸摆进去。深度图和材质白模里本来就有正确的形状和纹理，地面、长椅、小道具三个问题一起解决。② 生成完先检查平墙上有没有多出来的东西，有就在入库前局部重画，不让它进记忆。</div>
+<div class="box"><b>下一步</b>：⓪ <b>只记看清楚的</b>：每个记忆点带清晰度（多近、多正），糊的不拿来约束，等看清楚了再锁，应该能同时消掉第二段的鬼影和长椅前地面的变化。① <b>白模换成真实模型</b>：长椅、树、花盆、铺地换成写实的 CC0 模型和材质，按规划的尺寸摆进去。深度图和材质白模里本来就有正确的形状和纹理，地面、长椅、小道具三个问题一起解决。② 生成完先检查平墙上有没有多出来的东西，有就在入库前局部重画，不让它进记忆。</div>
 </div>
 </body>
 </html>

@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>记忆库与完整方法</title>
+<style>
+:root{--bg:#111;--panel:#181a1d;--panel2:#1e2125;--line:#2b2f34;--text:#ddd;--muted:#9a9ea4;--accent:#8cf;--ok:#7c7;--warn:#e9b85a;--err:#e66}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 16px 60px}
+h1{font-size:24px;margin:0 0 6px}h2{font-size:19px;margin:38px 0 12px;border-bottom:1px solid var(--line);padding-bottom:6px}
+h3{font-size:16px;margin:18px 0 8px}
+a{color:var(--accent)}
+.muted{color:var(--muted)}.small{font-size:13px}
+.nav{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}.nav a{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:3px 10px;text-decoration:none;font-size:13px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0}
+.status{border-left:4px solid var(--accent)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+figure img,figure video{width:100%;display:block;background:#000}
+figcaption{padding:8px 10px;font-size:13px;color:var(--muted)}figcaption b{color:var(--text)}
+.pair{display:grid;grid-template-columns:1fr 1fr}
+table{border-collapse:collapse;width:100%;font-size:13.5px}th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{background:var(--panel2);white-space:nowrap}
+.tw{overflow-x:auto;margin:8px 0}
+.tag{display:inline-block;border-radius:3px;padding:0 6px;font-size:12px;margin-right:4px;white-space:nowrap}
+.t-ok{background:#1f3a24;color:#9e9}.t-mid{background:#3a3220;color:#ec8}.t-bad{background:#3d2022;color:#f99}.t-new{background:#1d3040;color:#9cf}
+ol,ul{padding-left:22px}li{margin:3px 0}
+svg text{font-family:inherit}
+.big{font-size:22px;font-weight:600}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:10px 0}
+.kpi div{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:8px 10px}
+.kpi small{display:block;color:var(--muted);font-size:12px}
+code{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:0 4px;font-size:12.5px}
+details summary{cursor:pointer;font-weight:600}pre{margin:10px 0 0}
+
+.sw{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-1px;margin-right:4px;border:1px solid #444}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>记忆库与完整方法（P3）</h1>
+<div class="muted small">更新于 2026-10-30 · 把 P3 跑完时记忆库里存的东西原样摊开，并把整条流程从头写到尾 · 结果和这一轮的改动见 <a href="overview.html">项目概览</a></div>
+<div class="nav"><a href="#pipeline">完整流程</a><a href="#layers">每段拿到什么</a><a href="#scene">场景记忆</a><a href="#person">人物记忆</a><a href="#voice">声音记忆</a><a href="#issues">从记忆里看问题</a><a href="#free">H3 自由发挥怎么办</a><a href="#config">P3 的完整设置</a></div>
+
+<h2 id="pipeline">完整流程：从剧本到 40 秒成片</h2>
+<div class="box status"><p style="margin:0"><b>一句话</b>：所有东西都存在一个"世界状态"里，包括 3D 白模、场景记忆、人物记忆、声音记忆。每一段视频的条件都从世界状态渲染出来；生成完，画出来的东西再登记回世界状态。不针对某个镜头单独调参数。</p></div>
+<div class="tw"><table>
+<tr><th style="width:40px">#</th><th style="width:150px">步骤</th><th>做什么</th><th style="width:240px">产出</th></tr>
+<tr><td>0</td><td><b>规划</b></td><td>大模型把剧本补全，写成 3D 布局：6 个区域（街、店、工作间、走廊、厨房、后院）、墙、门窗、60 件物体的位置和尺寸。再写剧情节拍，包括人走的路线、相机路线、人什么时候停、转身、坐下</td><td>scene.json、clips.json</td></tr>
+<tr><td>1</td><td><b>切段</b></td><td>H3 一次最多生成约 15 秒。按剧情切成 3 段，相邻两段重叠 1.5 秒，交接放在镜头和人都不忙的时候</td><td>0–15.1 / 13.6–27.3 / 25.7–40 秒</td></tr>
+<tr><td>2</td><td><b>白模渲染</b>（Blender）</td><td>逐帧渲染：场景深度；人的深度，分真人体（SMPL-X）和占位人形两种；带材质的白模（墙贴灰泥、屋里木地板、院子小方砖，CC0 照片材质）；每件物体在画面里占哪</td><td>每帧的深度、材质图、遮罩</td></tr>
+<tr><td>3</td><td><b>写 prompt</b></td><td>先从白模算事实：哪些东西看得见、门洞是方顶还是圆拱、镜头先对着什么、人第几秒进画面、每 2 秒的左右站位。大模型只负责把事实写成通顺的话；写完自动检查，提到看不见的东西、人提前出现、世界里没有的拱门都打回重写</td><td>每段一份 prompt</td></tr>
+<tr><td>4</td><td><b>人和动作的初始记忆</b></td><td>先生成角色原地转一圈的定妆视频，抠出来按朝向分格存。动作参考（街舞）用搭档的方法：参考视频恢复成 3D，从我们的机位渲染成灰模，再让 H3 生成一段动作参考视频</td><td>人物记忆初值、动作参考视频</td></tr>
+<tr><td>5</td><td><b>生成一段</b>（H3，8 步，4 卡）</td><td>条件全部从世界状态来：深度、记忆颜色（分层，各层管不同的步数，见下一节）、人物参考图、音色、动作参考、prompt</td><td>一段带声音的视频</td></tr>
+<tr><td>6</td><td><b>登记回世界</b></td><td><b>场景</b>：取约 60 张关键帧，估深度（DAv2）并对齐白模，人用 SAM3 抠掉，每个像素变成带颜色的 3D 点。和白模相差 8% 以内的点贴到白模表面上；其余的点只收落在某件规划物体范围里的；H3 自己加、在这一段反复出现、立在地上的一团，登记成新物体。<br><b>人</b>：抠出来，按朝向（前、后、左、右）× 远近（全身、近景）分格存，先检查像不像本人，不像的不进；同时记下她实际被画在哪。<br><b>声音</b>：语音识别找到她说的台词，切出来存成音色参考</td><td>场景点、人物格、台词音频、人的位置</td></tr>
+<tr><td>7</td><td><b>下一段</b></td><td>回到第 5 步。人从上一段实际画到的位置开始，1.5 秒内回到规划路线；参考图按这一段会出现的角度从人物记忆里挑；音色用她说过的第一句</td><td></td></tr>
+<tr><td>8</td><td><b>拼接</b></td><td>在重叠段里找两段画面最像的那一帧，前后 9 帧渐变过去，声音也同样渐变</td><td>40 秒成片</td></tr>
+</table></div>
+
+<h2 id="layers">每段拿到什么：记忆颜色和"各管几步"</h2>
+<div class="box"><p style="margin:0 0 6px">H3 去噪共 8 步。前几步定布局和颜色，后几步画细节。记忆按可信程度分层，越可信的管得越久：</p>
+<div class="tw" style="margin:6px 0 0"><table>
+<tr><th style="width:150px">层</th><th>放什么</th><th style="width:120px">管几步</th></tr>
+<tr><td><span class="sw" style="background:#e63c3c"></span><b>交接照抄</b></td><td>重叠段前 60% 的整帧画面（去掉人），直接用上一段自己画的</td><td>每一步</td></tr>
+<tr><td><span class="sw" style="background:#ffa028"></span><b>硬抄</b></td><td>贴在白模上、视角差 45° 以内、放大不到 1.6 倍的表面，作为 H3 的"补全"输入照抄；其他东西只在几乎同一视角时照抄</td><td>全程</td></tr>
+<tr><td><span class="sw" style="background:#e6dc28"></span><b>地面</b></td><td>看过的地面</td><td>1–8</td></tr>
+<tr><td><span class="sw" style="background:#50c850"></span><b>平墙</b></td><td>离任何看得见的门窗 0.4 米以外的墙，拉向带材质的白模</td><td>1–6</td></tr>
+<tr><td><span class="sw" style="background:#969696"></span><b>软约束</b></td><td>其余看过的地方</td><td>1–6</td></tr>
+<tr><td><span class="sw" style="background:#2878dc"></span><b>材质白模</b></td><td>还没看过的墙、地面、天花板</td><td>1–4</td></tr>
+<tr><td><span class="sw" style="background:#000"></span><b>不约束</b></td><td>人、她要坐的长椅（整块按白模深度加人体）、没看过的物体</td><td>—</td></tr>
+</table></div></div>
+<div class="grid2">
+<figure><video src="media/yard_return/memin_w01.mp4" poster="media/yard_return/memin_w01.jpg" controls playsinline muted preload="metadata"></video>
+<figcaption><b>第二段（进屋）拿到的条件</b>。左上：记忆颜色；右上：分层（颜色同上表）；左下：深度；右下：H3 画出来的。开头 1 秒几乎整帧是红色的交接照抄；进工作间以后大部分地方是第一次看到（这一段只有 39% 的画面有记忆），主要靠蓝色的材质白模。</figcaption></figure>
+<figure><video src="media/yard_return/memin_w02.mp4" poster="media/yard_return/memin_w02.jpg" controls playsinline muted preload="metadata"></video>
+<figcaption><b>第三段（回院子）拿到的条件</b>。墙和盆栽大部分是橙色硬抄，树冠是灰色软约束；她和她要坐的长椅是黑色，不约束，由 H3 按深度重画，所以长椅回来会变样（见下文）。</figcaption></figure>
+</div>
+
+<h2 id="scene">场景记忆：P3 第三段开拍前存了什么</h2>
+<div class="kpi">
+<div><small>关键帧</small><span class="big">118</span> 张（第一段 62，第二段 56）</div>
+<div><small>3D 点</small><span class="big">975 万</span></div>
+<div><small>贴在白模表面上</small><span class="big">91%</span> 墙、地面、门窗</div>
+<div><small>在规划物体范围里</small><span class="big">8.5%</span> 树、长椅、盆栽…</div>
+<div><small>H3 自己加、登记成新物体</small><span class="big">1</span> 件，院子地面上一件 0.8×0.2 米、高 0.2 米的矮东西</div>
+</div>
+<figure><img src="media/yard_return/mem_yard.jpg" alt="记忆里的院子">
+<figcaption><b>记忆里的院子</b>（把所有记忆点从院子北边的高处看过去）。后门、窗、窗下的盆栽、门前的小方砖地面都很清楚，因为第一段在这里停了很久，看得近也看得正。<b>长椅是一块黑影，树下和右边的地面是一道道拉长的条纹</b>：这几处第一次只从远处斜着看到过，估出来的深度不准，记下的就是糊的。左下没有点，是因为相机从来没往那边看。</figcaption></figure>
+<div class="grid2" style="margin-top:12px">
+<figure><img src="media/yard_return/mem_top.jpg" alt="记忆俯视图">
+<figcaption><b>俯视图</b>（屋里去掉了天花板）。灰线是规划的墙，黄框是 H3 自己加、新登记的物体。院子和走廊最完整；店里只在走廊尽头远远看过，是一道道的条纹。</figcaption></figure>
+<figure><img src="media/yard_return/mem_keys.jpg" alt="关键帧">
+<figcaption><b>关键帧里哪些像素被记住了</b>（每 10 张取 1 张）。原色：贴在白模表面上；<span style="color:#39f">蓝色调</span>：落在规划物体范围里，按估出的深度记；<span style="color:#f66">红色调</span>：哪儿都不挨着，丢掉（深度估错的点，留着会穿墙）；暗的：人、深度边缘、斜着看到的面，不记。</figcaption></figure>
+</div>
+<figure style="margin-top:12px"><img src="media/yard_return/mem_textures.jpg" alt="表面贴图">
+<figcaption><b>表面贴图</b>（P3 新加的一份）：墙、地面、长椅、树、门按表面展开，各存一张颜色图，第一次看到就锁住。回来时用它给白模表面重新上色，摆在墙前的东西保持原样。现在的贴图很碎，有不少空洞，斜着看到的面还是条纹（如长椅、后门）。第二段开头的鬼影就来自这里，见下文。</figcaption></figure>
+
+<h2 id="person">人物记忆</h2>
+<figure><img src="media/yard_return/person_bank.jpg" alt="人物记忆">
+<figcaption><b>小雨的人物记忆：14 张，占了 8 个格子里的 7 个</b>（朝向 × 远近）。6 张来自开拍前的定妆视频（casting），4 张来自第一段，4 张来自第二段。每张入库前都和已有的比过像不像本人，第一段 50 张里只有 1 张可疑，第二段 46 张里 2 张。缺的格子是"左侧近景"。</figcaption></figure>
+<figure style="margin-top:12px"><img src="media/yard_return/person_sheets.jpg" alt="每段拿到的人物参考图">
+<figcaption><b>每段实际拿到的参考图</b>：按这一段她会以什么角度、多大出现（从白模里的人物路线和相机算），从记忆里挑 2–3 张拼成一张给 H3。第三段她坐着打电话，主要是左侧和正面近景。</figcaption></figure>
+
+<h2 id="voice">声音记忆</h2>
+<div class="box"><p style="margin:0 0 8px">第一段里她说"太好了，我考上了！"。生成后用语音识别在 7.98–9.87 秒找到这句，切出来存成她的音色参考。第三段打电话时把它作为参考音频给 H3，两段是同一个声音。</p>
+<audio src="media/yard_return/voice_yu_1.m4a" controls preload="none"></audio></div>
+<p class="small muted">动作记忆：只有开头那段街舞用了参考动作，走路、坐下由 H3 自己按 prompt 画。人的位置每段都记，用于交接。</p>
+
+<h2 id="issues">从记忆里看两个问题</h2>
+<h3>第二段开头为什么还会漂一下</h3>
+<figure><img src="media/yard_return/drift_clip2.jpg" alt="第二段开头的鬼影">
+<figcaption><b>第二段 15.25 秒和 15.5 秒</b>，交接照抄刚结束（15.1 秒）。P3 的记忆右边有一道深色竖条纹（第一列），H3 照着画出一根半透明的"鬼影柱子"（第二列）。P2 没有表面贴图，那里拉向的是干净的材质白模（第三列），画出来干净得多（第四列）。</figcaption></figure>
+<div class="box"><p style="margin:0">那道条纹在工作间门洞的边上（门框侧面）。第一段只从走廊远处斜着看到过它，P3 的表面贴图把这一眼锁住了。所以问题不在交接，而是<b>"第一眼就锁住"的时候，第一眼可能是糊的</b>。长椅前的地面变大石板也是同一个原因：第一眼离得远、角度斜。软约束只拉前几步，H3 半听半不听，就出现半透明的鬼影，或者把地面重新理解成大石板。</p></div>
+<h3>长椅的问题是什么意思</h3>
+<figure><img src="media/yard_return/bench.jpg" alt="长椅第一次和回来">
+<figcaption><b>左：第一次来（1.7 秒）　中：记忆里的长椅　右：回来坐下（35 秒）</b>。第一次是深色木条长椅；回来时木头变浅，还多了黑色铁腿。</figcaption></figure>
+<div class="box"><p style="margin:0">两个原因叠在一起：① 第一段只从侧后方斜着看到过长椅，记忆里它是一块黑影（中间那张），本来就没有可抄的东西；② 早先的版本照抄记忆里的长椅，靠背被切成锯齿、画到了她身前，所以现在她要坐的长椅整块不约束，只给白模深度（一个方盒子）加人体。H3 只知道"这里有个长椅形状"，颜色和腿每次都按自己的想法画。</p></div>
+
+<h2 id="free">H3 自由发挥怎么办</h2>
+<div class="box status"><p style="margin:0 0 8px">回头看所有出问题的地方，H3 自由发挥只发生在三种情况：</p>
+<ol style="margin:0">
+<li><b>没人管的地方</b>：没看过的角落、人和长椅周围、最后几步。它会加东西，比如平墙上的石牌、盆栽旁的白牌子，或者给长椅换颜色。</li>
+<li><b>管得含糊的地方</b>：记忆是糊的或者有条纹，又只拉前几步。它半听半不听，就画出鬼影，或者把地面理解成别的铺法。</li>
+<li><b>prompt 让它画的</b>：写了 arch 就画圆拱。这一条已经解决，名字都从世界里来。</li>
+</ol></div>
+<div class="tw"><table>
+<tr><th style="width:200px">办法</th><th>具体做什么</th><th style="width:220px">管哪种情况</th></tr>
+<tr><td><b>① 只记看清楚的</b></td><td>每个记忆点带一个清晰度：离得多近、看得多正。糊的不拿来约束（退回材质白模），等哪一段看清楚了再记，记下以后才锁住。约束要么可信、管到底，要么干脆不给；不再"拉一半"</td><td>2：鬼影、地面变样</td></tr>
+<tr><td><b>② 白模换真实模型</b></td><td>长椅、树、花盆、铺地换成写实的 CC0 模型和材质，按规划尺寸摆进去。没看过的地方也有可信的细节，深度里也有长椅真实的腿和靠背</td><td>1：没看过的地方、长椅</td></tr>
+<tr><td><b>③ 人碰的东西只管颜色</b></td><td>长椅不抄像素（会切出锯齿），但把记忆里它的颜色（模糊后的）作为整段的弱约束，形状交给真实模型</td><td>1：长椅换颜色</td></tr>
+<tr><td><b>④ 生成后检查</b></td><td>把输出和世界状态比：平墙上多了东西、记忆里清楚的地方画得不一样，就局部重画，至少不让它进记忆</td><td>兜底</td></tr>
+</table></div>
+<p class="small muted">建议顺序：先做 ①，改动小，只改记忆怎么挑点，应该能同时消掉第二段的鬼影和长椅前地面的变化；再做 ②③；④ 最后。</p>
+
+<h2 id="config">P3 的完整设置</h2>
+<details class="box"><summary>启动命令（点开）</summary>
+<pre style="white-space:pre-wrap;font-size:12.5px">memory_run.py stories/yard_return_v6 --label P3 --devices 0,1,2,3
+  --prior 4 --prior-tex --prior-plain 6          # 材质白模：没看过的 1–4 步，平墙 1–6 步
+  --refs --char-bank --person-bank --seed-bank casting_seed/bank   # 人物记忆 + 定妆视频
+  --motion-ref                                   # 动作参考（搭档的方法）
+  --geom gen --anchor-full 10                    # 记忆几何用生成画面估出的深度
+  --cue-take take_actors_smpl --cue-take2 take_boxact --body-steps 2 --actor-mask take_actors_smpl
+                                                 # 真人体管 1–2 步，之后占位人形
+  --v4 --blend-steps 6                           # 软约束 1–6 步
+  --snap 0.08 --plan-angle 45                    # 差 8% 以内贴到白模；贴上的表面 45° 内硬抄
+  --handover --zone-objects                      # 她要坐的长椅整块不抄记忆
+  --volume-gate                                  # 只记有着落的点；H3 加的东西登记成新物体
+  --floor-steps 8                                # 地面 1–8 步
+  --hybrid-memory                                # 表面贴图（P3 新加）
+  --overlap-lock 0.6                             # 交接：重叠段前 60% 每一步照抄
+  --person-writeback                             # 人从上一段实际位置接着走
+  --config minimax_h3_ref2av_control_union2_08steps_turbo_tp4_vaepar_msvg.json   # 8 步 turbo，4 卡</pre></details>
+</div>
+</body>
+</html>
