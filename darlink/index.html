@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Darlink</title>
+  <meta name="description" content="Darlink · 校园数字人社交">
+  <meta name="theme-color" content="#f5f5f7">
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: grid;
+      place-items: center;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      padding: 24px 16px;
+    }
+    main { text-align: center; max-width: 360px; }
+    .brand {
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #6f5092, #8a486f, #006686);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .status { margin-top: 14px; font-size: 15px; color: #6e6e73; min-height: 22px; }
+    .spinner {
+      width: 22px; height: 22px; margin: 22px auto 0;
+      border-radius: 50%;
+      border: 2.5px solid rgba(0, 0, 0, 0.1);
+      border-top-color: #5b3d8a;
+      animation: spin 0.9s linear infinite;
+    }
+    .spinner[hidden] { display: none; }
+    a.button {
+      display: inline-block; margin-top: 20px; padding: 11px 22px;
+      border-radius: 999px; background: #5b3d8a; color: #fff;
+      text-decoration: none; font-weight: 600; font-size: 15px;
+    }
+    a.button[hidden] { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="brand">Darlink</div>
+    <div class="status" id="status">正在连接…</div>
+    <div class="spinner" id="spinner" aria-hidden="true"></div>
+    <a class="button" id="retry" href="./" hidden>重试</a>
+    <noscript><p>请开启浏览器的 JavaScript 后再打开本页。</p></noscript>
+  </main>
+  <script>
+    // Fixed entry for Darlink. The app runs on a server whose public address can change;
+    // backend.json (kept up to date by the server) says where it is right now.
+    (function () {
+      var status = document.getElementById("status");
+      var spinner = document.getElementById("spinner");
+      var retry = document.getElementById("retry");
+
+      function fail(message) {
+        status.textContent = message;
+        spinner.hidden = true;
+        retry.hidden = false;
+      }
+
+      function targetFor(base) {
+        var root = String(base || "").replace(/\/+$/, "");
+        if (!/^https:\/\//.test(root)) return null;
+        // keep deep links such as /darlink/#community_campus_pulse_feed
+        if (location.hash && location.hash.length > 1) return root + "/app.html" + location.search + location.hash;
+        return root + "/" + location.search;
+      }
+
+      var timer = setTimeout(function () { fail("连接有点慢，请稍后点重试。"); }, 12000);
+      fetch("backend.json?t=" + Date.now(), { cache: "no-store" })
+        .then(function (res) { if (!res.ok) throw new Error(String(res.status)); return res.json(); })
+        .then(function (data) {
+          var target = targetFor(data && data.url);
+          if (!target) throw new Error("bad url");
+          clearTimeout(timer);
+          location.replace(target);
+        })
+        .catch(function () {
+          clearTimeout(timer);
+          fail("暂时连不上 Darlink 服务器，请稍后再试。");
+        });
+    })();
+  </script>
+</body>
+</html>
