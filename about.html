@@ -148,6 +148,26 @@
     }
     ul.items li:last-child { border-bottom: 1px solid var(--line); }
     .when { color: var(--muted); font-weight: 600; }
+    .meta a, .fn a {
+      color: var(--link);
+      font-weight: 600;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(26, 79, 104, 0.35);
+    }
+    .meta a:hover { border-bottom-color: var(--link); }
+    .tag {
+      margin-left: 6px;
+      font-family: "Familjen Grotesk", sans-serif;
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .fn { margin: -6px 0 0; color: var(--muted); font-size: 14px; }
+    .edu-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: baseline; }
+    .edu-head .when { font-size: 14.5px; }
+    .sub { display: block; margin-top: 3px; color: var(--muted); font-size: 14.5px; }
     strong { font-weight: 650; }
     @media (max-width: 860px) {
       .layout {
@@ -164,9 +184,11 @@
   <nav class="toc">
     <a href="index.html">Home</a>
     <a href="#say">Something to Say</a>
-    <a href="#work">Work</a>
-    <a href="#honors">Honors</a>
+    <a href="#education">Education</a>
+    <a href="#papers">Papers</a>
+    <a href="#projects">Projects</a>
     <a href="#experience">Experiences</a>
+    <a href="#honors">Honors</a>
   </nav>
 
   <div class="layout">
@@ -174,8 +196,8 @@
       <img class="portrait" src="assets/img/portrait.jpg" alt="Keyue Xing">
       <h1>Keyue Xing</h1>
       <p class="alias">Alita</p>
-      <p class="role">Undergraduate, Peking University</p>
-      <p class="blurb">I am an undergraduate in the Tong class at Yuanpei College. My research interests are video generation, speech, and multimodal learning.</p>
+      <p class="role">Undergraduate, Peking University<br>Incoming Visiting Student, UC Berkeley (Spring 2027)</p>
+      <p class="blurb">I am an undergraduate in the Tong Class (Honors Program in General Artificial Intelligence) at Yuanpei College. My research interests are video generation and world models, multimodal generative modeling and interactive agents, and audio-visual perception.</p>
       <ul class="facts">
         <li>Beijing, China</li>
         <li><a href="mailto:2400017816@stu.pku.edu.cn">Email</a></li>
@@ -187,26 +209,76 @@
     <main class="main">
       <section class="say" id="say">
         <h2>Something to Say</h2>
-        <p>hihi, i'm alita 🦊, a newly minted 20-year-old, still figuring out this whole grown-up thing. Currently exploring video generation, speech, and multimodal AI. I love swimming, beautiful scenery, and wild ideas, and I'm always asking, "Why?"</p>
+        <p>hihi, i'm alita 🦊, a newly minted 20-year-old, still figuring out this whole grown-up thing. Currently exploring video generation, world models, and audio-visual AI. I love swimming, beautiful scenery, and wild ideas, and I'm always asking, "Why?"</p>
         <p>I like to think of life as climbing a mountain: even when the summit is out of sight, I choose to keep moving upward. I want to pursue things that are challenging yet fascinating, discover broader horizons, and hold on to a little romance and ambition along the way. "Stand a little taller, step a little further forward." Keep climbing, stay ambitious, and never lose that curiosity and love for the world.</p>
       </section>
 
-      <section id="work">
-        <h2>Work</h2>
+      <section id="education">
+        <h2>Education</h2>
+        <ul class="items">
+          <li>
+            <div class="edu-head"><strong>Peking University</strong><span class="when">2024 – 2028 (expected)</span></div>
+            <span class="sub">Yuanpei College · Tong Class (Honors Program in General Artificial Intelligence) · GPA 3.731/4.0</span>
+            <span class="sub">Coursework: Machine Learning, Computer Vision (CS231n), Artificial Intelligence, Robotics, Probability and Statistics</span>
+          </li>
+          <li>
+            <div class="edu-head"><strong>University of California, Berkeley</strong><span class="when">Jan – May 2027</span></div>
+            <span class="sub">Incoming Visiting Student, Berkeley Global Access Program</span>
+          </li>
+        </ul>
+      </section>
+
+      <section id="papers">
+        <h2>Research Papers</h2>
         <article>
-          <h3>EditEvolve: A Self-Evolving Agent for Context-Aware Video Editing</h3>
-          <p class="authors">Jiayi Gao, <strong>Keyue Xing</strong>, Changcheng Hua, Yang Liu</p>
-          <p class="meta">Under review, ICLR 2027 · Video editing</p>
+          <h3>Plan in 3D, Shoot in One Take: Coherent Multi-Action Long-Take Video Generation in Interactive Scenes</h3>
+          <p class="authors"><strong>Keyue Xing</strong>*, Hongkun Lyu*, Jiayi Gao, Zhu Xu, Yang Liu</p>
+          <p class="meta">Under review, CVPR 2027 · Video generation</p>
+          <p class="note">Ariadne enables continuous multi-action one-take video generation by coordinating character motion, camera paths, and evolving scene states on an updatable 3D stage.</p>
         </article>
         <article>
-          <h3>DuplexAct-Bench: Broadening Full-Duplex Speech Evaluation toward Proactive Interaction</h3>
-          <p class="authors"><strong>Keyue Xing</strong>, Wentao Ding, Mengmeng Wang, Wenming Tu, Zilong Zheng, Yipeng Kang</p>
-          <p class="meta">Under review, ICASSP · Full-duplex speech agent</p>
+          <h3>Self-Evolving Agents for Context-Aware Video Editing (EditEvolve)</h3>
+          <p class="authors">Jiayi Gao, <strong>Keyue Xing</strong>, Changcheng Hua, Yang Liu</p>
+          <p class="meta">Under review, ICLR 2027 · Video editing</p>
+          <p class="note">EditEvolve lets editing systems adapt to varied video contexts by reusing feedback-verified tool workflows, without retraining the underlying models.</p>
+        </article>
+        <article>
+          <h3>DuplexAct-Bench: Broadening Full-Duplex Speech Evaluation toward Proactive Interaction across Diverse Behavioral Requirements</h3>
+          <p class="authors"><strong>Keyue Xing</strong>*, Wentao Ding*, Mengmeng Wang, Wenming Tu, Zilong Zheng, Yipeng Kang</p>
+          <p class="meta">Under review, ICASSP 2027 · <a href="https://arxiv.org/abs/2609.39446">arXiv</a> · <a href="DuplexAct-Bench/">Project page</a></p>
+          <p class="note">DuplexAct-Bench tests whether, when, and how full-duplex agents should join a live dialogue, scoring timing and content across six behaviors, 1,290 bilingual trials, and 12 systems.</p>
+        </article>
+        <p class="fn">* equal contribution</p>
+      </section>
+
+      <section id="projects">
+        <h2>Projects</h2>
+        <article>
+          <h3>Egocentric Audio-Visual Active Speaker Detection and Localization <span class="tag">ONGOING</span></h3>
+          <p class="note">Fusing first-person video with binaural spatial cues to find who is speaking and from which direction relative to the smart-glasses wearer.</p>
+        </article>
+        <article>
+          <h3>Xtalk: Cascaded Full-Duplex Omni-Modal Interaction <span class="tag">ONGOING</span></h3>
+          <p class="note">A cascaded, full-duplex omni-modal agent with streaming audio-visual inputs and both speech and video generation heads, aimed at continuous real-time interaction beyond turn-by-turn dialogue.</p>
+        </article>
+        <article>
+          <h3>Common-Sense-Guided Semantic Object Navigation in Unknown Indoor Environments <span class="tag">COMPLETED</span></h3>
+          <p class="note">An RGB-D navigation system that combines open-vocabulary perception, Bayesian 3D mapping, and informative viewpoint planning to search for target objects in unknown indoor scenes.</p>
         </article>
         <article>
           <h3>Darlink</h3>
           <p class="note">A startup I lead. We are building a college social platform based on digital-human distillation.</p>
         </article>
+      </section>
+
+      <section id="experience">
+        <h2>Experiences</h2>
+        <ul class="items">
+          <li><span class="when">Mar 2026 – Present.</span> Research Intern, Wangxuan Institute of Computer Technology, Peking University
+            <span class="sub">Advisor: Prof. Yang Liu · Video generation and multimodal generative systems</span></li>
+          <li><span class="when">Jun – Sep 2026.</span> Research Intern, Beijing Institute for General Artificial Intelligence (BIGAI)
+            <span class="sub">Mentors: Dr. Zilong Zheng, Dr. Yipeng Kang · Full-duplex speech and audio-visual interaction</span></li>
+        </ul>
       </section>
 
       <section id="honors">
@@ -215,14 +287,6 @@
           <li>Peking University Freshman Scholarship, Second Prize</li>
           <li>Cushman &amp; Wakefield Scholarship, Peking University, 2024–2025</li>
           <li>Peking University Social Work Award, 2024–2025</li>
-        </ul>
-      </section>
-
-      <section id="experience">
-        <h2>Experiences</h2>
-        <ul class="items">
-          <li><span class="when">Mar 2026 – Present.</span> Research intern, Wangxuan Institute of Computer Technology, Peking University</li>
-          <li><span class="when">Jun 2026 – Present.</span> Research intern, Beijing Academy of Artificial Intelligence (BIGAI)</li>
         </ul>
       </section>
     </main>
